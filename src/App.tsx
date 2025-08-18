@@ -1,20 +1,23 @@
-import { Button } from "./components/ui/button";
+import { ErrorPage } from "./pages/ErrorPage";
+import { LandingPage } from "./pages/LandingPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 function App() {
-  return (
-    <div className="flex flex-col gap-4 justify-center items-center">
-      <h1 className="text-2xl text-red-500 font-bold">Hello World!</h1>
-      <Button
-        className="cursor-pointer"
-        variant={"outline"}
-        onClick={() => {
-          alert("Test Test 123");
-        }}
-      >
-        This is a button
-      </Button>
-    </div>
-  );
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <LandingPage />,
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/register",
+      element: <RegisterPage />,
+      errorElement: <ErrorPage />,
+    },
+  ]);
+
+  return <RouterProvider router={router} />;
 }
 
 export default App;
