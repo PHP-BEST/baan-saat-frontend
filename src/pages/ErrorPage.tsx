@@ -11,7 +11,7 @@ export const ErrorPage = () => {
           alert("Error button clicked... Go to Landing Page");
         }}
         asChild
-        className="bg-black text-white"
+        className="bg-black text-white hover:bg-gray-800 transition duration-300"
       >
         <Link to="/">
           <p>Go Back</p>

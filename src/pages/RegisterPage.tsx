@@ -11,7 +11,7 @@ export const RegisterPage = () => {
           alert("Register button clicked... Go to Landing Page");
         }}
         asChild
-        className="bg-green-900 text-white"
+        className="bg-green-900 text-white hover:bg-green-800 transition duration-300"
       >
         <Link to="/">Submit</Link>
       </Button>
