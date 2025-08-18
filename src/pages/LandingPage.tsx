@@ -1,11 +1,19 @@
 import Counter from "@/components/our-components/counter";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export const LandingPage = () => {
+  const [text, setText] = useState<string>();
+
+  useEffect(() => {
+    const envTest = import.meta.env.VITE_TEST_ENV;
+    setText(envTest);
+  }, []);
+
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-bold text-2xl">This is Landing Page</p>
+      <p className="text-bold text-2xl">This is {text} from Landing Page</p>
 
       {/* Buttons */}
       <div className="flex gap-4">
