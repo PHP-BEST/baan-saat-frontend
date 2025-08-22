@@ -1,26 +1,18 @@
-import Counter from "@/components/our-components/counter";
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import Counter from '@/components/our-components/counter';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 export const LandingPage = () => {
-  const [text, setText] = useState<string>();
-
-  useEffect(() => {
-    const envTest = import.meta.env.VITE_TEST_ENV;
-    setText(envTest);
-  }, []);
-
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-bold text-2xl">This is {text} from Landing Page</p>
+      <p className="text-bold text-2xl">This is Landing Page</p>
 
       {/* Buttons */}
       <div className="flex gap-4">
         <Button
           variant="outline"
           onClick={() => {
-            alert("Landing button clicked");
+            alert('Landing button clicked');
           }}
           asChild
         >
@@ -29,7 +21,7 @@ export const LandingPage = () => {
         <Button
           variant="outline"
           onClick={() => {
-            alert("For what...");
+            alert('For what...');
           }}
           asChild
           className="bg-red-500 text-black hover:bg-red-400 transition duration-300"

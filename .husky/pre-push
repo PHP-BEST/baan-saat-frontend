@@ -1,0 +1,7 @@
+npm test
+if [ $? -ne 0 ]; then
+  echo "==================================================================="
+  echo "❌ You can't push this code since Failed tests detected! ❌"
+  echo "==================================================================="
+  exit 1
+fi
