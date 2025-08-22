@@ -1,17 +1,17 @@
 // Testing useCounter.ts
 
-import { renderHook, act } from "@testing-library/react";
-import useCounter from "../hooks/useCounter";
+import { renderHook, act } from '@testing-library/react';
+import useCounter from '../hooks/useCounter';
 
-describe("useCounter", () => {
-  it("should initialize with count 0 and val 1", () => {
+describe('useCounter', () => {
+  it('should initialize with count 0 and val 1', () => {
     const { result } = renderHook(() => useCounter());
 
     expect(result.current.count).toBe(0);
     expect(result.current.val).toBe(1);
   });
 
-  it("should increment count by default val (1)", () => {
+  it('should increment count by default val (1)', () => {
     const { result } = renderHook(() => useCounter());
 
     act(() => {
@@ -21,7 +21,7 @@ describe("useCounter", () => {
     expect(result.current.count).toBe(1);
   });
 
-  it("should increment count multiple times", () => {
+  it('should increment count multiple times', () => {
     const { result } = renderHook(() => useCounter());
 
     const n = 5;
@@ -35,7 +35,7 @@ describe("useCounter", () => {
     expect(result.current.count).toBe(n);
   });
 
-  it("should update val and increment by new val", () => {
+  it('should update val and increment by new val', () => {
     const { result } = renderHook(() => useCounter());
 
     act(() => {
@@ -49,7 +49,7 @@ describe("useCounter", () => {
     expect(result.current.count).toBe(10);
   });
 
-  it("should increment by updated val multiple times", () => {
+  it('should increment by updated val multiple times', () => {
     const { result } = renderHook(() => useCounter());
 
     const val = 2;
@@ -68,7 +68,7 @@ describe("useCounter", () => {
     expect(result.current.count).toBe(val * n);
   });
 
-  it("should handle zero val", () => {
+  it('should handle zero val', () => {
     const { result } = renderHook(() => useCounter());
 
     act(() => {
