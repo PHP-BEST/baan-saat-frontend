@@ -25,8 +25,11 @@ This guide outlines how to set up, develop, test, and maintain the `baan-saat-fr
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
+   npm install husky --save-dev
+   npx husky install
    ```
 
 ## Environment Setup
