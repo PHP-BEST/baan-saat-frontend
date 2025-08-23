@@ -1,12 +1,4 @@
-import { apiFetch } from '@/config/api';
-import { API_ROOT_DEV, API_ROOT_PROD, NODE_ENV } from '@/config/env';
-
-const API_ROOT =
-  NODE_ENV == 'production'
-    ? API_ROOT_PROD
-    : NODE_ENV == 'development'
-      ? API_ROOT_DEV
-      : '';
+import { API_ROOT, apiFetch } from '@/config/api';
 
 export interface Sample {
   _id: string;

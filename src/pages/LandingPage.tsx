@@ -6,15 +6,18 @@ import { Link } from 'react-router-dom';
 
 export const LandingPage = () => {
   const [samples, setSamples] = useState<Sample[]>([]);
+  const [isFetchingSamples, setFetchingSamples] = useState<boolean>(false);
 
   useEffect(() => {
     async function fetchSamples() {
+      setFetchingSamples(true);
       try {
         const samplesFromAPI = await getSamples();
         setSamples(samplesFromAPI);
       } catch (error) {
         setSamples([]);
       }
+      setFetchingSamples(false);
     }
     fetchSamples();
   }, []);
@@ -50,7 +53,9 @@ export const LandingPage = () => {
       <Counter />
 
       {/* API Things */}
-      {samples.length == 0 ? (
+      {isFetchingSamples ? (
+        <p>Loading...</p>
+      ) : samples.length == 0 ? (
         <p>There's no Objects!</p>
       ) : (
         <>
