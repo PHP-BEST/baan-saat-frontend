@@ -45,7 +45,7 @@ This guide outlines how to set up, develop, test, and maintain the `baan-saat-ba
 - **`production`**: Uses `VITE_API_ROOT_PROD` - connects to production backend on Vercel
 - **`test`**: Uses `VITE_API_ROOT_LOCAL` - connects to local backend (for testing unreleased backend changes)
 
-So... No need to use `production` but if you changes something in the backend, I recommend using `test` mode to check the result immediately
+So... No need to use `production` but if you changes something in the backend, I recommend using `test` mode to check the result immediately but if you change the mode, make sure to restart the server and run it again...
 
 ## Running the Application
 

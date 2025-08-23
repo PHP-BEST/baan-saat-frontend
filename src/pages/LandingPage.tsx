@@ -1,5 +1,5 @@
 import { getSamples, type Sample } from '@/api/samples';
-import { testConnection } from '@/api/test';
+import { testConnection } from '@/api/connection';
 import Counter from '@/components/our-components/counter';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
