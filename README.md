@@ -1,10 +1,9 @@
 # Development Guide
 
-This guide outlines how to set up, develop, test, and maintain the `baan-saat-backend` project.
+This guide outlines how to set up, develop, test, and maintain the `baan-saat-frontend` project.
 
 ## Table of Contents
 
-- [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Environment Setup](#environment-setup)
 - [Running the Application](#running-the-application)
@@ -16,18 +15,13 @@ This guide outlines how to set up, develop, test, and maintain the `baan-saat-ba
 
 ---
 
-## Prerequisites
-
-- **Node.js**
-- **npm**
-
 ## Installation
 
 1. **Clone this repository:**
 
    ```bash
    git clone https://github.com/PHP-BEST/baan-saat-frontend.git
-   cd baan-saat-backend
+   cd baan-saat-frontend
    ```
 
 2. **Install dependencies:**
@@ -38,14 +32,6 @@ This guide outlines how to set up, develop, test, and maintain the `baan-saat-ba
 ## Environment Setup
 
 - Create a `.env` file in the root directory with the variables in [.env.example](/.env.example)
-
-### Environment Modes
-
-- **`development`** (default): Uses `VITE_API_ROOT_DEV` - connects to development backend on Vercel
-- **`production`**: Uses `VITE_API_ROOT_PROD` - connects to production backend on Vercel
-- **`test`**: Uses `VITE_API_ROOT_LOCAL` - connects to local backend (for testing unreleased backend changes)
-
-So... No need to use `production` but if you changes something in the backend, I recommend using `test` mode to check the result immediately
 
 ## Running the Application
 
@@ -175,12 +161,12 @@ src/
 
 The frontend is deployed on Vercel with two environments:
 
-- **Development**: https://baan-saat-frontend-development.vercel.app/
+- **Development**: https://baan-saat-frontend-git-developer-php-wanttosurvives-projects.vercel.app/
   - Automatically deploys from the `developer` branch
   - Used for testing and staging
   - Connected to development database and services
 
-- **Production**: https://baan-saat-frontend-production.vercel.app/
+- **Production**: https://baan-saat-frontend.vercel.app/
   - Automatically deploys from the `main` branch
   - Live production environment
   - Connected to production database and services
@@ -244,16 +230,9 @@ The frontend is deployed on Vercel with two environments:
 When working with unreleased backend changes:
 
 1. **Run backend locally** on `localhost:5000`
-2. **Set environment** to test mode:
-   ```bash
-   # In your .env file
-   VITE_NODE_ENV=test
-   ```
-3. **Test your frontend** changes against the local backend
-4. **Switch back to development** mode when testing deployed backend:
-   ```bash
-   VITE_NODE_ENV=development
-   ```
+2. **Test your frontend** changes against the local backend
+
+Note: If it works, don't forget to push that backend code also...
 
 ---
 

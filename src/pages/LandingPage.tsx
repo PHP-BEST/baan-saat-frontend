@@ -1,4 +1,5 @@
 import { getSamples, type Sample } from '@/api/samples';
+import { testConnection } from '@/api/connection';
 import Counter from '@/components/our-components/counter';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
@@ -6,7 +7,23 @@ import { Link } from 'react-router-dom';
 
 export const LandingPage = () => {
   const [samples, setSamples] = useState<Sample[]>([]);
+  const [connectionWord, setConnectionWord] = useState<string>('');
+  const [isConnecting, setConnecting] = useState<boolean>(false);
   const [isFetchingSamples, setFetchingSamples] = useState<boolean>(false);
+
+  useEffect(() => {
+    async function checkConnection() {
+      setConnecting(true);
+      try {
+        const connection = await testConnection();
+        setConnectionWord(connection);
+      } catch (error) {
+        setConnectionWord('There is something wrong...');
+      }
+      setConnecting(false);
+    }
+    checkConnection();
+  }, []);
 
   useEffect(() => {
     async function fetchSamples() {
@@ -53,6 +70,9 @@ export const LandingPage = () => {
       <Counter />
 
       {/* API Things */}
+      <p className="text-2xl font-bold">Testing Connection</p>
+      {isConnecting ? <p>Loading...</p> : <p>{connectionWord}</p>}
+
       {isFetchingSamples ? (
         <p>Loading...</p>
       ) : samples.length == 0 ? (
