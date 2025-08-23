@@ -37,7 +37,7 @@ jobs:
 
           VITE_API_ROOT_LOCAL: ${{ secrets.VITE_API_ROOT_LOCAL }}
 
-      - name: Run tests (main uses prod, others use dev)
+      - name: Run tests
 
         env:
           VITE_API_ROOT_DEV: ${{ secrets.VITE_API_ROOT_DEV }}
