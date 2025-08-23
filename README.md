@@ -1,10 +1,9 @@
 # Development Guide
 
-This guide outlines how to set up, develop, test, and maintain the `baan-saat-backend` project.
+This guide outlines how to set up, develop, test, and maintain the `baan-saat-frontend` project.
 
 ## Table of Contents
 
-- [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Environment Setup](#environment-setup)
 - [Running the Application](#running-the-application)
@@ -16,18 +15,13 @@ This guide outlines how to set up, develop, test, and maintain the `baan-saat-ba
 
 ---
 
-## Prerequisites
-
-- **Node.js**
-- **npm**
-
 ## Installation
 
 1. **Clone this repository:**
 
    ```bash
    git clone https://github.com/PHP-BEST/baan-saat-frontend.git
-   cd baan-saat-backend
+   cd baan-saat-frontend
    ```
 
 2. **Install dependencies:**
@@ -167,8 +161,7 @@ src/
 
 The frontend is deployed on Vercel with two environments:
 
-- **Development**: https://baan-saat-frontend-git-developer-php-wanttosurvives-projects.vercel.app
-  /
+- **Development**: https://baan-saat-frontend-git-developer-php-wanttosurvives-projects.vercel.app/
   - Automatically deploys from the `developer` branch
   - Used for testing and staging
   - Connected to development database and services
@@ -237,16 +230,9 @@ The frontend is deployed on Vercel with two environments:
 When working with unreleased backend changes:
 
 1. **Run backend locally** on `localhost:5000`
-2. **Set environment** to test mode:
-   ```bash
-   # In your .env file
-   VITE_NODE_ENV=test
-   ```
-3. **Test your frontend** changes against the local backend
-4. **Switch back to development** mode when testing deployed backend:
-   ```bash
-   VITE_NODE_ENV=development
-   ```
+2. **Test your frontend** changes against the local backend
+
+Note: If it works, don't forget to push that backend code also...
 
 ---
 
