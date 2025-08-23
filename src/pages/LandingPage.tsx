@@ -70,7 +70,7 @@ export const LandingPage = () => {
       <Counter />
 
       {/* API Things */}
-      <p>Testing Connection</p>
+      <p className="text-2xl font-bold">Testing Connection</p>
       {isConnecting ? <p>Loading...</p> : <p>{connectionWord}</p>}
 
       {isFetchingSamples ? (
