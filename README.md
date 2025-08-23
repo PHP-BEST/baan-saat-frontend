@@ -39,14 +39,6 @@ This guide outlines how to set up, develop, test, and maintain the `baan-saat-ba
 
 - Create a `.env` file in the root directory with the variables in [.env.example](/.env.example)
 
-### Environment Modes
-
-- **`development`** (default): Uses `VITE_API_ROOT_DEV` - connects to development backend on Vercel
-- **`production`**: Uses `VITE_API_ROOT_PROD` - connects to production backend on Vercel
-- **`test`**: Uses `VITE_API_ROOT_LOCAL` - connects to local backend (for testing unreleased backend changes)
-
-So... No need to use `production` but if you changes something in the backend, I recommend using `test` mode to check the result immediately but if you change the mode, make sure to restart the server and run it again...
-
 ## Running the Application
 
 - **Start the development server:**
@@ -175,12 +167,13 @@ src/
 
 The frontend is deployed on Vercel with two environments:
 
-- **Development**: https://baan-saat-frontend-development.vercel.app/
+- **Development**: https://baan-saat-frontend-git-developer-php-wanttosurvives-projects.vercel.app
+  /
   - Automatically deploys from the `developer` branch
   - Used for testing and staging
   - Connected to development database and services
 
-- **Production**: https://baan-saat-frontend-production.vercel.app/
+- **Production**: https://baan-saat-frontend.vercel.app/
   - Automatically deploys from the `main` branch
   - Live production environment
   - Connected to production database and services

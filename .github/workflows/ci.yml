@@ -1,21 +1,16 @@
 name: CI
 
 on:
-
   push:
-
     branches: [main, '**']
 
   pull_request:
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout code
 
         uses: actions/checkout@v4
@@ -25,7 +20,6 @@ jobs:
         uses: actions/setup-node@v4
 
         with:
-
           node-version: 20
 
       - name: Install dependencies
@@ -37,7 +31,6 @@ jobs:
         run: echo "Branch is ${{ github.ref }}"
 
         env:
-
           VITE_API_ROOT_DEV: ${{ secrets.VITE_API_ROOT_DEV }}
 
           VITE_API_ROOT_PROD: ${{ secrets.VITE_API_ROOT_PROD }}
@@ -47,9 +40,6 @@ jobs:
       - name: Run tests (main uses prod, others use dev)
 
         env:
-
-          NODE_ENV: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
-
           VITE_API_ROOT_DEV: ${{ secrets.VITE_API_ROOT_DEV }}
 
           VITE_API_ROOT_PROD: ${{ secrets.VITE_API_ROOT_PROD }}
