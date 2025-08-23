@@ -1,7 +1,6 @@
 import { API_ROOT_DEV, API_ROOT_LOCAL, API_ROOT_PROD, NODE_ENV } from './env';
 
 export const API_ROOT = (() => {
-  // Development deployment (URL contains "git-developer")
   if (NODE_ENV == 'development') {
     console.log('🔧 Using DEVELOPMENT API 🔧');
     return API_ROOT_DEV;
