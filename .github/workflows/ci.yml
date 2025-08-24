@@ -3,8 +3,7 @@ name: ci
 on:
   push:
     branches:
-      - main
-      - developer
+      - '**'
   pull_request:
 
 jobs:
@@ -24,13 +23,13 @@ jobs:
         run: npm ci
 
       - name: Set environment for main (production)
-        if: github.ref == 'refs/heads/main'
+        if: github.ref_name == 'main'
         run: |
           echo "NODE_ENV=production" >> $GITHUB_ENV
           echo "VITE_API_ROOT=${{ secrets.VITE_API_ROOT_PROD }}" >> $GITHUB_ENV
 
-      - name: Set environment for developer (staging/dev)
-        if: github.ref == 'refs/heads/developer'
+      - name: Set environment for other branches (development)
+        if: github.ref_name != 'main'
         run: |
           echo "NODE_ENV=development" >> $GITHUB_ENV
           echo "VITE_API_ROOT=${{ secrets.VITE_API_ROOT_DEV }}" >> $GITHUB_ENV
