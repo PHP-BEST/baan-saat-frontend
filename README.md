@@ -25,8 +25,11 @@ This guide outlines how to set up, develop, test, and maintain the `baan-saat-fr
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
+   npm install husky --save-dev
+   npx husky install
    ```
 
 ## Environment Setup
@@ -40,6 +43,14 @@ This guide outlines how to set up, develop, test, and maintain the `baan-saat-fr
   npm run dev
   ```
 - By default, the app runs on `localhost:5173`.
+
+### Environment Modes
+
+- **`development`** (default): Uses `VITE_API_ROOT_DEV` - connects to development backend on Vercel
+- **`production`**: Uses `VITE_API_ROOT_PROD` - connects to production backend on Vercel
+- **`test`**: Uses `VITE_API_ROOT_LOCAL` - connects to local backend (for testing unreleased backend changes)
+
+So... No need to use `production` but if you changes something in the backend, I recommend using `test` mode to check the result immediately
 
 ## Project Structure
 
@@ -161,7 +172,7 @@ src/
 
 The frontend is deployed on Vercel with two environments:
 
-- **Development**: https://baan-saat-frontend-git-developer-php-wanttosurvives-projects.vercel.app/
+- **Development**: https://baan-saat-frontend-dev.vercel.app/
   - Automatically deploys from the `developer` branch
   - Used for testing and staging
   - Connected to development database and services

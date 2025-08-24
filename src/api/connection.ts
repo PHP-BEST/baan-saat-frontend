@@ -9,5 +9,5 @@ interface GetTestResponse {
 export async function testConnection(): Promise<string> {
   const result = await apiFetch<GetTestResponse>(`${API_ROOT}/`);
   if (result.success) return result.data;
-  return 'Fail to connect';
+  return 'There is an error!';
 }
