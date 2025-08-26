@@ -1,9 +1,9 @@
 import { getSamples, type Sample } from '@/api/samples';
 import { testConnection } from '@/api/connection';
-import Counter from '@/components/our-components/counter';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import React from 'react';
 
 export const LandingPage = () => {
   const [samples, setSamples] = useState<Sample[]>([]);
@@ -18,7 +18,8 @@ export const LandingPage = () => {
         const connection = await testConnection();
         setConnectionWord(connection);
       } catch (error) {
-        setConnectionWord('There is something wrong...');
+        console.error(error);
+        setConnectionWord('There is something wrong... ');
       }
       setConnecting(false);
     }
@@ -32,6 +33,7 @@ export const LandingPage = () => {
         const samplesFromAPI = await getSamples();
         setSamples(samplesFromAPI);
       } catch (error) {
+        console.error(error);
         setSamples([]);
       }
       setFetchingSamples(false);
@@ -66,9 +68,6 @@ export const LandingPage = () => {
         </Button>
       </div>
 
-      {/* Counter */}
-      <Counter />
-
       {/* API Things */}
       <p className="text-2xl font-bold">Testing Connection</p>
       {isConnecting ? <p>Loading...</p> : <p>{connectionWord}</p>}
@@ -76,10 +75,10 @@ export const LandingPage = () => {
       {isFetchingSamples ? (
         <p>Loading...</p>
       ) : samples.length == 0 ? (
-        <p>There's no Objects!</p>
+        <p>{"There's no Objects!"}</p>
       ) : (
         <>
-          <p>Here's the objects...</p>
+          <p>{"Here's the objects..."}</p>
           <ul>
             {samples.map((s) => (
               <li key={s._id}>

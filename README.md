@@ -63,6 +63,7 @@ src/
     ui/         # Reusable UI components (shadcn/ui)
   config/       # Configuration files (API, environment)
   hooks/        # Custom React hooks
+  layouts/      # Layout components
   lib/          # Utility functions and helpers
   pages/        # Page components for routing
   tests/        # Jest and React Testing Library tests
@@ -116,6 +117,13 @@ src/
 **Naming Convention**: `use<HookName>.ts`
 
 - `useCounter.ts` - Counter hook with count state and increment functionality
+
+### /src/layouts/ - Layout Components
+
+**Purpose**: Components that wrap pages to provide consistent layout (header, footer, background, etc.)
+**Naming Convention**: `<LayoutName>.tsx`
+
+- `MainLayout.tsx` - The Main Layout that groups other Layout files
 
 #### `/src/lib/` - Utility Functions
 

@@ -1,6 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import useCounter from "@/hooks/useCounter";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import useCounter from '@/hooks/useCounter';
+import React from 'react';
 
 export default function Counter() {
   const { count, increment, val, setVal } = useCounter();
@@ -12,7 +13,7 @@ export default function Counter() {
         type="text"
         value={val}
         onChange={(e) => {
-          const num = e.target.value.replace(/[^0-9]/g, "");
+          const num = e.target.value.replace(/[^0-9]/g, '');
           setVal(Math.max(0, Number(num)));
         }}
       />
