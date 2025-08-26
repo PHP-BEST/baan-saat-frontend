@@ -1,6 +1,5 @@
 import { getSamples, type Sample } from '@/api/samples';
 import { testConnection } from '@/api/connection';
-import Counter from '@/components/our-components/counter';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -65,9 +64,6 @@ export const LandingPage = () => {
           <Link to="/xdza555+">What is this?</Link>
         </Button>
       </div>
-
-      {/* Counter */}
-      <Counter />
 
       {/* API Things */}
       <p className="text-2xl font-bold">Testing Connection</p>
