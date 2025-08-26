@@ -1,8 +1,8 @@
 import { getSamples, type Sample } from '@/api/samples';
 import { testConnection } from '@/api/connection';
-import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import ActionButton from '@/components/our-components/actionButton';
 
 export const LandingPage = () => {
   const [samples, setSamples] = useState<Sample[]>([]);
@@ -46,25 +46,34 @@ export const LandingPage = () => {
 
       {/* Buttons */}
       <div className="flex gap-4">
-        <Button
-          variant="outline"
+        <ActionButton
+          buttonColor="blue"
+          buttonType="filled"
           onClick={() => {
-            alert('Landing button clicked');
+            alert('Register button clicked');
           }}
-          asChild
         >
           <Link to="/register">Register</Link>
-        </Button>
-        <Button
-          variant="outline"
+        </ActionButton>
+
+        <ActionButton buttonColor="red" buttonType="outline">
+          Sign out
+        </ActionButton>
+
+        <ActionButton
+          buttonColor="green"
+          buttonType="outline"
           onClick={() => {
-            alert('For what...');
+            alert('Upload Successfully');
           }}
-          asChild
-          className="bg-red-500 text-black hover:bg-red-400 transition duration-300"
+          fontSize={16}
         >
-          <Link to="/xdza555+">What is this?</Link>
-        </Button>
+          Upload
+        </ActionButton>
+
+        <ActionButton className="bg-black text-white text-2xl font-semibold">
+          Customize
+        </ActionButton>
       </div>
 
       {/* API Things */}
