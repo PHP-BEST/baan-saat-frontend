@@ -63,6 +63,7 @@ src/
     ui/         # Reusable UI components (shadcn/ui)
   config/       # Configuration files (API, environment)
   hooks/        # Custom React hooks
+  layouts/      # Layout components
   lib/          # Utility functions and helpers
   pages/        # Page components for routing
   tests/        # Jest and React Testing Library tests
@@ -79,14 +80,10 @@ src/
 **Purpose**: API service functions, request/response handlers, and TypeScript type definitions
 **Naming Convention**: `<resource-name>.ts`
 
-- `samples.ts` - Sample API service with getSamples(), getSampleById() functions and Sample interface
-
 #### `/src/assets/` - Static Assets
 
 **Purpose**: Images, icons, SVGs, and other static files
 **Naming Convention**: `<asset-name>.<extension>`
-
-- `react.svg` - React logo SVG
 
 #### `/src/components/` - React Components
 
@@ -95,57 +92,43 @@ src/
 
 ##### `/src/components/our-components/` - Custom Components
 
-- `counter.tsx` - Counter component with input and increment functionality
-
 ##### `/src/components/ui/` - UI Components (shadcn/ui)
-
-- `button.tsx` - Button component with variants and size options
-- `input.tsx` - Input component with styling and focus states
 
 #### `/src/config/` - Configuration Files
 
 **Purpose**: Environment configuration, API setup, and app-wide settings
 **Naming Convention**: `<config-type>.ts`
 
-- `api.ts` - API configuration with apiFetch utility and API_ROOT selection logic
-- `env.ts` - Environment variables exports and type safety
-
 #### `/src/hooks/` - Custom React Hooks
 
 **Purpose**: Reusable stateful logic and side effects
 **Naming Convention**: `use<HookName>.ts`
 
-- `useCounter.ts` - Counter hook with count state and increment functionality
+### /src/layouts/ - Layout Components
+
+**Purpose**: Components that wrap pages to provide consistent layout (header, footer, background, etc.)
+**Naming Convention**: `<LayoutName>.tsx`
 
 #### `/src/lib/` - Utility Functions
 
 **Purpose**: Helper functions, utilities, and shared logic
 **Naming Convention**: `<utility-name>.ts`
 
-- `utils.ts` - Utility functions including cn() for className merging
-
 #### `/src/pages/` - Page Components
 
 **Purpose**: Top-level page components for routing
 **Naming Convention**: `<PageName>Page.tsx`
-
-- `LandingPage.tsx` - Landing page with counter, API samples display, and navigation
-- `RegisterPage.tsx` - Registration page component
-- `ErrorPage.tsx` - Error page with navigation back to landing
 
 #### `/src/tests/` - Test Files
 
 **Purpose**: Jest and React Testing Library unit and integration tests
 **Naming Convention**: `<component-name>.test.ts` or `<hook-name>.test.ts`
 
-- `useCounter.test.ts` - Comprehensive tests for useCounter hook functionality
-
 #### Root Files
 
 - `App.tsx` - Main application component with React Router setup
 - `main.tsx` - Application entry point with React root rendering
 - `index.css` - Global styles, Tailwind CSS imports, and CSS custom properties
-- `vite-env.d.ts` - Vite environment type definitions
 
 🚧🚧 **Under Construction** 🚧🚧
 
@@ -224,7 +207,7 @@ The frontend is deployed on Vercel with two environments:
 3. **Open a Pull Request**
    - **On GitHub**, open a pull request from your feature/fix branch to the `developer` branch (never directly into `main`).
    - Assign reviewers if required.
-   - Wait for approval and merge.
+   - Wait for approval and merge (You can merge by yourself if it's approved).
    - After merging, **delete your working branch** and recreate it from the updated `developer` branch for your next task:
      ```bash
      git checkout developer

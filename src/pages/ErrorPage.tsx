@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 export const ErrorPage = () => {
   return (
@@ -8,7 +8,7 @@ export const ErrorPage = () => {
       <Button
         variant="secondary"
         onClick={() => {
-          alert("Error button clicked... Go to Landing Page");
+          alert('Error button clicked... Go to Landing Page');
         }}
         asChild
         className="bg-black text-white hover:bg-gray-800 transition duration-300"
