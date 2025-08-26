@@ -3,6 +3,7 @@ import { testConnection } from '@/api/connection';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import React from 'react';
 
 export const LandingPage = () => {
   const [samples, setSamples] = useState<Sample[]>([]);
