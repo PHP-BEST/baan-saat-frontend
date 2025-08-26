@@ -52,7 +52,6 @@ export const LandingPage = () => {
           onClick={() => {
             alert('Register button clicked');
           }}
-          asChild
         >
           <Link to="/register">Register</Link>
         </ActionButton>

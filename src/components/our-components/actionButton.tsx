@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 
 interface ActionButtonProps {
   onClick?: () => void;
-  asChild?: boolean;
   className?: string;
   fontSize?: number;
   buttonColor?: 'blue' | 'red' | 'green';
@@ -14,7 +13,6 @@ interface ActionButtonProps {
 
 export default function ActionButton({
   onClick,
-  asChild = false,
   className,
   fontSize = 20,
   buttonColor = 'blue',
@@ -70,7 +68,6 @@ export default function ActionButton({
         className,
       )}
       onClick={onClick}
-      asChild={asChild}
       style={{ fontSize, minWidth: 100 }}
       {...props}
     >
