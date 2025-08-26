@@ -207,11 +207,12 @@ The frontend is deployed on Vercel with two environments:
 3. **Open a Pull Request**
    - **On GitHub**, open a pull request from your feature/fix branch to the `developer` branch (never directly into `main`).
    - Assign reviewers if required.
-   - Wait for approval and merge (You can merge by yourself if it's approved because it will send your commit history to the developer branch...).
-   - After merging, **Don't have to delete your working branch** but recreate it from the updated `developer` branch for your next task so it can still save your commit history in your local branches:
+   - Wait for approval and merge (You can merge by yourself if it's approved).
+   - After merging, **delete your working branch** and recreate it from the updated `developer` branch for your next task:
      ```bash
      git checkout developer
      git pull
+     git branch -d feat/user-dashboard
      git checkout -b feat/another-feature
      ```
 
