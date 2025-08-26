@@ -1,5 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import React from 'react';
 
 export const RegisterPage = () => {
   return (
@@ -8,7 +9,7 @@ export const RegisterPage = () => {
       <Button
         variant="secondary"
         onClick={() => {
-          alert("Register button clicked... Go to Landing Page");
+          alert('Register button clicked... Go to Landing Page');
         }}
         asChild
         className="bg-green-900 text-white hover:bg-green-800 transition duration-300"
