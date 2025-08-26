@@ -3,7 +3,6 @@ import { ErrorPage } from './pages/ErrorPage';
 import { LandingPage } from './pages/LandingPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import React from 'react';
 
 function App() {
   const router = createBrowserRouter([
