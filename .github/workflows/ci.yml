@@ -9,7 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,17 +21,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Set environment for main (production)
-        if: github.ref_name == 'main'
+      - name: Set environment variables
         run: |
-          echo "NODE_ENV=production" >> $GITHUB_ENV
-          echo "VITE_API_ROOT=${{ secrets.VITE_API_ROOT_PROD }}" >> $GITHUB_ENV
-
-      - name: Set environment for other branches (development)
-        if: github.ref_name != 'main'
-        run: |
-          echo "NODE_ENV=development" >> $GITHUB_ENV
-          echo "VITE_API_ROOT=${{ secrets.VITE_API_ROOT_DEV }}" >> $GITHUB_ENV
+          echo "VITE_API_ROOT=${{ github.ref_name == 'main' && secrets.VITE_API_ROOT_PROD || secrets.VITE_API_ROOT_DEV }}" >> $GITHUB_ENV
 
       - name: Run tests
+        env:
+          NODE_ENV: development
         run: npm test
