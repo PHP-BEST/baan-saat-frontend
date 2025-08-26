@@ -5,12 +5,22 @@ import pluginReact from 'eslint-plugin-react';
 import { defineConfig } from 'eslint/config';
 
 export default defineConfig([
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  pluginReact.configs.flat.recommended,
   {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    plugins: { js },
-    extends: ['js/recommended'],
-    languageOptions: { globals: globals.browser },
+    languageOptions: {
+      globals: globals.browser,
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+    rules: {
+      'react/react-in-jsx-scope': 'off',
+      'react/jsx-uses-react': 'off',
+    },
   },
-  tseslint.configs.recommended,
-  pluginReact.configs.flat.recommended,
 ]);
