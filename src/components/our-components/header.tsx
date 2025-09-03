@@ -26,7 +26,7 @@ const Header = () => {
   };
 
   return (
-    <div className="w-full px-3 py-1 bg-background-header-footer flex justify-between items-center">
+    <header className="w-full px-3 py-1 bg-background-header-footer flex justify-between items-center">
       {/* Left Side */}
       <div className="w-full max-w-[50%] flex gap-3 justify-start items-center">
         {/* Logo */}
@@ -79,7 +79,7 @@ const Header = () => {
         {/* Avatar Image */}
         <AvatarImage />
       </div>
-    </div>
+    </header>
   );
 };
 export default Header;
