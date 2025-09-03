@@ -1,4 +1,5 @@
 import MainLayout from './layouts/MainLayout';
+import AccountPage from './pages/AccountPage';
 import { ErrorPage } from './pages/ErrorPage';
 import { LandingPage } from './pages/LandingPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -15,6 +16,11 @@ function App() {
       path: '/register',
       element: <RegisterPage />,
       errorElement: <ErrorPage />,
+    },
+    {
+      path: '/account',
+      element: <AccountPage />,
+      errorElement: <AccountPage />,
     },
   ]);
 
