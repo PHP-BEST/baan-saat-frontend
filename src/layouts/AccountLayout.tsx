@@ -9,7 +9,7 @@ interface SidebarItem {
 }
 
 const SidebarMenu: SidebarItem[] = [
-  { name: 'Profile', path: '/profile' },
+  { name: 'Profile', path: '/' },
   { name: 'Account Setting', path: '/setting' },
   { name: 'Privacy', path: '/privacy' },
   { name: 'Your Request', path: '/request' },
@@ -26,7 +26,7 @@ export default function AccountLayout() {
           <h1 className="text-2xl font-bold mb-2">Your Account</h1>
           <div className="w-full h-full bg-white border rounded-2xl px-4 pb-4 pt-8 flex flex-col gap-4 shadow-sm text-center">
             {SidebarMenu.map((item: SidebarItem) => (
-              <>
+              <div key={item.name}>
                 <NavLink
                   key={item.path}
                   to={'/account' + item.path}
@@ -37,7 +37,7 @@ export default function AccountLayout() {
                 {(item.name === 'Privacy' || item.name === 'Your Service') && (
                   <hr className="my-2" />
                 )}
-              </>
+              </div>
             ))}
             <div className="mt-auto">
               <ActionButton
