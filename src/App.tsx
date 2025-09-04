@@ -2,7 +2,7 @@ import MainLayout from './layouts/MainLayout';
 import AccountPage from './pages/AccountPage';
 import { ErrorPage } from './pages/ErrorPage';
 import { LandingPage } from './pages/LandingPage';
-import { RegisterPage } from './pages/RegisterPage';
+import ProfileCreationPage from './pages/ProfileCreationPage';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 function App() {
@@ -14,7 +14,7 @@ function App() {
     },
     {
       path: '/register',
-      element: <RegisterPage />,
+      element: <ProfileCreationPage />,
       errorElement: <ErrorPage />,
     },
     {
