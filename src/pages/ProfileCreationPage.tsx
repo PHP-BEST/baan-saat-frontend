@@ -82,13 +82,11 @@ export const ProfileCreationPage: React.FC = () => {
 
     return (
         <>
-            <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 font-sans">
+            <div className="min-h-screen flex items-center justify-center p-4">
                 <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 space-y-6">
-                    {/* ... (Logo and other elements remain the same) ... */}
                     <div className="flex justify-center">
-                        <div className="w-16 h-8 bg-purple-300 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                        gdg
-                        </div>
+                        {/* Use a direct path from the public folder */}
+                        <img src="/logo.png" alt="Company Logo" className="h-12" />
                     </div>
 
                     <h1 className="text-center text-2xl font-bold text-gray-800">
@@ -118,7 +116,6 @@ export const ProfileCreationPage: React.FC = () => {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* ... (Input fields remain the same) ... */}
                         <div>
                             <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">First name</label>
                             <Input id="firstName" name="firstName" type="text" placeholder="First name" value={formData.firstName} onChange={handleInputChange} />
