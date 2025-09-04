@@ -60,6 +60,21 @@ export default function ProfilePage() {
     return getFieldValue(field);
   };
 
+  const getPlaceholderText = (field: string): string => {
+    switch (field) {
+      case 'name':
+        return 'No name provided';
+      case 'telNumber':
+        return 'No phone number provided';
+      case 'email':
+        return 'No email provided';
+      case 'description':
+        return 'No description provided';
+      default:
+        return 'No information provided';
+    }
+  };
+
   const startEditing = (field: string) => {
     setEditingFields((prev) => new Set([...prev, field]));
     setTempValues((prev) => ({ ...prev, [field]: getFieldValue(field) }));
@@ -222,15 +237,21 @@ export default function ProfilePage() {
               )}
             </div>
           ) : (
-            <p
-              className={
-                tempValues[field] !== undefined
-                  ? 'text-button-upload font-medium'
-                  : ''
-              }
-            >
-              {getDisplayValue(field)}
-            </p>
+            <>
+              {getDisplayValue(field) ? (
+                <p
+                  className={
+                    tempValues[field] !== undefined
+                      ? 'text-button-upload font-medium'
+                      : ''
+                  }
+                >
+                  {getDisplayValue(field)}
+                </p>
+              ) : (
+                <p className="text-gray-500">{getPlaceholderText(field)}</p>
+              )}
+            </>
           )}
         </>
       )}

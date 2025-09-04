@@ -24,15 +24,15 @@ interface UserProviderProps {
 export const UserProvider = ({ children }: UserProviderProps) => {
   const [user, setUser] = useState<User>({
     userId: '',
-    name: '<Your Name>',
+    name: '',
     role: 'customer',
-    telNumber: '<Your Phone Number>',
+    telNumber: '',
     avatarUrl: '',
-    email: '<Your Email>',
-    address: '<Your Address>',
+    email: '',
+    address: '',
     providerProfile: {
-      title: '<Your Title>',
-      description: '<Your Description>',
+      title: '',
+      description: '',
       skills: [],
     },
     lastLoginAt: new Date(),
