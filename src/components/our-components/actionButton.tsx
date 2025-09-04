@@ -50,9 +50,9 @@ export default function ActionButton({
 
     switch (buttonType) {
       case 'filled':
-        return `text-${subColor} bg-${mainColor} border-${mainColor}`;
+        return `text-${subColor} bg-${mainColor} border border-${mainColor}`;
       case 'outline':
-        return `text-${mainColor} bg-${subColor} border-${mainColor}`;
+        return `text-${mainColor} bg-${subColor} border border-${mainColor}`;
       default:
         return '';
     }

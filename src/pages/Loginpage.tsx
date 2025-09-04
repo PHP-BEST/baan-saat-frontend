@@ -1,17 +1,16 @@
-import { BACKEND_URL } from '@/config/env';
-export default function Loginpage() {
-  const backendUrl = `http://localhost:${BACKEND_URL}`; // change to your backend domain in production
+import { API_ROOT } from '@/config/api';
 
+export default function Loginpage() {
   const handleGoogleSignIn = () => {
-    window.location.href = `${backendUrl}/auth/google`;
+    window.location.href = `${API_ROOT}/auth/google`;
   };
 
   const handleFacebookSignIn = () => {
-    window.location.href = `${backendUrl}/auth/facebook`;
+    window.location.href = `${API_ROOT}/auth/facebook`;
   };
 
   const handleLineSignIn = () => {
-    window.location.href = `${backendUrl}/auth/line`;
+    window.location.href = `${API_ROOT}/auth/line`;
   };
 
   return (

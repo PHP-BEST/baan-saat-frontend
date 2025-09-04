@@ -4,12 +4,12 @@ import {
   RouterProvider,
   Navigate,
 } from 'react-router-dom';
-import Loginpage from './pages/Loginpage';
-import AccountPage from './pages/AccountPage';
+import Loginpage from './pages/LoginPage';
+import AccountPage from './components/our-components/accountPage/accountProfile';
 import { ErrorPage } from './pages/ErrorPage';
 import { LandingPage } from './pages/LandingPage';
 import MainLayout from './layouts/MainLayout';
-import AccountLayout from './pages/Layout';
+import AccountLayout from './pages/AccountPage';
 function App() {
   const router = createBrowserRouter([
     {
