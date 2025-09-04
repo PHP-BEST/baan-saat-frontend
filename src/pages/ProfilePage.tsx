@@ -1,34 +1,91 @@
 import { useState } from 'react';
 import { Pencil, Check } from 'lucide-react';
+import type { User } from '@/interfaces/User';
 
-interface User {
-  name: string;
-  phone: string;
-  email: string;
-  description: string;
-  skills: string;
-}
+const skillOptions = [
+  'houseCleaning',
+  'houseRepair',
+  'plumbing',
+  'electrical',
+  'hvac',
+  'painting',
+  'landscaping',
+  'others',
+];
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User>({
-    name: 'John Doe',
-    phone: '+00 000 000 000',
-    email: 'john@doe.com',
-    description: 'I do some cleaning',
-    skills: 'I did some cleaning',
+    userId: '',
+    name: '<Your Name>',
+    role: 'customer',
+    telNumber: '<Your Phone Number>',
+    avatarUrl: '',
+    email: '<Your Email>',
+    address: '<Your Address>',
+    providerProfile: {
+      title: '<Your Title>',
+      description: '<Your Description>',
+      skills: [''],
+    },
+    lastLoginAt: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   });
 
-  const [editingField, setEditingField] = useState<keyof User | null>(null);
+  const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState<string>('');
 
-  const startEditing = (field: keyof User, value: string) => {
+  const getFieldValue = (field: string): string => {
+    switch (field) {
+      case 'name':
+        return user.name;
+      case 'telNumber':
+        return user.telNumber;
+      case 'email':
+        return user.email;
+      case 'description':
+        return user.providerProfile?.description || '';
+      case 'skills':
+        return user.providerProfile?.skills.join(', ') || '';
+      default:
+        return '';
+    }
+  };
+
+  const startEditing = (field: string) => {
     setEditingField(field);
-    setTempValue(value);
+    setTempValue(getFieldValue(field));
   };
 
   const saveEditing = () => {
     if (editingField) {
-      setUser({ ...user, [editingField]: tempValue });
+      if (editingField === 'description') {
+        setUser({
+          ...user,
+          providerProfile: {
+            title: user.providerProfile?.title || '',
+            description: tempValue,
+            skills: user.providerProfile?.skills || [],
+          },
+        });
+      } else if (editingField === 'skills') {
+        // Validate skills against skillOptions
+        const validSkills = tempValue
+          .split(',')
+          .map((skill) => skill.trim())
+          .filter((skill) => skill && skillOptions.includes(skill));
+
+        setUser({
+          ...user,
+          providerProfile: {
+            title: user.providerProfile?.title || '',
+            description: user.providerProfile?.description || '',
+            skills: validSkills,
+          },
+        });
+      } else {
+        setUser({ ...user, [editingField]: tempValue });
+      }
       setEditingField(null);
     }
   };
@@ -41,7 +98,7 @@ export default function ProfilePage() {
   // Props type for the inner component
   interface EditableFieldProps {
     label: string;
-    field: keyof User;
+    field: string;
   }
 
   const EditableField = ({ label, field }: EditableFieldProps) => (
@@ -50,32 +107,82 @@ export default function ProfilePage() {
         {label}
         {editingField !== field && (
           <Pencil
-            onClick={() => startEditing(field, user[field])}
+            onClick={() => startEditing(field)}
             className="w-4 h-4 ml-2 text-gray-500 cursor-pointer hover:text-gray-700"
           />
         )}
       </span>
 
       {editingField === field ? (
-        <div className="flex items-center gap-2 mt-1">
-          <input
-            type="text"
-            value={tempValue}
-            onChange={(e) => setTempValue(e.target.value)}
-            className="border rounded px-2 py-1 flex-1"
-            autoFocus
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') saveEditing();
-              if (e.key === 'Escape') cancelEditing();
-            }}
-          />
-          <Check
-            onClick={saveEditing}
-            className="w-4 h-4 text-green-600 cursor-pointer"
-          />
+        <div className="flex flex-col gap-2 mt-1">
+          {field === 'skills' ? (
+            <>
+              <div className="grid grid-cols-2 gap-2">
+                {skillOptions.map((skill) => {
+                  const isChecked =
+                    user.providerProfile?.skills.includes(skill) || false;
+                  return (
+                    <label key={skill} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          const currentSkills =
+                            user.providerProfile?.skills || [];
+                          let newSkills;
+                          if (e.target.checked) {
+                            newSkills = [...currentSkills, skill];
+                          } else {
+                            newSkills = currentSkills.filter(
+                              (s) => s !== skill,
+                            );
+                          }
+                          setUser({
+                            ...user,
+                            providerProfile: {
+                              title: user.providerProfile?.title || '',
+                              description:
+                                user.providerProfile?.description || '',
+                              skills: newSkills,
+                            },
+                          });
+                        }}
+                        className="rounded"
+                      />
+                      <span className="text-sm">{skill}</span>
+                    </label>
+                  );
+                })}
+              </div>
+              <div className="flex justify-end">
+                <Check
+                  onClick={() => setEditingField(null)}
+                  className="w-4 h-4 text-green-600 cursor-pointer"
+                />
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={tempValue}
+                onChange={(e) => setTempValue(e.target.value)}
+                className="border rounded px-2 py-1 flex-1"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') saveEditing();
+                  if (e.key === 'Escape') cancelEditing();
+                }}
+              />
+              <Check
+                onClick={saveEditing}
+                className="w-4 h-4 text-green-600 cursor-pointer"
+              />
+            </div>
+          )}
         </div>
       ) : (
-        <p>{user[field]}</p>
+        <p>{getFieldValue(field)}</p>
       )}
     </div>
   );
@@ -95,7 +202,7 @@ export default function ProfilePage() {
         {/* Editable Fields */}
         <div className="space-y-4 w-full">
           <EditableField label="Name" field="name" />
-          <EditableField label="Telephone" field="phone" />
+          <EditableField label="Telephone" field="telNumber" />
           <EditableField label="Email" field="email" />
           <EditableField label="Description" field="description" />
           <EditableField label="Skill & Experience" field="skills" />
