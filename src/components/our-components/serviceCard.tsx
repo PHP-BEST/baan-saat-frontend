@@ -6,15 +6,14 @@ interface ServiceCardProps {
 }
 
 export default function ServiceCard({
-  title, 
-  img, 
-  priceRating, 
-  rating
-}: ServiceCardProps){
-
+  title,
+  img,
+  priceRating,
+  rating,
+}: ServiceCardProps) {
   return (
     <div className="rounded-lg p-2">
-        <img src={img} width="100%" className="rounded-xl" />
+      <img src={img} width="100%" className="rounded-xl" />
       <div>
         <p className="text-xl">
           <strong>{title}</strong>
@@ -24,4 +23,4 @@ export default function ServiceCard({
       </div>
     </div>
   );
-};
+}

@@ -1,22 +1,22 @@
 import { Link } from 'react-router-dom';
-import { useState } from "react";
-import { useEffect } from "react";
-import  ServiceCard  from '@/components/our-components/serviceCard'
+import { useState } from 'react';
+// import { useEffect } from "react";
+import ServiceCard from '@/components/our-components/serviceCard';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
-type Service = {
+// type Service = { รอ endpoint from backend
 
-}
+// }
 export const ServiceListProfilePage = () => {
-  const [services, setServices] = useState<Service[]>([]);
+  // const [services, setServices] = useState<Service[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const requestServiceWindow = () => {
     setIsModalOpen(true);
   };
-  useEffect(() => {
-    fetch("#")
-    .then((res) => res.json())
-    .then((data: Service[]) => setServices(data));
-  })
+  // useEffect(() => {
+  //   fetch("#")
+  //   .then((res) => res.json())
+  //   .then((data: Service[]) => setServices(data));
+  // })
   return (
     <div className="p-18">
       <div className="my-10 flex">
