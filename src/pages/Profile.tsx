@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
-import { Pencil, Check } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Pencil, Check, Save, X } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
+import ActionButton from '@/components/our-components/actionButton';
 
 interface SkillOption {
   label: string;
@@ -20,9 +21,20 @@ const skillOptions: SkillOption[] = [
 
 export default function ProfilePage() {
   const { user, updateUser } = useUser();
-  const [editingField, setEditingField] = useState<string | null>(null);
-  const [tempValue, setTempValue] = useState<string>('');
+  const [editingFields, setEditingFields] = useState<Set<string>>(new Set());
+  const [tempValues, setTempValues] = useState<Record<string, string>>({});
+  const [hasChanges, setHasChanges] = useState(false);
+  const [skillsChanged, setSkillsChanged] = useState(false);
+  const [tempAvatarUrl, setTempAvatarUrl] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const hasUnsavedChanges =
+      Object.keys(tempValues).length > 0 ||
+      skillsChanged ||
+      tempAvatarUrl !== '';
+    setHasChanges(hasUnsavedChanges);
+  }, [tempValues, skillsChanged, tempAvatarUrl]);
 
   const getFieldValue = (field: string): string => {
     switch (field) {
@@ -41,47 +53,47 @@ export default function ProfilePage() {
     }
   };
 
-  const startEditing = (field: string) => {
-    setEditingField(field);
-    setTempValue(getFieldValue(field));
+  const getDisplayValue = (field: string): string => {
+    if (tempValues[field] !== undefined) {
+      return tempValues[field];
+    }
+    return getFieldValue(field);
   };
 
-  const saveEditing = () => {
-    if (editingField) {
-      if (editingField === 'description') {
-        updateUser({
-          ...user,
-          providerProfile: {
-            title: user.providerProfile?.title || '',
-            description: tempValue,
-            skills: user.providerProfile?.skills || [],
-          },
-        });
-      } else if (editingField === 'skills') {
-        const validSkillValues = skillOptions.map((skill) => skill.value);
-        const validSkills = tempValue
-          .split(',')
-          .map((skill) => skill.trim())
-          .filter((skill) => skill && validSkillValues.includes(skill));
+  const startEditing = (field: string) => {
+    setEditingFields((prev) => new Set([...prev, field]));
+    setTempValues((prev) => ({ ...prev, [field]: getFieldValue(field) }));
+  };
 
-        updateUser({
-          ...user,
-          providerProfile: {
-            title: user.providerProfile?.title || '',
-            description: user.providerProfile?.description || '',
-            skills: validSkills,
-          },
-        });
-      } else {
-        updateUser({ ...user, [editingField]: tempValue });
-      }
-      setEditingField(null);
+  const saveEditing = (field: string) => {
+    if (editingFields.has(field)) {
+      setEditingFields((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(field);
+        return newSet;
+      });
     }
   };
 
-  const cancelEditing = () => {
-    setEditingField(null);
-    setTempValue('');
+  const cancelEditing = (field: string) => {
+    setEditingFields((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(field);
+      return newSet;
+    });
+    setTempValues((prev) => {
+      const newValues = { ...prev };
+      delete newValues[field];
+      return newValues;
+    });
+  };
+
+  const cancelAllChanges = () => {
+    setEditingFields(new Set());
+    setTempValues({});
+    setHasChanges(false);
+    setSkillsChanged(false);
+    setTempAvatarUrl('');
   };
 
   const handleAvatarClick = () => {
@@ -92,7 +104,7 @@ export default function ProfilePage() {
     const file = event.target.files?.[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
-      updateUser({ ...user, avatarUrl: imageUrl });
+      setTempAvatarUrl(imageUrl);
     }
   };
 
@@ -106,9 +118,9 @@ export default function ProfilePage() {
     <div>
       <span className="font-semibold flex items-center">
         {label}
-        {editingField === field ? (
+        {editingFields.has(field) ? (
           <Check
-            onClick={() => setEditingField(null)}
+            onClick={() => saveEditing(field)}
             className="w-4 h-4 ml-2 text-green-600 cursor-pointer hover:text-green-700"
           />
         ) : (
@@ -119,7 +131,7 @@ export default function ProfilePage() {
         )}
       </span>
 
-      {editingField === field ? (
+      {editingFields.has(field) ? (
         <div className="flex flex-col gap-2 mt-1">
           {field === 'skills' ? (
             <div className="grid grid-cols-2 gap-2">
@@ -136,6 +148,7 @@ export default function ProfilePage() {
                       type="checkbox"
                       checked={isChecked}
                       onChange={(e) => {
+                        setSkillsChanged(true);
                         const currentSkills =
                           user.providerProfile?.skills || [];
                         let newSkills;
@@ -173,13 +186,15 @@ export default function ProfilePage() {
           ) : (
             <input
               type="text"
-              value={tempValue}
-              onChange={(e) => setTempValue(e.target.value)}
+              value={tempValues[field] || ''}
+              onChange={(e) =>
+                setTempValues((prev) => ({ ...prev, [field]: e.target.value }))
+              }
               className="border rounded px-2 py-1 flex-1"
               autoFocus
               onKeyDown={(e) => {
-                if (e.key === 'Enter') saveEditing();
-                if (e.key === 'Escape') cancelEditing();
+                if (e.key === 'Enter') saveEditing(field);
+                if (e.key === 'Escape') cancelEditing(field);
               }}
             />
           )}
@@ -207,12 +222,56 @@ export default function ProfilePage() {
               )}
             </div>
           ) : (
-            <p>{getFieldValue(field)}</p>
+            <p
+              className={
+                tempValues[field] !== undefined
+                  ? 'text-button-upload font-medium'
+                  : ''
+              }
+            >
+              {getDisplayValue(field)}
+            </p>
           )}
         </>
       )}
     </div>
   );
+
+  const submitAllChanges = () => {
+    let updatedUser = { ...user };
+
+    // Apply avatar change if exists
+    if (tempAvatarUrl) {
+      updatedUser = { ...updatedUser, avatarUrl: tempAvatarUrl };
+    }
+
+    Object.entries(tempValues).forEach(([field, value]) => {
+      if (field === 'description') {
+        updatedUser = {
+          ...updatedUser,
+          providerProfile: {
+            title: updatedUser.providerProfile?.title || '',
+            description: value,
+            skills: updatedUser.providerProfile?.skills || [],
+          },
+        };
+      } else if (field !== 'skills') {
+        updatedUser = { ...updatedUser, [field]: value };
+      }
+    });
+
+    updateUser(updatedUser);
+
+    setEditingFields(new Set());
+    setTempValues({});
+    setHasChanges(false);
+    setSkillsChanged(false);
+    setTempAvatarUrl('');
+
+    alert('Profile updated successfully!');
+  };
+
+  const canSave = hasChanges && editingFields.size === 0;
 
   return (
     <>
@@ -226,10 +285,10 @@ export default function ProfilePage() {
           onClick={handleAvatarClick}
           className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-6 cursor-pointer hover:bg-gray-200 transition-colors overflow-hidden relative group"
         >
-          {user.avatarUrl ? (
+          {tempAvatarUrl || user.avatarUrl ? (
             <>
               <img
-                src={user.avatarUrl}
+                src={tempAvatarUrl || user.avatarUrl}
                 alt="Profile Avatar"
                 className="w-full h-full object-cover rounded-full"
               />
@@ -237,6 +296,10 @@ export default function ProfilePage() {
               <div className="absolute inset-0 bg-black bg-opacity-70 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <Pencil className="w-6 h-6 text-white" />
               </div>
+              {/* Change indicator */}
+              {tempAvatarUrl && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-button-upload rounded-full border-2 border-white"></div>
+              )}
             </>
           ) : (
             <Pencil className="w-6 h-6 text-gray-500" />
@@ -260,6 +323,28 @@ export default function ProfilePage() {
           <EditableField label="Description" field="description" />
           <EditableField label="Skill & Experience" field="skills" />
         </div>
+
+        {/* Submit Button */}
+        {canSave && (
+          <div className="mt-auto flex gap-3">
+            <ActionButton
+              buttonColor="red"
+              buttonType="outline"
+              onClick={cancelAllChanges}
+            >
+              <X className="w-4 h-4" />
+              Cancel
+            </ActionButton>
+            <ActionButton
+              buttonColor="blue"
+              buttonType="filled"
+              onClick={submitAllChanges}
+            >
+              <Save className="w-4 h-4" />
+              Save Changes
+            </ActionButton>
+          </div>
+        )}
       </div>
     </>
   );
