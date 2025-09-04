@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ActionButton from '@/components/our-components/actionButton';
 
-export const LandingPage = () => {
+export default function LandingPage() {
   const [samples, setSamples] = useState<Sample[]>([]);
   const [connectionWord, setConnectionWord] = useState<string>('');
   const [isConnecting, setConnecting] = useState<boolean>(false);
@@ -50,10 +50,10 @@ export const LandingPage = () => {
           buttonColor="blue"
           buttonType="filled"
           onClick={() => {
-            alert('Register button clicked');
+            alert('Login button clicked');
           }}
         >
-          <Link to="/register">Register</Link>
+          <Link to="/login">Login</Link>
         </ActionButton>
 
         <ActionButton buttonColor="red" buttonType="outline">
@@ -99,4 +99,4 @@ export const LandingPage = () => {
       )}
     </div>
   );
-};
+}

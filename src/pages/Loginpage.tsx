@@ -1,6 +1,6 @@
 import { API_ROOT } from '@/config/api';
 
-export default function Loginpage() {
+export default function LoginPage() {
   const handleGoogleSignIn = () => {
     window.location.href = `${API_ROOT}/auth/google`;
   };
