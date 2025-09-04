@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { Pencil, Check, Save, X } from 'lucide-react';
+import { Pencil, Check, Save, X, AlertCircle } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import ActionButton from '@/components/our-components/actionButton';
+import { validateField } from '@/utils/formValidator';
 
 interface SkillOption {
   label: string;
@@ -26,6 +27,9 @@ export default function ProfilePage() {
   const [hasChanges, setHasChanges] = useState(false);
   const [skillsChanged, setSkillsChanged] = useState(false);
   const [tempAvatarUrl, setTempAvatarUrl] = useState<string>('');
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -82,6 +86,24 @@ export default function ProfilePage() {
 
   const saveEditing = (field: string) => {
     if (editingFields.has(field)) {
+      // Validate before saving
+      const currentValue = tempValues[field] || '';
+      const validation = validateField(field, currentValue);
+
+      if (!validation.isValid) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          [field]: validation.error || '',
+        }));
+        return;
+      }
+
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+
       setEditingFields((prev) => {
         const newSet = new Set(prev);
         newSet.delete(field);
@@ -101,6 +123,11 @@ export default function ProfilePage() {
       delete newValues[field];
       return newValues;
     });
+    setValidationErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[field];
+      return newErrors;
+    });
   };
 
   const cancelAllChanges = () => {
@@ -109,6 +136,7 @@ export default function ProfilePage() {
     setHasChanges(false);
     setSkillsChanged(false);
     setTempAvatarUrl('');
+    setValidationErrors({});
   };
 
   const handleAvatarClick = () => {
@@ -199,19 +227,40 @@ export default function ProfilePage() {
               })}
             </div>
           ) : (
-            <input
-              type="text"
-              value={tempValues[field] || ''}
-              onChange={(e) =>
-                setTempValues((prev) => ({ ...prev, [field]: e.target.value }))
-              }
-              className="border rounded px-2 py-1 flex-1"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') saveEditing(field);
-                if (e.key === 'Escape') cancelEditing(field);
-              }}
-            />
+            <>
+              <input
+                type="text"
+                value={tempValues[field] || ''}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  setTempValues((prev) => ({ ...prev, [field]: newValue }));
+
+                  if (validationErrors[field]) {
+                    setValidationErrors((prev) => {
+                      const newErrors = { ...prev };
+                      delete newErrors[field];
+                      return newErrors;
+                    });
+                  }
+                }}
+                className={`border rounded px-2 py-1 flex-1 focus:outline-none focus:ring-2 ${
+                  validationErrors[field]
+                    ? 'border-red-500 focus:ring-red-200'
+                    : 'border-gray-300 focus:ring-blue-200'
+                }`}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') saveEditing(field);
+                  if (e.key === 'Escape') cancelEditing(field);
+                }}
+              />
+              {validationErrors[field] && (
+                <div className="flex items-center gap-1 text-red-500 text-sm mt-1">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{validationErrors[field]}</span>
+                </div>
+              )}
+            </>
           )}
         </div>
       ) : (
@@ -259,6 +308,23 @@ export default function ProfilePage() {
   );
 
   const submitAllChanges = () => {
+    let hasErrors = false;
+    const newValidationErrors: Record<string, string> = {};
+
+    Object.entries(tempValues).forEach(([field, value]) => {
+      const validation = validateField(field, value);
+      if (!validation.isValid) {
+        newValidationErrors[field] = validation.error || '';
+        hasErrors = true;
+      }
+    });
+
+    if (hasErrors) {
+      setValidationErrors(newValidationErrors);
+      alert('Please fix validation errors before saving.');
+      return;
+    }
+
     let updatedUser = { ...user };
 
     // Apply avatar change if exists
@@ -288,6 +354,7 @@ export default function ProfilePage() {
     setHasChanges(false);
     setSkillsChanged(false);
     setTempAvatarUrl('');
+    setValidationErrors({});
 
     alert('Profile updated successfully!');
   };
