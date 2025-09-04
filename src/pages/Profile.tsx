@@ -81,13 +81,29 @@ export default function ProfilePage() {
 
   const startEditing = (field: string) => {
     setEditingFields((prev) => new Set([...prev, field]));
-    setTempValues((prev) => ({ ...prev, [field]: getFieldValue(field) }));
+    setTempValues((prev) => ({ ...prev, [field]: getDisplayValue(field) }));
   };
 
   const saveEditing = (field: string) => {
     if (editingFields.has(field)) {
-      // Validate before saving
       const currentValue = tempValues[field] || '';
+      const originalValue = getFieldValue(field);
+
+      // If value is same as original, remove from temp values
+      if (currentValue === originalValue) {
+        setTempValues((prev) => {
+          const newValues = { ...prev };
+          delete newValues[field];
+          return newValues;
+        });
+        setEditingFields((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(field);
+          return newSet;
+        });
+        return;
+      }
+
       const validation = validateField(field, currentValue);
 
       if (!validation.isValid) {
@@ -290,7 +306,8 @@ export default function ProfilePage() {
               {getDisplayValue(field) ? (
                 <p
                   className={
-                    tempValues[field] !== undefined
+                    tempValues[field] !== undefined &&
+                    tempValues[field] !== getFieldValue(field)
                       ? 'text-button-upload font-medium'
                       : ''
                   }

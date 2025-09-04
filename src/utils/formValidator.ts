@@ -4,6 +4,10 @@ export interface ValidationResult {
 }
 
 export const validateName = (name: string): ValidationResult => {
+  if (name === '') {
+    return { isValid: false, error: 'Name cannot be empty' };
+  }
+
   if (name.length > 150) {
     return { isValid: false, error: 'Name must be 150 characters or less' };
   }
@@ -17,7 +21,7 @@ export const validateName = (name: string): ValidationResult => {
 
 export const validateEmail = (email: string): ValidationResult => {
   if (email === '') {
-    return { isValid: true };
+    return { isValid: false, error: 'Email cannot be empty' };
   }
 
   if (email.length > 254) {
@@ -34,7 +38,7 @@ export const validateEmail = (email: string): ValidationResult => {
 
 export const validateTelNumber = (telNumber: string): ValidationResult => {
   if (telNumber === '') {
-    return { isValid: true };
+    return { isValid: false, error: 'Telephone number cannot be empty' };
   }
 
   if (telNumber.length > 10) {
@@ -53,6 +57,13 @@ export const validateTelNumber = (telNumber: string): ValidationResult => {
 
   if (!telNumber.startsWith('0')) {
     return { isValid: false, error: 'Telephone number must start with 0' };
+  }
+
+  if (!/^[0-9]{10}$/.test(telNumber)) {
+    return {
+      isValid: false,
+      error: 'Telephone number must be exactly 10 digits',
+    };
   }
 
   return { isValid: true };
