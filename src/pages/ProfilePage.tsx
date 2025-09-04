@@ -64,7 +64,6 @@ export default function ProfilePage() {
             onChange={(e) => setTempValue(e.target.value)}
             className="border rounded px-2 py-1 flex-1"
             autoFocus
-            onBlur={cancelEditing}
             onKeyDown={(e) => {
               if (e.key === 'Enter') saveEditing();
               if (e.key === 'Escape') cancelEditing();
