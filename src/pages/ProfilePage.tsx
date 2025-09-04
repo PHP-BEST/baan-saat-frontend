@@ -9,7 +9,7 @@ interface User {
   skills: string;
 }
 
-export default function AccountPage() {
+export default function ProfilePage() {
   const [user, setUser] = useState<User>({
     name: 'John Doe',
     phone: '+00 000 000 000',

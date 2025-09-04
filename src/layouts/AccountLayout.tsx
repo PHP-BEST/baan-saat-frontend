@@ -10,7 +10,7 @@ interface SidebarItem {
 
 const SidebarMenu: SidebarItem[] = [
   { name: 'Profile', path: '/profile' },
-  { name: 'Account Setting', path: '/account-setting' },
+  { name: 'Account Setting', path: '/setting' },
   { name: 'Privacy', path: '/privacy' },
   { name: 'Your Request', path: '/request' },
   { name: 'Your Service', path: '/service' },

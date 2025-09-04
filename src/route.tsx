@@ -1,10 +1,11 @@
 import { createBrowserRouter } from 'react-router-dom';
 import ErrorPage from './pages/ErrorPage';
-import LoginPage from './pages/LoginPage';
 import AccountLayout from './layouts/AccountLayout';
 import LandingPage from './pages/LandingPage';
-import AccountPage from './pages/AccountPage';
+import ProfilePage from './pages/ProfilePage';
 import YourServicePage from './pages/YourServicePage';
+import AccountStaticPage from './pages/AccountStaticPage';
+import LoginPage from './pages/LoginPage';
 
 export const router = createBrowserRouter([
   {
@@ -17,7 +18,8 @@ export const router = createBrowserRouter([
     element: <AccountLayout />,
     errorElement: <ErrorPage />,
     children: [
-      { path: 'profile', element: <AccountPage /> },
+      { path: '', element: <AccountStaticPage /> },
+      { path: 'profile', element: <ProfilePage /> },
       { path: 'service', element: <YourServicePage /> },
     ],
   },
