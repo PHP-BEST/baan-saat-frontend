@@ -23,7 +23,7 @@ function App() {
       element: <AccountPage />,
       errorElement: <AccountPage />,
     },
-      {
+    {
       path: '/CreateService',
       element: <ServiceCreationPage />,
       errorElement: <ErrorPage />,

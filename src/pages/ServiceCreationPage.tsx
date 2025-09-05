@@ -1,11 +1,12 @@
 import React, { useState, type ChangeEvent, type FormEvent } from 'react';
-import { Link } from 'react-router-dom'; // Import Link for navigation
-import { Button } from '@/components/ui/button'; // Assuming path
-import { Input } from '@/components/ui/input'; // Assuming path
-import { cn } from '@/lib/utils'; // Assuming path
+import { Link } from 'react-router-dom';
+import { buttonVariants } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
+import ActionButton from '@/components/our-components/actionButton';
 
 // --- The Main Service Creation Page Component ---
 export const ServiceCreationPage: React.FC = () => {
@@ -19,10 +20,10 @@ export const ServiceCreationPage: React.FC = () => {
   const [coverPhoto, setCoverPhoto] = useState<string | null>(null);
 
   const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -57,7 +58,10 @@ export const ServiceCreationPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Service Title */}
             <div>
-              <label htmlFor="serviceTitle" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="serviceTitle"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Service Title
               </label>
               <Input
@@ -73,7 +77,10 @@ export const ServiceCreationPage: React.FC = () => {
 
             {/* Description */}
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Description
               </label>
               <textarea
@@ -83,13 +90,16 @@ export const ServiceCreationPage: React.FC = () => {
                 placeholder="Description"
                 value={formData.description}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-input rounded-md shadow-xs focus:outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] transition-all resize-none"
               />
             </div>
 
             {/* Tags */}
             <div>
-              <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="tags"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Tags
               </label>
               <Input
@@ -106,7 +116,10 @@ export const ServiceCreationPage: React.FC = () => {
             {/* Pricing and Location */}
             <div className="flex gap-6">
               <div className="flex-1">
-                <label htmlFor="pricing" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="pricing"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Pricing
                 </label>
                 <Input
@@ -120,7 +133,10 @@ export const ServiceCreationPage: React.FC = () => {
                 />
               </div>
               <div className="flex-1">
-                <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="location"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Location
                 </label>
                 <Input
@@ -137,11 +153,17 @@ export const ServiceCreationPage: React.FC = () => {
 
             {/* Cover Photo */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cover Photo</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Cover Photo
+              </label>
               <div className="mt-1 flex items-center gap-4">
                 <div className="w-48 h-32 rounded-md bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300">
                   {coverPhoto ? (
-                    <img src={coverPhoto} alt="Cover Preview" className="w-full h-full object-cover"/>
+                    <img
+                      src={coverPhoto}
+                      alt="Cover Preview"
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <span className="text-xs text-gray-500">Preview</span>
                   )}
@@ -149,23 +171,35 @@ export const ServiceCreationPage: React.FC = () => {
                 <label
                   htmlFor="cover-photo-upload"
                   className={cn(
-                    'cursor-pointer rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50'
+                    buttonVariants({ variant: 'outline', size: 'default' }),
+                    'cursor-pointer text-green-500 bg-white border-green-500 hover:bg-green-50 hover:text-green-800',
                   )}
                 >
                   Upload
                 </label>
-                <input id="cover-photo-upload" name="cover-photo-upload" type="file" className="sr-only" onChange={handleImageUpload} accept="image/*"/>
+                <input
+                  id="cover-photo-upload"
+                  name="cover-photo-upload"
+                  type="file"
+                  className="sr-only"
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                />
               </div>
             </div>
 
             {/* Action Buttons */}
             <div className="flex items-center gap-4 pt-4">
-              <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-full px-8">
+              <ActionButton
+                type="submit"
+                buttonColor="blue"
+                buttonType="filled"
+              >
                 Submit
-              </Button>
-              <Button asChild type="button" variant="outline" className="border-gray-300 hover:bg-indigo-300 text-gray-700 rounded-full px-8">
+              </ActionButton>
+              <ActionButton buttonColor="red" buttonType="outline">
                 <Link to="/">Cancel</Link>
-              </Button>
+              </ActionButton>
             </div>
           </form>
         </div>
