@@ -24,14 +24,16 @@ function App() {
       element: <AccountPage />,
       errorElement: <AccountPage />,
     },
-    {path: 'servicelist',
+    {
+      path: 'servicelist',
       element: <ServiceListProfilePage />,
-      errorElement: <ErrorPage />
+      errorElement: <ErrorPage />,
     },
-    {path: 'servicelistall',
+    {
+      path: 'servicelistall',
       element: <ServiceListAllPage />,
-      errorElement: <ErrorPage />
-    }
+      errorElement: <ErrorPage />,
+    },
   ]);
 
   return (
