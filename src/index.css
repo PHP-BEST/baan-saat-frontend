@@ -28,6 +28,19 @@
 
   --color-white: rgba(255, 255, 255, 1);
   --color-black: rgba(0, 0, 0, 1);
+
+  --color-table-row-content: rgba(
+    255,
+    255,
+    255,
+    1
+  ); /* Table row content background */
+  --color-table-row-header: rgba(
+    240,
+    240,
+    240,
+    1
+  ); /* Table row header background */
 }
 
 .font-serif {
