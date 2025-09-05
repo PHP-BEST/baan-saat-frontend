@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
-export const ErrorPage = () => {
+export default function ErrorPage() {
   return (
     <div>
       <p className="text-bold text-2xl">This is Error Page</p>
@@ -19,4 +19,4 @@ export const ErrorPage = () => {
       </Button>
     </div>
   );
-};
+}
