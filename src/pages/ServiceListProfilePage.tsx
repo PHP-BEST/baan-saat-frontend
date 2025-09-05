@@ -5,6 +5,7 @@ import Footer from '@/components/our-components/footer';
 import { useEffect } from 'react';
 import ServiceCard from '@/components/our-components/serviceCard';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
+import AvatarImage from '@/components/our-components/accountImage';
 // type Service = { รอ endpoint from backend
 
 // }
@@ -31,12 +32,8 @@ export const ServiceListProfilePage = () => {
     <>
       <Header />
       <div className="px-16 pt-6 pb-18 bg-white">
-        <div className="my-10 flex">
-          <img
-            className="me-10 rounded-[50%]"
-            width="80px"
-            src="https://www.khaosod.co.th/wpapp/uploads/2022/02/%E0%B8%9E%E0%B8%9B%E0%B8%8A%E0%B8%A3.%E0%B9%80%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD.jpg"
-          />
+        <div className="my-10 flex gap-6 items-center">
+          <AvatarImage />
           <h1 className="text-4xl font-bold">John Doe’s Profile</h1>
         </div>
         <div className="border border-gray-400 rounded-3xl p-8">
