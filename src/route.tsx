@@ -5,6 +5,7 @@ import LandingPage from './pages/Landing';
 import YourServicePage from './pages/YourService';
 import LoginPage from './pages/Login';
 import ProfilePage from './pages/Profile';
+import CustomerRequestPage from './pages/CustomerRequest';
 
 export const router = createBrowserRouter([
   {
@@ -18,6 +19,7 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { path: '', element: <ProfilePage /> },
+      { path: 'request', element: <CustomerRequestPage /> },
       { path: 'service', element: <YourServicePage /> },
     ],
   },
