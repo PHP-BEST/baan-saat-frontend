@@ -80,7 +80,7 @@ export const validateDescription = (description: string): ValidationResult => {
   return { isValid: true };
 };
 
-export const validateField = (
+export const profileValidator = (
   field: string,
   value: string,
 ): ValidationResult => {
