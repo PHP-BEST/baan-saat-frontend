@@ -1,7 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/context/UserContext';
 
-const AvatarImage = () => {
+interface AccountImageProps {
+  width?: number;
+}
+
+const AvatarImage = ({ width = 52 }: AccountImageProps) => {
   const navigate = useNavigate();
   const { user } = useUser();
 
@@ -12,8 +16,9 @@ const AvatarImage = () => {
 
   return (
     <div
-      className="w-[52px] h-[52px] bg-background-profile rounded-full mx-auto flex items-center justify-center overflow-hidden cursor-pointer"
+      className={`bg-background-profile rounded-full flex items-center justify-center overflow-hidden cursor-pointer`}
       onClick={handleClick}
+      style={{ width: width, height: width }}
     >
       {user.avatarUrl ? (
         <img

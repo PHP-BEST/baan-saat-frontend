@@ -8,12 +8,12 @@ import ProfilePage from './pages/Profile';
 
 export const router = createBrowserRouter([
   {
-    path: '/',
+    path: '',
     element: <LandingPage />,
     errorElement: <ErrorPage />,
   },
   {
-    path: '/account',
+    path: 'account',
     element: <AccountLayout />,
     errorElement: <ErrorPage />,
     children: [
@@ -22,7 +22,7 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: '/login',
+    path: 'login',
     element: <LoginPage />,
     errorElement: <ErrorPage />,
   },
