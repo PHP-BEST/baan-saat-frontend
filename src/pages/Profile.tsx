@@ -101,6 +101,11 @@ export default function ProfilePage() {
           newSet.delete(field);
           return newSet;
         });
+
+        if (field === 'skills') {
+          setSkillsChanged(false);
+        }
+
         return;
       }
 
@@ -144,6 +149,10 @@ export default function ProfilePage() {
       delete newErrors[field];
       return newErrors;
     });
+
+    if (field === 'skills') {
+      setSkillsChanged(false);
+    }
   };
 
   const cancelAllChanges = () => {
@@ -195,9 +204,14 @@ export default function ProfilePage() {
           {field === 'skills' ? (
             <div className="grid grid-cols-2 gap-2">
               {skillOptions.map((skillOption) => {
-                const isChecked =
-                  user.providerProfile?.skills.includes(skillOption.value) ||
-                  false;
+                const currentSkills = tempValues['skills']
+                  ? tempValues['skills']
+                      .split(', ')
+                      .filter((s) => s.trim() !== '')
+                  : user.providerProfile?.skills || [];
+
+                const isChecked = currentSkills.includes(skillOption.value);
+
                 return (
                   <label
                     key={skillOption.value}
@@ -208,8 +222,6 @@ export default function ProfilePage() {
                       checked={isChecked}
                       onChange={(e) => {
                         setSkillsChanged(true);
-                        const currentSkills =
-                          user.providerProfile?.skills || [];
                         let newSkills;
                         if (e.target.checked) {
                           newSkills = [...currentSkills, skillOption.value];
@@ -225,15 +237,10 @@ export default function ProfilePage() {
                           .sort((a, b) => a.order - b.order)
                           .map((skill) => skill.value);
 
-                        updateUser({
-                          ...user,
-                          providerProfile: {
-                            title: user.providerProfile?.title || '',
-                            description:
-                              user.providerProfile?.description || '',
-                            skills: sortedSkills,
-                          },
-                        });
+                        setTempValues((prev) => ({
+                          ...prev,
+                          skills: sortedSkills.join(', '),
+                        }));
                       }}
                       className="rounded"
                     />
@@ -283,23 +290,31 @@ export default function ProfilePage() {
         <>
           {field === 'skills' ? (
             <div className="flex flex-wrap gap-2 mt-1">
-              {user.providerProfile?.skills.length ? (
-                user.providerProfile.skills.map((skillValue, index) => {
-                  const skillOption = skillOptions.find(
-                    (s) => s.value === skillValue,
-                  );
-                  return (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-background border border-gray-300 rounded-full text-sm text-black"
-                    >
-                      {skillOption?.label || skillValue}
-                    </span>
-                  );
-                })
-              ) : (
-                <p className="text-gray-500">No skills selected</p>
-              )}
+              {(() => {
+                const currentSkills = tempValues['skills']
+                  ? tempValues['skills']
+                      .split(', ')
+                      .filter((s) => s.trim() !== '')
+                  : user.providerProfile?.skills || [];
+
+                return currentSkills.length ? (
+                  currentSkills.map((skillValue, index) => {
+                    const skillOption = skillOptions.find(
+                      (s) => s.value === skillValue,
+                    );
+                    return (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-background border border-gray-300 rounded-full text-sm text-black"
+                      >
+                        {skillOption?.label || skillValue}
+                      </span>
+                    );
+                  })
+                ) : (
+                  <p className="text-gray-500">No skills selected</p>
+                );
+              })()}
             </div>
           ) : (
             <>
@@ -359,7 +374,19 @@ export default function ProfilePage() {
             skills: updatedUser.providerProfile?.skills || [],
           },
         };
-      } else if (field !== 'skills') {
+      } else if (field === 'skills') {
+        const skillsArray = value
+          ? value.split(', ').filter((s) => s.trim() !== '')
+          : [];
+        updatedUser = {
+          ...updatedUser,
+          providerProfile: {
+            title: updatedUser.providerProfile?.title || '',
+            description: updatedUser.providerProfile?.description || '',
+            skills: skillsArray,
+          },
+        };
+      } else {
         updatedUser = { ...updatedUser, [field]: value };
       }
     });
@@ -374,6 +401,8 @@ export default function ProfilePage() {
     setValidationErrors({});
 
     alert('Profile updated successfully!');
+
+    // console.log('User Data: ', updatedUser);
   };
 
   const canSave = hasChanges && editingFields.size === 0;
