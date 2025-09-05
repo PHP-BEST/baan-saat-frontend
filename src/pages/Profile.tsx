@@ -22,7 +22,7 @@ const skillOptions: SkillOption[] = [
 
 export default function ProfilePage() {
   const { user, updateUser } = useUser();
-  const [editingFields, setEditingFields] = useState<Set<string>>(new Set());
+  const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValues, setTempValues] = useState<Record<string, string>>({});
   const [hasChanges, setHasChanges] = useState(false);
   const [skillsChanged, setSkillsChanged] = useState(false);
@@ -30,7 +30,11 @@ export default function ProfilePage() {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
+  const [cursorPositions, setCursorPositions] = useState<
+    Record<string, number>
+  >({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
     const hasUnsavedChanges =
@@ -80,12 +84,29 @@ export default function ProfilePage() {
   };
 
   const startEditing = (field: string) => {
-    setEditingFields((prev) => new Set([...prev, field]));
+    // If already editing another field, validate current field first
+    if (editingField && editingField !== field) {
+      const currentValue = tempValues[editingField] || '';
+      const validation = validateField(editingField, currentValue);
+
+      if (!validation.isValid) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          [editingField]: validation.error || '',
+        }));
+        return;
+      }
+
+      // Save current field if valid
+      saveEditing(editingField);
+    }
+
+    setEditingField(field);
     setTempValues((prev) => ({ ...prev, [field]: getDisplayValue(field) }));
   };
 
   const saveEditing = (field: string) => {
-    if (editingFields.has(field)) {
+    if (editingField === field) {
       const currentValue = tempValues[field] || '';
       const originalValue = getFieldValue(field);
 
@@ -96,11 +117,7 @@ export default function ProfilePage() {
           delete newValues[field];
           return newValues;
         });
-        setEditingFields((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(field);
-          return newSet;
-        });
+        setEditingField(null);
 
         if (field === 'skills') {
           setSkillsChanged(false);
@@ -125,38 +142,12 @@ export default function ProfilePage() {
         return newErrors;
       });
 
-      setEditingFields((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(field);
-        return newSet;
-      });
-    }
-  };
-
-  const cancelEditing = (field: string) => {
-    setEditingFields((prev) => {
-      const newSet = new Set(prev);
-      newSet.delete(field);
-      return newSet;
-    });
-    setTempValues((prev) => {
-      const newValues = { ...prev };
-      delete newValues[field];
-      return newValues;
-    });
-    setValidationErrors((prev) => {
-      const newErrors = { ...prev };
-      delete newErrors[field];
-      return newErrors;
-    });
-
-    if (field === 'skills') {
-      setSkillsChanged(false);
+      setEditingField(null);
     }
   };
 
   const cancelAllChanges = () => {
-    setEditingFields(new Set());
+    setEditingField(null);
     setTempValues({});
     setHasChanges(false);
     setSkillsChanged(false);
@@ -182,162 +173,197 @@ export default function ProfilePage() {
     field: string;
   }
 
-  const EditableField = ({ label, field }: EditableFieldProps) => (
-    <div>
-      <span className="font-semibold flex items-center">
-        {label}
-        {editingFields.has(field) ? (
-          <Check
-            onClick={() => saveEditing(field)}
-            className="w-4 h-4 ml-2 text-green-600 cursor-pointer hover:text-green-700"
-          />
+  const EditableField = ({ label, field }: EditableFieldProps) => {
+    useEffect(() => {
+      if (
+        field !== 'skills' &&
+        editingField === field &&
+        inputRefs.current[field] &&
+        cursorPositions[field] !== undefined
+      ) {
+        const input = inputRefs.current[field];
+        input?.focus();
+        input?.setSelectionRange(
+          cursorPositions[field],
+          cursorPositions[field],
+        );
+      }
+    }, [field, editingField, cursorPositions]);
+
+    return (
+      <div>
+        <span className="font-semibold flex items-center">
+          {label}
+          {editingField === field ? (
+            <Check
+              onClick={() => saveEditing(field)}
+              className="w-4 h-4 ml-2 text-green-600 cursor-pointer hover:text-green-700"
+            />
+          ) : (
+            <Pencil
+              onClick={() => startEditing(field)}
+              className="w-4 h-4 ml-2 text-gray-500 cursor-pointer hover:text-gray-700"
+            />
+          )}
+        </span>
+
+        {editingField === field ? (
+          <div className="flex flex-col gap-2 mt-1">
+            {field === 'skills' ? (
+              <div className="grid grid-cols-2 gap-2">
+                {skillOptions.map((skillOption) => {
+                  const currentSkills = tempValues['skills']
+                    ? tempValues['skills']
+                        .split(', ')
+                        .filter((s) => s.trim() !== '')
+                    : user.providerProfile?.skills || [];
+
+                  const isChecked = currentSkills.includes(skillOption.value);
+
+                  return (
+                    <label
+                      key={skillOption.value}
+                      className="flex items-center space-x-2"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          setSkillsChanged(true);
+                          let newSkills;
+                          if (e.target.checked) {
+                            newSkills = [...currentSkills, skillOption.value];
+                          } else {
+                            newSkills = currentSkills.filter(
+                              (s) => s !== skillOption.value,
+                            );
+                          }
+
+                          // Sort skills according to the order defined in skillOptions
+                          const sortedSkills = skillOptions
+                            .filter((skill) => newSkills.includes(skill.value))
+                            .sort((a, b) => a.order - b.order)
+                            .map((skill) => skill.value);
+
+                          setTempValues((prev) => ({
+                            ...prev,
+                            skills: sortedSkills.join(', '),
+                          }));
+                        }}
+                        className="rounded"
+                      />
+                      <span className="text-sm">{skillOption.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            ) : (
+              <>
+                <input
+                  ref={(el) => {
+                    inputRefs.current[field] = el;
+                  }}
+                  type="text"
+                  value={tempValues[field] || ''}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    const cursorPos = e.target.selectionStart || 0;
+                    setTempValues((prev) => ({ ...prev, [field]: newValue }));
+                    setCursorPositions((prev) => ({
+                      ...prev,
+                      [field]: cursorPos,
+                    }));
+
+                    if (validationErrors[field]) {
+                      setValidationErrors((prev) => {
+                        const newErrors = { ...prev };
+                        delete newErrors[field];
+                        return newErrors;
+                      });
+                    }
+                  }}
+                  onKeyUp={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    setCursorPositions((prev) => ({
+                      ...prev,
+                      [field]: target.selectionStart || 0,
+                    }));
+                  }}
+                  onClick={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    setCursorPositions((prev) => ({
+                      ...prev,
+                      [field]: target.selectionStart || 0,
+                    }));
+                  }}
+                  className={`border rounded px-2 py-1 flex-1 focus:outline-none focus:ring-2 ${
+                    validationErrors[field]
+                      ? 'border-red-500 focus:ring-red-200'
+                      : 'border-gray-300 focus:ring-blue-200'
+                  }`}
+                />
+                {validationErrors[field] && (
+                  <div className="flex items-center gap-1 text-red-500 text-sm mt-1">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>{validationErrors[field]}</span>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         ) : (
-          <Pencil
-            onClick={() => startEditing(field)}
-            className="w-4 h-4 ml-2 text-gray-500 cursor-pointer hover:text-gray-700"
-          />
-        )}
-      </span>
+          <>
+            {field === 'skills' ? (
+              <div className="flex flex-wrap gap-2 mt-1">
+                {(() => {
+                  const currentSkills = tempValues['skills']
+                    ? tempValues['skills']
+                        .split(', ')
+                        .filter((s) => s.trim() !== '')
+                    : user.providerProfile?.skills || [];
 
-      {editingFields.has(field) ? (
-        <div className="flex flex-col gap-2 mt-1">
-          {field === 'skills' ? (
-            <div className="grid grid-cols-2 gap-2">
-              {skillOptions.map((skillOption) => {
-                const currentSkills = tempValues['skills']
-                  ? tempValues['skills']
-                      .split(', ')
-                      .filter((s) => s.trim() !== '')
-                  : user.providerProfile?.skills || [];
-
-                const isChecked = currentSkills.includes(skillOption.value);
-
-                return (
-                  <label
-                    key={skillOption.value}
-                    className="flex items-center space-x-2"
+                  return currentSkills.length ? (
+                    currentSkills.map((skillValue, index) => {
+                      const skillOption = skillOptions.find(
+                        (s) => s.value === skillValue,
+                      );
+                      return (
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-background border border-gray-300 rounded-full text-sm text-black"
+                        >
+                          {skillOption?.label || skillValue}
+                        </span>
+                      );
+                    })
+                  ) : (
+                    <p className="text-gray-500">No skills selected</p>
+                  );
+                })()}
+              </div>
+            ) : (
+              <>
+                {getDisplayValue(field) ? (
+                  <p
+                    className={
+                      tempValues[field] !== undefined &&
+                      tempValues[field] !== getFieldValue(field)
+                        ? 'text-button-upload font-medium'
+                        : ''
+                    }
                   >
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={(e) => {
-                        setSkillsChanged(true);
-                        let newSkills;
-                        if (e.target.checked) {
-                          newSkills = [...currentSkills, skillOption.value];
-                        } else {
-                          newSkills = currentSkills.filter(
-                            (s) => s !== skillOption.value,
-                          );
-                        }
-
-                        // Sort skills according to the order defined in skillOptions
-                        const sortedSkills = skillOptions
-                          .filter((skill) => newSkills.includes(skill.value))
-                          .sort((a, b) => a.order - b.order)
-                          .map((skill) => skill.value);
-
-                        setTempValues((prev) => ({
-                          ...prev,
-                          skills: sortedSkills.join(', '),
-                        }));
-                      }}
-                      className="rounded"
-                    />
-                    <span className="text-sm">{skillOption.label}</span>
-                  </label>
-                );
-              })}
-            </div>
-          ) : (
-            <>
-              <input
-                type="text"
-                value={tempValues[field] || ''}
-                onChange={(e) => {
-                  const newValue = e.target.value;
-                  setTempValues((prev) => ({ ...prev, [field]: newValue }));
-
-                  if (validationErrors[field]) {
-                    setValidationErrors((prev) => {
-                      const newErrors = { ...prev };
-                      delete newErrors[field];
-                      return newErrors;
-                    });
-                  }
-                }}
-                className={`border rounded px-2 py-1 flex-1 focus:outline-none focus:ring-2 ${
-                  validationErrors[field]
-                    ? 'border-red-500 focus:ring-red-200'
-                    : 'border-gray-300 focus:ring-blue-200'
-                }`}
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') saveEditing(field);
-                  if (e.key === 'Escape') cancelEditing(field);
-                }}
-              />
-              {validationErrors[field] && (
-                <div className="flex items-center gap-1 text-red-500 text-sm mt-1">
-                  <AlertCircle className="w-4 h-4" />
-                  <span>{validationErrors[field]}</span>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      ) : (
-        <>
-          {field === 'skills' ? (
-            <div className="flex flex-wrap gap-2 mt-1">
-              {(() => {
-                const currentSkills = tempValues['skills']
-                  ? tempValues['skills']
-                      .split(', ')
-                      .filter((s) => s.trim() !== '')
-                  : user.providerProfile?.skills || [];
-
-                return currentSkills.length ? (
-                  currentSkills.map((skillValue, index) => {
-                    const skillOption = skillOptions.find(
-                      (s) => s.value === skillValue,
-                    );
-                    return (
-                      <span
-                        key={index}
-                        className="px-3 py-1 bg-background border border-gray-300 rounded-full text-sm text-black"
-                      >
-                        {skillOption?.label || skillValue}
-                      </span>
-                    );
-                  })
+                    {getDisplayValue(field)}
+                  </p>
                 ) : (
-                  <p className="text-gray-500">No skills selected</p>
-                );
-              })()}
-            </div>
-          ) : (
-            <>
-              {getDisplayValue(field) ? (
-                <p
-                  className={
-                    tempValues[field] !== undefined &&
-                    tempValues[field] !== getFieldValue(field)
-                      ? 'text-button-upload font-medium'
-                      : ''
-                  }
-                >
-                  {getDisplayValue(field)}
-                </p>
-              ) : (
-                <p className="text-gray-500">{getPlaceholderText(field)}</p>
-              )}
-            </>
-          )}
-        </>
-      )}
-    </div>
-  );
+                  <p className="text-gray-500">{getPlaceholderText(field)}</p>
+                )}
+              </>
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
 
   const submitAllChanges = () => {
     let hasErrors = false;
@@ -393,7 +419,7 @@ export default function ProfilePage() {
 
     updateUser(updatedUser);
 
-    setEditingFields(new Set());
+    setEditingField(null);
     setTempValues({});
     setHasChanges(false);
     setSkillsChanged(false);
@@ -405,7 +431,7 @@ export default function ProfilePage() {
     // console.log('User Data: ', updatedUser);
   };
 
-  const canSave = hasChanges && editingFields.size === 0;
+  const canSave = hasChanges && editingField === null;
 
   return (
     <>
