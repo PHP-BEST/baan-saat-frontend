@@ -19,7 +19,7 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { path: '', element: <ProfilePage /> },
-      { path: 'request', element: <CustomerRequestPage /> },
+      { path: 'requests', element: <CustomerRequestPage /> },
       { path: 'service', element: <YourServicePage /> },
     ],
   },

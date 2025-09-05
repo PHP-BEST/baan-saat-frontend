@@ -12,7 +12,8 @@ const SidebarMenu: SidebarItem[] = [
   { name: 'Profile', path: '/' },
   { name: 'Account Setting', path: '/setting' },
   { name: 'Privacy', path: '/privacy' },
-  { name: 'Your Request', path: '/request' },
+  { name: 'Your Request', path: '/your-request' },
+  { name: 'Requests', path: '/requests' },
   { name: 'Your Service', path: '/service' },
 ];
 
@@ -34,7 +35,7 @@ export default function AccountLayout() {
                 >
                   {item.name}
                 </NavLink>
-                {(item.name === 'Privacy' || item.name === 'Your Service') && (
+                {(item.name === 'Privacy' || item.name === 'Requests') && (
                   <hr className="my-2" />
                 )}
               </div>
