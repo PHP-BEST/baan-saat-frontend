@@ -6,6 +6,8 @@ import { mockServices } from '@/mock/services';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import { API_ROOT } from '@/config/api';
+import ActionButton from '@/components/our-components/actionButton';
+import { convertTagsToLabels } from '@/utils/function';
 
 export default function ServiceDetailPage() {
   const { serviceId } = useParams<{ serviceId: string }>();
@@ -45,16 +47,36 @@ export default function ServiceDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <p>Loading service details...</p>
+      <div>
+        <Header />
+        <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
+          {loading && (
+            <div className="flex justify-center items-center h-64">
+              <p>Loading service details...</p>
+            </div>
+          )}
+        </div>
+        <Footer />
       </div>
     );
   }
 
   if (!service) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <p>Service not found</p>
+      <div>
+        <Header />
+        <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
+          <p>Service not found</p>
+          <ActionButton
+            onClick={() => {
+              window.location.href = '/account/service';
+            }}
+            buttonType="filled"
+          >
+            Go Back
+          </ActionButton>
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -112,12 +134,12 @@ export default function ServiceDetailPage() {
               <h2 className="text-xl font-semibold mb-3">Service Tags</h2>
               <div className="flex flex-wrap gap-2 mb-6">
                 {service.tags && service.tags.length > 0 ? (
-                  service.tags.map((tag, index) => (
+                  convertTagsToLabels(service.tags).map((label, index) => (
                     <span
                       key={index}
                       className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
                     >
-                      {tag}
+                      {label}
                     </span>
                   ))
                 ) : (

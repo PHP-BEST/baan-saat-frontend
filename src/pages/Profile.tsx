@@ -9,6 +9,7 @@ interface SkillOption {
   value: string;
   order: number;
 }
+
 const skillOptions: SkillOption[] = [
   { label: 'การทำความสะอาด', value: 'houseCleaning', order: 1 },
   { label: 'การซ่อมแซม', value: 'houseRepair', order: 2 },
