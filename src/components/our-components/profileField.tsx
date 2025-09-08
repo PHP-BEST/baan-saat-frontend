@@ -134,6 +134,12 @@ export default function ProfileField({
                           skills: sortedSkills.join(', '),
                         }));
                       }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          saveEditing(field);
+                        }
+                      }}
                       className="rounded"
                     />
                     <span className="text-sm">{skillOption.label}</span>
@@ -178,6 +184,12 @@ export default function ProfileField({
                     ...prev,
                     [field]: target.selectionStart || 0,
                   }));
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.ctrlKey) {
+                    e.preventDefault();
+                    saveEditing('description');
+                  }
                 }}
                 onClick={(e) => {
                   const target = e.target as HTMLTextAreaElement;

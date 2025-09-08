@@ -257,11 +257,11 @@ export default function ProfilePage() {
       <h1 className="text-2xl font-bold mb-2">Profile</h1>
 
       {/* Content */}
-      <div className="w-full h-full flex flex-col items-center bg-white border rounded-2xl p-8 shadow-sm m-0">
+      <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
         {/* Avatar */}
         <div
           onClick={handleAvatarClick}
-          className="w-28 h-28 rounded-full bg-gray-100 flex items-center justify-center mb-6 cursor-pointer hover:bg-gray-200 transition-colors overflow-hidden relative group"
+          className="w-28 h-28 rounded-full bg-background-sidebar flex items-center justify-center mb-6 cursor-pointer hover:bg-background-header-footer transition-colors overflow-hidden relative group"
         >
           {tempAvatarUrl || user.avatarUrl ? (
             <>
