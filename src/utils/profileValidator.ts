@@ -59,10 +59,10 @@ export const validateTelNumber = (telNumber: string): ValidationResult => {
     return { isValid: false, error: 'Telephone number must start with 0' };
   }
 
-  if (!/^[0-9]{10}$/.test(telNumber)) {
+  if (!/^[0-9]{9,10}$/.test(telNumber)) {
     return {
       isValid: false,
-      error: 'Telephone number must be exactly 10 digits',
+      error: 'Telephone number must be 9 or 10 digits',
     };
   }
 

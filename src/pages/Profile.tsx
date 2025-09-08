@@ -156,7 +156,10 @@ export default function ProfilePage() {
   };
 
   const handleAvatarClick = () => {
-    fileInputRef.current?.click();
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -235,6 +238,19 @@ export default function ProfilePage() {
 
   const canSave = hasChanges && editingField === null;
 
+  const commonFieldProperties = {
+    editingField,
+    tempValues,
+    validationErrors,
+    getDisplayValue,
+    getFieldValue,
+    getPlaceholderText,
+    startEditing,
+    saveEditing,
+    setTempValues,
+    setValidationErrors,
+  };
+
   return (
     <>
       {/* Header */}
@@ -245,7 +261,7 @@ export default function ProfilePage() {
         {/* Avatar */}
         <div
           onClick={handleAvatarClick}
-          className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-6 cursor-pointer hover:bg-gray-200 transition-colors overflow-hidden relative group"
+          className="w-28 h-28 rounded-full bg-gray-100 flex items-center justify-center mb-6 cursor-pointer hover:bg-gray-200 transition-colors overflow-hidden relative group"
         >
           {tempAvatarUrl || user.avatarUrl ? (
             <>
@@ -282,87 +298,42 @@ export default function ProfilePage() {
           <ProfileField
             label="Name"
             field="name"
-            editingField={editingField}
-            tempValues={tempValues}
-            validationErrors={validationErrors}
             cursorPositions={cursorPositions}
-            getDisplayValue={getDisplayValue}
-            getFieldValue={getFieldValue}
-            getPlaceholderText={getPlaceholderText}
-            startEditing={startEditing}
-            saveEditing={saveEditing}
-            setTempValues={setTempValues}
             setCursorPositions={setCursorPositions}
-            setValidationErrors={setValidationErrors}
+            {...commonFieldProperties}
             setSkillsChanged={setSkillsChanged}
           />
           <ProfileField
             label="Telephone"
             field="telNumber"
-            editingField={editingField}
-            tempValues={tempValues}
-            validationErrors={validationErrors}
+            {...commonFieldProperties}
             cursorPositions={cursorPositions}
-            getDisplayValue={getDisplayValue}
-            getFieldValue={getFieldValue}
-            getPlaceholderText={getPlaceholderText}
-            startEditing={startEditing}
-            saveEditing={saveEditing}
-            setTempValues={setTempValues}
             setCursorPositions={setCursorPositions}
-            setValidationErrors={setValidationErrors}
             setSkillsChanged={setSkillsChanged}
           />
           <ProfileField
             label="Email"
             field="email"
-            editingField={editingField}
-            tempValues={tempValues}
-            validationErrors={validationErrors}
+            {...commonFieldProperties}
             cursorPositions={cursorPositions}
-            getDisplayValue={getDisplayValue}
-            getFieldValue={getFieldValue}
-            getPlaceholderText={getPlaceholderText}
-            startEditing={startEditing}
-            saveEditing={saveEditing}
-            setTempValues={setTempValues}
             setCursorPositions={setCursorPositions}
-            setValidationErrors={setValidationErrors}
             setSkillsChanged={setSkillsChanged}
           />
           <ProfileField
             label="Description"
             field="description"
-            editingField={editingField}
-            tempValues={tempValues}
-            validationErrors={validationErrors}
+            {...commonFieldProperties}
             cursorPositions={cursorPositions}
-            getDisplayValue={getDisplayValue}
-            getFieldValue={getFieldValue}
-            getPlaceholderText={getPlaceholderText}
-            startEditing={startEditing}
-            saveEditing={saveEditing}
-            setTempValues={setTempValues}
             setCursorPositions={setCursorPositions}
-            setValidationErrors={setValidationErrors}
             setSkillsChanged={setSkillsChanged}
           />
           <ProfileField
             label="Skill & Experience"
             field="skills"
             skillOptions={skillOptions}
-            editingField={editingField}
-            tempValues={tempValues}
-            validationErrors={validationErrors}
+            {...commonFieldProperties}
             cursorPositions={cursorPositions}
-            getDisplayValue={getDisplayValue}
-            getFieldValue={getFieldValue}
-            getPlaceholderText={getPlaceholderText}
-            startEditing={startEditing}
-            saveEditing={saveEditing}
-            setTempValues={setTempValues}
             setCursorPositions={setCursorPositions}
-            setValidationErrors={setValidationErrors}
             setSkillsChanged={setSkillsChanged}
             userSkills={user.providerProfile?.skills}
           />
