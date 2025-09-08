@@ -41,6 +41,13 @@
     240,
     1
   ); /* Table row header background */
+
+  --color-service-blank-cover: rgba(
+    217,
+    217,
+    217,
+    1
+  ); /* Service card blank cover background */
 }
 
 .font-serif {

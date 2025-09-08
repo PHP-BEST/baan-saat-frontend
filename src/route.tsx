@@ -6,6 +6,7 @@ import YourServicePage from './pages/YourService';
 import LoginPage from './pages/Login';
 import ProfilePage from './pages/Profile';
 import CustomerRequestPage from './pages/CustomerRequest';
+import ServiceDetailPage from './pages/ServiceDetail';
 
 export const router = createBrowserRouter([
   {
@@ -26,6 +27,11 @@ export const router = createBrowserRouter([
   {
     path: 'login',
     element: <LoginPage />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: 'service/:serviceId',
+    element: <ServiceDetailPage />,
     errorElement: <ErrorPage />,
   },
 ]);
