@@ -1,11 +1,11 @@
 interface ProviderProfile {
   title: string;
-  skills: string[];
+  skills: SkillsType[];
   description: string;
 }
 
 export interface User {
-  userId: string;
+  _id: string;
   role: 'customer' | 'provider';
   name: string;
   email: string;
@@ -17,3 +17,13 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type SkillsType =
+  | 'houseCleaning'
+  | 'houseRepair'
+  | 'plumbing'
+  | 'electrical'
+  | 'hvac'
+  | 'painting'
+  | 'landscaping'
+  | 'others';

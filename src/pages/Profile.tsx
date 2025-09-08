@@ -4,6 +4,7 @@ import { useUser } from '@/context/UserContext';
 import ActionButton from '@/components/our-components/actionButton';
 import ProfileField from '@/components/our-components/profileField';
 import { profileValidator } from '@/utils/profileValidator';
+import type { SkillsType } from '@/interfaces/User';
 
 interface SkillOption {
   label: string;
@@ -214,7 +215,7 @@ export default function ProfilePage() {
           providerProfile: {
             title: updatedUser.providerProfile?.title || '',
             description: updatedUser.providerProfile?.description || '',
-            skills: skillsArray,
+            skills: skillsArray as SkillsType[],
           },
         };
       } else {
