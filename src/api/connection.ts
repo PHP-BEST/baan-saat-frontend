@@ -1,4 +1,5 @@
-import { API_ROOT, apiFetch } from '@/config/api';
+import { API_ROOT } from '@/config/api';
+import axios from 'axios';
 
 interface GetTestResponse {
   success: boolean;
@@ -7,7 +8,7 @@ interface GetTestResponse {
 
 // GET /
 export async function testConnection(): Promise<string> {
-  const result = await apiFetch<GetTestResponse>(`${API_ROOT}/`);
-  if (result.success) return result.data;
+  const result = await axios.get<GetTestResponse>(`${API_ROOT}/`);
+  if (result.data.success) return result.data.data;
   return 'There is an error!';
 }

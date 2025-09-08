@@ -1,7 +1,7 @@
 import type { Service } from '@/interfaces/Service';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { useParams } from 'react-router-dom';
 import { mockServices } from '@/mock/services';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
