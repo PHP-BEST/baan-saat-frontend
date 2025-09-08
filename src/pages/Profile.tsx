@@ -284,59 +284,61 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Hidden file input */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="hidden"
-        />
+        <div className="pb-16 w-full">
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
 
-        {/* Editable Fields */}
-        <div className="space-y-4 w-full">
-          <ProfileField
-            label="Name"
-            field="name"
-            cursorPositions={cursorPositions}
-            setCursorPositions={setCursorPositions}
-            {...commonFieldProperties}
-            setSkillsChanged={setSkillsChanged}
-          />
-          <ProfileField
-            label="Telephone"
-            field="telNumber"
-            {...commonFieldProperties}
-            cursorPositions={cursorPositions}
-            setCursorPositions={setCursorPositions}
-            setSkillsChanged={setSkillsChanged}
-          />
-          <ProfileField
-            label="Email"
-            field="email"
-            {...commonFieldProperties}
-            cursorPositions={cursorPositions}
-            setCursorPositions={setCursorPositions}
-            setSkillsChanged={setSkillsChanged}
-          />
-          <ProfileField
-            label="Description"
-            field="description"
-            {...commonFieldProperties}
-            cursorPositions={cursorPositions}
-            setCursorPositions={setCursorPositions}
-            setSkillsChanged={setSkillsChanged}
-          />
-          <ProfileField
-            label="Skill & Experience"
-            field="skills"
-            skillOptions={skillOptions}
-            {...commonFieldProperties}
-            cursorPositions={cursorPositions}
-            setCursorPositions={setCursorPositions}
-            setSkillsChanged={setSkillsChanged}
-            userSkills={user.providerProfile?.skills}
-          />
+          {/* Editable Fields */}
+          <div className="space-y-4 w-full">
+            <ProfileField
+              label="Name"
+              field="name"
+              cursorPositions={cursorPositions}
+              setCursorPositions={setCursorPositions}
+              {...commonFieldProperties}
+              setSkillsChanged={setSkillsChanged}
+            />
+            <ProfileField
+              label="Telephone"
+              field="telNumber"
+              {...commonFieldProperties}
+              cursorPositions={cursorPositions}
+              setCursorPositions={setCursorPositions}
+              setSkillsChanged={setSkillsChanged}
+            />
+            <ProfileField
+              label="Email"
+              field="email"
+              {...commonFieldProperties}
+              cursorPositions={cursorPositions}
+              setCursorPositions={setCursorPositions}
+              setSkillsChanged={setSkillsChanged}
+            />
+            <ProfileField
+              label="Description"
+              field="description"
+              {...commonFieldProperties}
+              cursorPositions={cursorPositions}
+              setCursorPositions={setCursorPositions}
+              setSkillsChanged={setSkillsChanged}
+            />
+            <ProfileField
+              label="Skill & Experience"
+              field="skills"
+              skillOptions={skillOptions}
+              {...commonFieldProperties}
+              cursorPositions={cursorPositions}
+              setCursorPositions={setCursorPositions}
+              setSkillsChanged={setSkillsChanged}
+              userSkills={user.providerProfile?.skills}
+            />
+          </div>
         </div>
 
         {/* Submit Button */}
