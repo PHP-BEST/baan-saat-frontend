@@ -4,7 +4,7 @@ export const mockServices: Service[] = [
   {
     _id: '1',
     customerId: 'cust1',
-    title: 'House Cleaning and Repairing',
+    title: 'House Cleaning and Repairing: Service by Customer Number 1',
     description: 'Deep cleaning for your home',
     budget: 100,
     telNumber: '012-345-6789',
