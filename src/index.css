@@ -18,6 +18,8 @@
     163,
     1
   ); /* Profile Icon background */
+  --color-background-sidebar: rgba(240, 240, 240, 1); /* Sidebar background */
+  --color-border-sidebar: rgba(186, 186, 186, 1); /* Sidebar border */
 
   --color-button-action: rgba(119, 123, 179, 1); /* Primary action button */
   --color-button-upload: rgba(20, 174, 92, 1); /* Upload button */

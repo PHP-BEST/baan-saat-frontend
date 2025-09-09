@@ -1,21 +1,17 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@/context/UserContext';
 
 interface AccountImageProps {
   width?: number;
 }
 
-const AvatarImage = ({ width }: AccountImageProps) => {
+const AvatarImage = ({ width = 52 }: AccountImageProps) => {
   const navigate = useNavigate();
-  const [avatarUrl, setAvatarUrl] = useState<string>('');
+  const { user } = useUser();
 
   const handleClick = () => {
     alert('Go to Account Page to see Your Account');
     navigate('/account');
-
-    // Avoiding no-unused-vars problems, I will remove later... - Best
-    setAvatarUrl('');
-    // ===============================================================
   };
 
   if (!width) {
@@ -28,9 +24,9 @@ const AvatarImage = ({ width }: AccountImageProps) => {
       onClick={handleClick}
       style={{ width: width, height: width }}
     >
-      {avatarUrl ? (
+      {user.avatarUrl ? (
         <img
-          src={avatarUrl}
+          src={user.avatarUrl}
           alt="Avatar Image"
           className="w-full h-full object-cover"
         />
