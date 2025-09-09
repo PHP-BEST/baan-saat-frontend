@@ -1,3 +1,4 @@
+import { RouterProvider } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import AccountPage from './pages/AccountPage';
 import { ErrorPage } from './pages/ErrorPage';
