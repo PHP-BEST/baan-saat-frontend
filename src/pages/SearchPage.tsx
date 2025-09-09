@@ -21,7 +21,7 @@ function ExtendedServiceCard({
 }: ExtendedServiceCardProps) {
   return (
     <div>
-      <p className="text-xl p-2">By {providerName}</p>
+      <p className="text-xs p-2">By {providerName}</p>
       <ServiceCard
         title={title}
         img={img}

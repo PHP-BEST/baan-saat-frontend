@@ -1,6 +1,6 @@
-import { useRef, useEffect } from 'react';
-import { Pencil, Check, AlertCircle } from 'lucide-react';
-import { profileValidator } from '@/utils/profileValidator';
+import { useRef, useEffect } from "react";
+import { Pencil, AlertCircle, Check } from "lucide-react";
+import { profileValidator } from "@/utils/profileValidator";
 
 interface SkillOption {
   label: string;
@@ -21,6 +21,7 @@ interface ProfileFieldProps {
   getPlaceholderText: (field: string) => string;
   startEditing: (field: string) => void;
   saveEditing: (field: string) => void;
+  cancelEditing: () => void;
   setTempValues: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   setCursorPositions: React.Dispatch<
     React.SetStateAction<Record<string, number>>
@@ -57,7 +58,7 @@ export default function ProfileField({
 
   useEffect(() => {
     if (
-      field !== 'skills' &&
+      field !== "skills" &&
       editingField === field &&
       inputRefs.current[field] &&
       cursorPositions[field] !== undefined
@@ -80,10 +81,14 @@ export default function ProfileField({
       <span className="font-semibold flex items-center">
         {label}
         {editingField === field ? (
-          <Check
-            onClick={() => saveEditing(field)}
-            className="w-4 h-4 ml-2 text-green-600 cursor-pointer hover:text-green-700"
-          />
+          <div className="flex items-center gap-2 ml-2">
+            <button
+              onClick={() => saveEditing(field)}
+              className="text-green-600 hover:text-green-800"
+            >
+              <Check className="w-4 h-4" />
+            </button>
+          </div>
         ) : (
           <Pencil
             onClick={() => startEditing(field)}
@@ -94,13 +99,13 @@ export default function ProfileField({
 
       {editingField === field ? (
         <div className="flex flex-col gap-2 mt-1">
-          {field === 'skills' ? (
+          {field === "skills" ? (
             <div className="grid grid-cols-2 gap-2">
               {skillOptions.map((skillOption) => {
-                const currentSkills = tempValues['skills']
-                  ? tempValues['skills']
-                      .split(', ')
-                      .filter((s) => s.trim() !== '')
+                const currentSkills = tempValues["skills"]
+                  ? tempValues["skills"]
+                      .split(", ")
+                      .filter((s) => s.trim() !== "")
                   : userSkills || [];
 
                 const isChecked = currentSkills.includes(skillOption.value);
@@ -120,7 +125,7 @@ export default function ProfileField({
                           newSkills = [...currentSkills, skillOption.value];
                         } else {
                           newSkills = currentSkills.filter(
-                            (s) => s !== skillOption.value,
+                            (s) => s !== skillOption.value
                           );
                         }
 
@@ -131,11 +136,11 @@ export default function ProfileField({
 
                         setTempValues((prev) => ({
                           ...prev,
-                          skills: sortedSkills.join(', '),
+                          skills: sortedSkills.join(", "),
                         }));
                       }}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
+                        if (e.key === "Enter") {
                           e.preventDefault();
                           saveEditing(field);
                         }
@@ -147,15 +152,18 @@ export default function ProfileField({
                 );
               })}
             </div>
-          ) : field === 'description' ? (
+          ) : field === "description" ? (
             <>
               <textarea
                 ref={(el) => {
                   inputRefs.current[field] = el;
                 }}
-                value={tempValues[field] || ''}
+                value={tempValues[field] || ""}
                 onChange={(e) => {
-                  const newValue = (e.target as HTMLTextAreaElement).value;
+                  const newValue = (e.target as HTMLTextAreaElement).value.slice(
+                    0,
+                    100
+                  ); // limit 100 chars
                   const cursorPos =
                     (e.target as HTMLTextAreaElement).selectionStart ?? 0;
                   setTempValues((prev) => ({ ...prev, [field]: newValue }));
@@ -164,11 +172,11 @@ export default function ProfileField({
                     [field]: cursorPos,
                   }));
 
-                  const validation = profileValidator('description', newValue);
+                  const validation = profileValidator("description", newValue);
                   if (!validation.isValid) {
                     setValidationErrors((prev) => ({
                       ...prev,
-                      [field]: validation.error || '',
+                      [field]: validation.error || "",
                     }));
                   } else {
                     setValidationErrors((prev) => {
@@ -178,32 +186,12 @@ export default function ProfileField({
                     });
                   }
                 }}
-                onKeyUp={(e) => {
-                  const target = e.target as HTMLTextAreaElement;
-                  setCursorPositions((prev) => ({
-                    ...prev,
-                    [field]: target.selectionStart || 0,
-                  }));
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && e.ctrlKey) {
-                    e.preventDefault();
-                    saveEditing('description');
-                  }
-                }}
-                onClick={(e) => {
-                  const target = e.target as HTMLTextAreaElement;
-                  setCursorPositions((prev) => ({
-                    ...prev,
-                    [field]: target.selectionStart || 0,
-                  }));
-                }}
                 rows={4}
                 className={`
                   border rounded px-2 py-1 w-full focus:outline-none focus:ring-2 ${
                     validationErrors[field]
-                      ? 'border-red-500 focus:ring-red-200'
-                      : 'border-gray-300 focus:ring-blue-200'
+                      ? "border-red-500 focus:ring-red-200"
+                      : "border-gray-300 focus:ring-blue-200"
                   }`}
               />
               {validationErrors[field] && (
@@ -221,10 +209,18 @@ export default function ProfileField({
                 ref={(el) => {
                   inputRefs.current[field] = el;
                 }}
-                type="text"
-                value={tempValues[field] || ''}
+                type={field === "telNumber" ? "tel" : "text"}
+                value={tempValues[field] || ""}
                 onChange={(e) => {
-                  const newValue = e.target.value;
+                  let newValue = e.target.value;
+
+                  if (field === "telNumber") {
+                    newValue = newValue.replace(/\D/g, "");
+                    if (newValue.length > 10) {
+                      newValue = newValue.slice(0, 10);
+                    }
+                  }
+
                   const cursorPos = e.target.selectionStart || 0;
                   setTempValues((prev) => ({ ...prev, [field]: newValue }));
                   setCursorPositions((prev) => ({
@@ -240,30 +236,10 @@ export default function ProfileField({
                     });
                   }
                 }}
-                onKeyUp={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  setCursorPositions((prev) => ({
-                    ...prev,
-                    [field]: target.selectionStart || 0,
-                  }));
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    saveEditing(field);
-                  }
-                }}
-                onClick={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  setCursorPositions((prev) => ({
-                    ...prev,
-                    [field]: target.selectionStart || 0,
-                  }));
-                }}
                 className={`border rounded px-2 py-1 flex-1 focus:outline-none focus:ring-2 ${
                   validationErrors[field]
-                    ? 'border-red-500 focus:ring-red-200'
-                    : 'border-gray-300 focus:ring-blue-200'
+                    ? "border-red-500 focus:ring-red-200"
+                    : "border-gray-300 focus:ring-blue-200"
                 }`}
               />
               {validationErrors[field] && (
@@ -277,19 +253,19 @@ export default function ProfileField({
         </div>
       ) : (
         <>
-          {field === 'skills' ? (
+          {field === "skills" ? (
             <div className="flex flex-wrap gap-2 mt-1">
               {(() => {
-                const currentSkills = tempValues['skills']
-                  ? tempValues['skills']
-                      .split(', ')
-                      .filter((s) => s.trim() !== '')
+                const currentSkills = tempValues["skills"]
+                  ? tempValues["skills"]
+                      .split(", ")
+                      .filter((s) => s.trim() !== "")
                   : userSkills || [];
 
                 return currentSkills.length ? (
                   currentSkills.map((skillValue, index) => {
                     const skillOption = skillOptions.find(
-                      (s) => s.value === skillValue,
+                      (s) => s.value === skillValue
                     );
                     return (
                       <span
@@ -308,13 +284,13 @@ export default function ProfileField({
           ) : (
             <>
               {getDisplayValue(field) ? (
-                field === 'description' ? (
+                field === "description" ? (
                   <div
                     className={`whitespace-pre-wrap break-words ${
                       tempValues[field] !== undefined &&
                       tempValues[field] !== getFieldValue(field)
-                        ? 'text-button-upload font-medium'
-                        : ''
+                        ? "text-button-upload font-medium"
+                        : ""
                     }`}
                   >
                     {getDisplayValue(field)}
@@ -324,8 +300,8 @@ export default function ProfileField({
                     className={
                       tempValues[field] !== undefined &&
                       tempValues[field] !== getFieldValue(field)
-                        ? 'text-button-upload font-medium'
-                        : ''
+                        ? "text-button-upload font-medium"
+                        : ""
                     }
                   >
                     {getDisplayValue(field)}
