@@ -3,6 +3,7 @@ import AccountPage from './pages/AccountPage';
 import { ErrorPage } from './pages/ErrorPage';
 import { LandingPage } from './pages/LandingPage';
 import { RegisterPage } from './pages/RegisterPage';
+import SearchPage from './pages/SearchPage';
 import { ServiceListAllPage } from './pages/ServiceListAllPage';
 import { ServiceListProfilePage } from './pages/ServiceListProfilePage';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
@@ -32,6 +33,11 @@ function App() {
     {
       path: 'servicelistall',
       element: <ServiceListAllPage />,
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: 'search',
+      element: <SearchPage />,
       errorElement: <ErrorPage />,
     },
   ]);
