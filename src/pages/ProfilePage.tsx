@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Pencil } from 'lucide-react';
+import { Pencil, X, Save } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { fetchData, updateData } from '@/config/api';
-import { EditableField } from '@/components/our-components/Editablecomponent';
+import { EditableField } from '@/components/our-components/profileField';
+import ActionButton from '@/components/our-components/ActionButton';
 //Wait for backend to provide user ID
 const USER_ID = 1; // Replace with actual user ID from auth context or similar
 // --- Interfaces and Constants (No Change) ---
@@ -81,14 +82,14 @@ export default function ProfilePage() {
       const updatedUser = { ...user, phone: digitsOnly };
       setUser(updatedUser);
       setEditingField(null);
-      mutate(updatedUser);
+      // mutate(updatedUser);
       return;
     }
 
     const updatedUser = { ...user, [editingField]: tempValue } as User;
     setUser(updatedUser);
     setEditingField(null);
-    mutate(updatedUser);
+    // mutate(updatedUser);
   };
 
   const cancelEditing = () => {
@@ -111,7 +112,6 @@ export default function ProfilePage() {
     cancelEditing,
     setTempValue,
     setUser,
-    mutate,
   };
 
   return (
@@ -119,7 +119,7 @@ export default function ProfilePage() {
       <h1 className="text-2xl font-bold mb-2">Profile</h1>
       <div className="w-full h-full flex flex-col items-center bg-white border rounded-2xl p-8 shadow-sm">
         {/* Profile Picture and Delete Button (No Change) */}
-        <div className="relative w-28 h-28 sm:w-36 sm:h-36 mb-6">
+        <div className="relative w-25 h-25 sm:w-32 sm:h-32 mb-6">
           <div
             className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden cursor-pointer hover:opacity-80"
             onClick={() => {
@@ -160,7 +160,7 @@ export default function ProfilePage() {
                   const base64String = reader.result as string;
                   const updatedUser = { ...user, profilePicture: base64String };
                   setUser(updatedUser);
-                  mutate(updatedUser);
+                  // mutate(updatedUser);
                 };
                 reader.readAsDataURL(file);
               }
@@ -172,7 +172,7 @@ export default function ProfilePage() {
             onClick={() => {
               const updatedUser = { ...user, profilePicture: '' };
               setUser(updatedUser);
-              mutate(updatedUser);
+              // mutate(updatedUser);
             }}
             className="text-sm text-red-500 hover:underline mb-6"
           >
@@ -212,6 +212,31 @@ export default function ProfilePage() {
             usedtype="text"
             {...editableFieldProps}
           />
+        </div>
+        <div className="mt-auto flex gap-3">
+          <ActionButton
+            buttonColor="red"
+            buttonType="outline"
+            onClick={() => {
+              cancelEditing();
+              setUser(data as User); // Revert to last saved data
+            }}
+          >
+            <X className="w-4 h-4" />
+            Cancel
+          </ActionButton>
+          <ActionButton
+            buttonColor="blue"
+            buttonType="filled"
+            onClick={() => {
+              mutate(user);
+              setError(null);
+              setEditingField(null);
+            }}
+          >
+            <Save className="w-4 h-4" />
+            Save Changes
+          </ActionButton>
         </div>
       </div>
     </>

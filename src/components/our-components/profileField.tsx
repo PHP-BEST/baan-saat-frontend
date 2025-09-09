@@ -1,4 +1,3 @@
-//This page is specifically for editable field component in profile page
 import { useRef, useLayoutEffect } from 'react';
 import { Pencil, Check } from 'lucide-react';
 
@@ -52,7 +51,6 @@ export const EditableField = ({
   cancelEditing,
   setTempValue,
   setUser,
-  mutate,
   usedtype = 'text',
   editable = true,
 }: EditableFieldProps) => {
@@ -140,7 +138,6 @@ export const EditableField = ({
                       .map((opt) => opt.value);
                     const updatedUser = { ...user, skills: ordered };
                     setUser(updatedUser);
-                    mutate(updatedUser);
                   }}
                   className="rounded"
                 />
