@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const AvatarImage = () => {
+interface AccountImageProps {
+  width?: number;
+}
+
+const AvatarImage = ({ width }: AccountImageProps) => {
   const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = useState<string>('');
 
@@ -14,10 +18,15 @@ const AvatarImage = () => {
     // ===============================================================
   };
 
+  if (!width) {
+    width = 52;
+  }
+
   return (
     <div
-      className="w-[52px] h-[52px] bg-background-profile rounded-full mx-auto flex items-center justify-center overflow-hidden cursor-pointer"
+      className={`bg-background-profile rounded-full flex items-center justify-center overflow-hidden cursor-pointer`}
       onClick={handleClick}
+      style={{ width: width, height: width }}
     >
       {avatarUrl ? (
         <img

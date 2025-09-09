@@ -5,6 +5,7 @@ import Footer from '@/components/our-components/footer';
 import { useEffect } from 'react';
 import ServiceCard from '@/components/our-components/serviceCard';
 import RequestList from '@/components/our-components/requestList';
+import AvatarImage from '@/components/our-components/accountImage';
 import {
   Dialog,
   DialogContent,
@@ -15,7 +16,8 @@ import {
   DialogClose,
   DialogFooter
 } from '@/components/ui/dialog';
-// type Service = {
+// type Service = { รอ endpoint from backend
+
 // }
 export const ServiceListProfilePage = () => {
   // const [services, setServices] = useState<Service[]>([]);
@@ -67,13 +69,8 @@ export const ServiceListProfilePage = () => {
     <>
       <Header />
       <div className="px-16 pt-6 pb-18 bg-white">
-        <div className="my-10 flex items-center">
-          <img
-            className="me-10 rounded-[50%] bg-background-profile rounded-full"
-            width="80px"
-            height="80px"
-            src="#"
-          />
+        <div className="my-10 flex gap-6 items-center">
+          <AvatarImage />
           <h1 className="text-4xl font-bold">John Doe’s Profile</h1>
         </div>
         <div className="border border-gray-400 rounded-3xl p-8">
