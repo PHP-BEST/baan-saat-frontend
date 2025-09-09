@@ -4,25 +4,61 @@ import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import { useEffect } from 'react';
 import ServiceCard from '@/components/our-components/serviceCard';
-import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
-// type Service = { รอ endpoint from backend
-
+import RequestList from '@/components/our-components/requestList';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+  DialogFooter
+} from '@/components/ui/dialog';
+// type Service = {
 // }
 export const ServiceListProfilePage = () => {
   // const [services, setServices] = useState<Service[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const requestServiceWindow = () => {
-    setIsModalOpen(true);
-  };
+  const [requests, setRequests] = useState<any[]>([
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' }
+  ]);
   useEffect(() => {
-    const html = document.documentElement;
+    const body = document.body;
     const observer = new MutationObserver(() => {
-      html.style.paddingRight = '';
+    if (body.hasAttribute('data-scroll-locked')) {
+      body.style.setProperty('margin-right', '0px', 'important');
+    }
     });
 
-    observer.observe(html, {
+    observer.observe(body, {
       attributes: true,
-      attributeFilter: ['class', 'style'],
+      attributeFilter: ['data-scroll-locked'],
     });
 
     return () => observer.disconnect();
@@ -31,11 +67,12 @@ export const ServiceListProfilePage = () => {
     <>
       <Header />
       <div className="px-16 pt-6 pb-18 bg-white">
-        <div className="my-10 flex">
+        <div className="my-10 flex items-center">
           <img
-            className="me-10 rounded-[50%]"
+            className="me-10 rounded-[50%] bg-background-profile rounded-full"
             width="80px"
-            src="https://www.khaosod.co.th/wpapp/uploads/2022/02/%E0%B8%9E%E0%B8%9B%E0%B8%8A%E0%B8%A3.%E0%B9%80%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD.jpg"
+            height="80px"
+            src="#"
           />
           <h1 className="text-4xl font-bold">John Doe’s Profile</h1>
         </div>
@@ -65,16 +102,76 @@ export const ServiceListProfilePage = () => {
               <br />I did some cleaning
             </p>
             <div className="flex justify-end">
-              <button
-                className="bg-[#777BB3] text-white text-xs px-4 py-1 rounded-3xl hover:bg-[#464a85] active:bg-[#191b40]"
-                onClick={requestServiceWindow}
-              >
-                Select For Your Request
-              </button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="bg-[#777BB3] text-white text-xs px-4 py-1 rounded-3xl hover:bg-[#464a85] active:bg-[#191b40]">
+                    Select For Your Request
+                  </button>
+                </DialogTrigger>
+                <DialogContent
+                  className="bg-white rounded-md w-[40%] p-0"
+                  showCloseButton={false}
+                >
+                  <DialogHeader>
+                    <DialogTitle className="border-b border-gray-400 mt-0">
+                      <div className="text-gray-600 flex justify-between items-center h-10">
+                        <div className="px-3 py-1 text-sm">
+                          Select For Your Request
+                        </div>
+                        <DialogClose asChild>
+                          <div
+                            role="button"
+                            className="rounded-tr-md h-full px-3 items-center hover:bg-red-600 active:bg-red-800"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="currentColor"
+                              viewBox="0 0 16 16"
+                              className="w-4 flex h-full"
+                            >
+                              <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                            </svg>
+                          </div>
+                        </DialogClose>
+                      </div>
+                    </DialogTitle>
+                    <DialogDescription
+                      className="mb-0 max-h-[60vh] overflow-y-auto"
+                      asChild
+                    >
+                      <div className="min-h-[40vh]">
+                        {requests.length > 0 ? (
+                          requests.map((request) => {
+                            return (
+                              <RequestList
+                                serviceName={request.serviceName}
+                                price={request.price}
+                                date={request.date}
+                              />
+                            );
+                          })
+                        ) : (
+                          <div className="flex justify-center items-center h-full">
+                            <p className="text-gray-500 text-sm">
+                              Sorry, we couldn't find the request
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </DialogDescription>
+                    <DialogFooter className="border-t border-gray-400">
+                      <div className="flex justify-end">
+                        <button className="me-1 my-1 bg-[#777BB3] text-sm text-white px-4 py-1 rounded-3xl  hover:bg-[#464a85] active:bg-[#191b40]">
+                          Submit
+                        </button>
+                      </div>
+                    </DialogFooter>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>
-
         {/* Services Section */}
         <div className="mt-8 pe-14">
           <div className="flex justify-between">
@@ -140,53 +237,6 @@ export const ServiceListProfilePage = () => {
         </div>
       </div>
       <Footer />
-      <Dialog
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        className="fixed inset-0 z-10 bg-black/50"
-      >
-        <div className="flex items-center justify-center min-h-screen">
-          <DialogPanel className="bg-white rounded-md w-[40%]">
-            <DialogTitle className="text-gray-600 flex justify-between items-center h-10">
-              <div className="px-3 py-1">Select For Your Request</div>
-              <div
-                role="button"
-                onClick={() => setIsModalOpen(false)}
-                className="rounded-tr-md h-full px-3 items-center hover:bg-red-600 active:bg-red-800"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                  className="w-4 h-6 flex h-full"
-                >
-                  <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                </svg>
-              </div>
-            </DialogTitle>
-            <hr className="border-t border-gray-400 mb-2" />
-            <div className="min-h-[40vh]">
-              <div className="grid grid-cols-[2fr_1fr_2fr_0.5fr] px-3">
-                <span className="text-gray-600">ล้างจาน</span>
-                <span className="text-gray-600">300$</span>
-                <span className="text-gray-600">23/8/2025</span>
-                <div className="flex items-center">
-                  <input className="w-4 h-4 bg-gray-400" type="checkbox" />
-                </div>
-              </div>
-            </div>
-            <hr className="border-t border-gray-400 mt-2" />
-            <div className="flex justify-end">
-              <button
-                className="me-1 my-1 bg-[#777BB3] text-sm text-white px-4 py-1 rounded-3xl  hover:bg-[#464a85] active:bg-[#191b40]"
-                onClick={() => setIsModalOpen(false)}
-              >
-                Submit
-              </button>
-            </div>
-          </DialogPanel>
-        </div>
-      </Dialog>
     </>
   );
 };

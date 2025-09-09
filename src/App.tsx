@@ -6,7 +6,6 @@ import { RegisterPage } from './pages/RegisterPage';
 import { ServiceListAllPage } from './pages/ServiceListAllPage';
 import { ServiceListProfilePage } from './pages/ServiceListProfilePage';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-
 function App() {
   const router = createBrowserRouter([
     {
@@ -33,7 +32,7 @@ function App() {
       path: 'servicelistall',
       element: <ServiceListAllPage />,
       errorElement: <ErrorPage />,
-    },
+    }
   ]);
 
   return (
