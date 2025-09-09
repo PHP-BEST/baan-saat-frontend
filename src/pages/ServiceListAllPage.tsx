@@ -11,7 +11,20 @@ export const ServiceListAllPage = () => {
       <Header />
       <div className="px-16 pt-10 pb-18 bg-white">
         <div className="flex justify-between">
-          <h2 className="font-bold text-xl">Service by John Doe</h2>
+          <div className="flex justify-start items-center">
+            <Link to="/servicelist"className="hover:bg-gray-200 active:bg-gray-500 px-3 py-1 rounded-md">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z" />
+              </svg>
+            </Link>
+            <h2 className="font-bold text-xl ms-2">Service by John Doe</h2>
+          </div>
           <Link className="font-bold underline" to="#">
             Filter(0 applied)
           </Link>
