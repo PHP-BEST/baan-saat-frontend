@@ -19,7 +19,7 @@ import {
 // type Service = { รอ endpoint from backend
 
 // }
-export const ServiceListProfilePage = () => {
+export default function ServiceListProfilePage(){
   // const [services, setServices] = useState<Service[]>([]);
   const [requests, setRequests] = useState<any[]>([
     { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 // type Service = { รอ endpoint from backend
 
 // };
-export const ServiceListAllPage = () => {
+export default function ServiceListAllPage(){
   return (
     <>
       <Header />
