@@ -66,6 +66,7 @@ export const ProfileCreationPage: React.FC = () => {
   });
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false); // State for the modal
+  const handleClose = () => setIsTermsModalOpen(false);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -126,7 +127,7 @@ export const ProfileCreationPage: React.FC = () => {
           </div>
 
           <h1 className="text-center text-2xl font-bold text-gray-800">
-            สร้างบัญชี
+            Profile Creating
           </h1>
 
           <div className="flex flex-col items-center space-y-3">
@@ -234,7 +235,7 @@ export const ProfileCreationPage: React.FC = () => {
                 htmlFor="agreedToTerms"
                 className="ml-2 block text-sm text-gray-900"
               >
-                ฉันยอมรับ{' '}
+                I accept{' '}
                 <span
                   className="text-blue-600 hover:underline cursor-pointer font-medium"
                   onClick={(e) => {
@@ -260,10 +261,7 @@ export const ProfileCreationPage: React.FC = () => {
 
       {/* Render the modal conditionally based on state */}
       {isTermsModalOpen && (
-        <TermsModal
-          title="Terms of Service"
-          onClose={() => setIsTermsModalOpen(false)}
-        >
+        <TermsModal title="Terms of Service" onClose={handleClose}>
           <p>
             <strong>Last updated: September 5, 2025</strong>
           </p>
