@@ -12,7 +12,10 @@ export const ServiceListAllPage = () => {
       <div className="px-16 pt-10 pb-18 bg-white">
         <div className="flex justify-between">
           <div className="flex justify-start items-center">
-            <Link to="/servicelist"className="hover:bg-gray-200 active:bg-gray-500 px-3 py-1 rounded-md">
+            <Link
+              to="/servicelist"
+              className="hover:bg-gray-200 active:bg-gray-500 px-3 py-1 rounded-md"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"

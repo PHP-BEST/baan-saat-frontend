@@ -14,14 +14,19 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
-  DialogFooter
+  DialogFooter,
 } from '@/components/ui/dialog';
 // type Service = { รอ endpoint from backend
 
 // }
+type RequestProps = {
+  serviceName: string;
+  price: string;
+  date: string;
+};
 export const ServiceListProfilePage = () => {
   // const [services, setServices] = useState<Service[]>([]);
-  const [requests, setRequests] = useState<any[]>([
+  const [requests, setRequests] = useState<RequestProps[]>([
     { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
     { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
     { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
@@ -48,14 +53,15 @@ export const ServiceListProfilePage = () => {
     { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
     { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
     { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
-    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' }
+    { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
   ]);
+  setRequests(requests);
   useEffect(() => {
     const body = document.body;
     const observer = new MutationObserver(() => {
-    if (body.hasAttribute('data-scroll-locked')) {
-      body.style.setProperty('margin-right', '0px', 'important');
-    }
+      if (body.hasAttribute('data-scroll-locked')) {
+        body.style.setProperty('margin-right', '0px', 'important');
+      }
     });
 
     observer.observe(body, {
@@ -138,9 +144,10 @@ export const ServiceListProfilePage = () => {
                     >
                       <div className="min-h-[40vh]">
                         {requests.length > 0 ? (
-                          requests.map((request) => {
+                          requests.map((request: RequestProps, index) => {
                             return (
                               <RequestList
+                                key={index}
                                 serviceName={request.serviceName}
                                 price={request.price}
                                 date={request.date}
@@ -150,7 +157,7 @@ export const ServiceListProfilePage = () => {
                         ) : (
                           <div className="flex justify-center items-center h-full">
                             <p className="text-gray-500 text-sm">
-                              Sorry, we couldn't find the request
+                              {"Sorry, we couldn't find the request"}
                             </p>
                           </div>
                         )}
