@@ -4,7 +4,7 @@ import AccountLayout from './layouts/AccountLayout';
 import LandingPage from './pages/Landing';
 import YourServicePage from './pages/YourService';
 import LoginPage from './pages/Login';
-import ProfilePage from './pages/ProfilePage';
+import ProfilePage from './pages/Profile';
 export const router = createBrowserRouter([
   {
     path: '',
