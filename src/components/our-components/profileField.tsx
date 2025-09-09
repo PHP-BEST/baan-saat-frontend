@@ -33,7 +33,7 @@ interface EditableFieldProps {
   cancelEditing: () => void;
   setTempValue: (value: string) => void;
   setUser: React.Dispatch<React.SetStateAction<User>>;
-  mutate: (updatedUser: User) => void;
+
   // Config
   usedtype?: string;
   editable?: boolean;

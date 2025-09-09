@@ -3,7 +3,7 @@ import { Pencil, X, Save } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { fetchData, updateData } from '@/config/api';
 import { EditableField } from '@/components/our-components/profileField';
-import ActionButton from '@/components/our-components/ActionButton';
+import ActionButton from '@/components/our-components/actionButton';
 //Wait for backend to provide user ID
 const USER_ID = 1; // Replace with actual user ID from auth context or similar
 // --- Interfaces and Constants (No Change) ---
@@ -82,11 +82,12 @@ export default function ProfilePage() {
       const updatedUser = { ...user, phone: digitsOnly };
       setUser(updatedUser);
       setEditingField(null);
+      setError(null);
       // mutate(updatedUser);
       return;
     }
 
-    const updatedUser = { ...user, [editingField]: tempValue } as User;
+    const updatedUser = { ...user, [editingField]: tempValue.trim() } as User;
     setUser(updatedUser);
     setEditingField(null);
     // mutate(updatedUser);

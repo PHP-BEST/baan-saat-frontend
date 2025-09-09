@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Pencil, Save, X } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import ActionButton from '@/components/our-components/actionButton';
-import ProfileField from '@/components/our-components/profileField';
+import { EditableField as ProfileField } from '@/components/our-components/profileField';
 import { profileValidator } from '@/utils/profileValidator';
 import type { SkillsType } from '@/interfaces/User';
 
