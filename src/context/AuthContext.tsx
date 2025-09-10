@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState } from 'react';
-import axios from "axios";
-
-axios.defaults.withCredentials = true;
+import React, { createContext, useContext, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useLocation } from 'react-router-dom';
+import Axios from '@/auth/interceptor';
 
 interface SessionType {
   name?: string,
@@ -10,14 +10,25 @@ interface SessionType {
 }
 
 interface SessionContextType {
-  session: SessionType | null;
-  setSession: React.Dispatch<React.SetStateAction<SessionType | null>>;
-  getSession: () => Promise<SessionType | undefined>;
-  clearSession: () => void;
+  session?: SessionType | null;
   isLoading: boolean;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
+
+// Query function for fetching session
+const fetchSession = async (): Promise<SessionType | null> => {
+  try {
+    const response = await Axios.get<SessionType>('http://localhost:5000/api/user/session');
+    if (response.status === 200) {
+      return response.data;
+    }
+    return null;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
 
 export const useSession = () => {
   const context = useContext(SessionContext);
@@ -32,43 +43,34 @@ interface ProtectedRouteProps {
 }
 
 export const SessionProvider: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const [session, setSession] = useState<SessionType | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
+
+  // React Query hook for session management
+  const {
+    data: session,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ['session'],
+    queryFn: fetchSession,
+    enabled: true,
+    retry: 1,
+    staleTime: 0, // Always stale - refetch every time
+    gcTime: 0, // No caching - always fetch fresh data
+  });
 
   const getSession = async (): Promise<SessionType | undefined> => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get<SessionType>('http://localhost:5000/api/user/session');
-      if (response.status === 200) {
-        setSession(response.data);
-        setIsLoading(false);
-        return response.data;
-      }
-      setSession(null);
-      setIsLoading(false);
-      return undefined;
-    } catch (error) {
-      console.error(error);
-      setSession(null);
-      setIsLoading(false);
-      return undefined;
-    }
+    const result = await refetch();
+    return result.data || undefined;
   };
 
-  const clearSession = () => {
-    setSession(null);
-  };
-
-  const value = {
-    session,
-    setSession,
-    getSession,
-    clearSession,
-    isLoading
-  };
+  useEffect(() => {
+    console.log('SessionProvider useEffect runs');
+    getSession();
+  }, [location.pathname]);
 
   return (
-    <SessionContext.Provider value={value}>
+    <SessionContext.Provider value={{session, isLoading}}>
       {children}
     </SessionContext.Provider>
   );
