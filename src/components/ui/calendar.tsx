@@ -4,10 +4,7 @@ import { useState } from 'react';
 interface MyDatePickerProps {
   onSendData: (date: Date | undefined) => void;
 }
-export default function MyDatePicker({
-  onSendData
-}: MyDatePickerProps
-) {
+export default function MyDatePicker({ onSendData }: MyDatePickerProps) {
   const [selected, setSelected] = useState<Date>();
 
   return (

@@ -42,11 +42,11 @@ export const router = createBrowserRouter([
   {
     path: 'search',
     element: <SearchPage />,
-    errorElement: <ErrorPage />
+    errorElement: <ErrorPage />,
   },
   {
     path: 'ServiceRequest',
     element: <ServiceRequestPage />,
-    errorElement: <ErrorPage />
+    errorElement: <ErrorPage />,
   },
 ]);
