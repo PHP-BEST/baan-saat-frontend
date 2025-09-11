@@ -1,8 +1,17 @@
 import { API_ROOT } from '@/config/api';
+import { useUser } from '../context/UserContext';
+import { useNavigate } from 'react-router-dom'; 
 
 export default function LoginPage() {
+  const { user } = useUser();
+  const navigate = useNavigate();
+
+  if (user) { 
+    navigate('/') 
+  }
+
   const handleGoogleSignIn = () => {
-    window.location.href = `${API_ROOT}/auth/google`;
+    window.location.href = `http://localhost:5000/auth/google`;
   };
 
   const handleFacebookSignIn = () => {
