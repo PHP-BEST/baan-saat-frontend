@@ -7,6 +7,7 @@ import LoginPage from './pages/Login';
 import ProfilePage from './pages/Profile';
 import CustomerRequestPage from './pages/CustomerRequest';
 import ServiceDetailPage from './pages/ServiceDetail';
+import ServiceEditPage from './pages/ServiceEdit';
 
 export const router = createBrowserRouter([
   {
@@ -32,6 +33,11 @@ export const router = createBrowserRouter([
   {
     path: 'service/:serviceId',
     element: <ServiceDetailPage />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: 'service/:serviceId/edit',
+    element: <ServiceEditPage />,
     errorElement: <ErrorPage />,
   },
 ]);

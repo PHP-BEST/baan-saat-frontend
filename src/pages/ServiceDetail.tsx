@@ -1,21 +1,33 @@
 import type { Service } from '@/interfaces/Service';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import { API_ROOT, type ResponseInterface } from '@/config/api';
 import ActionButton from '@/components/our-components/actionButton';
 import { convertTagsToLabels } from '@/utils/function';
 import { Loader, Phone } from 'lucide-react';
+import { serviceCache } from '@/utils/cache';
 
 export default function ServiceDetailPage() {
+  const navigate = useNavigate();
   const { serviceId } = useParams<{ serviceId: string }>();
   const [service, setService] = useState<Service | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchService = async () => {
+      if (!serviceId) return;
+
+      const cacheKey = `service-${serviceId}`;
+
+      if (serviceCache.has(cacheKey)) {
+        setService(serviceCache.get(cacheKey)!);
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         const response = await axios.get<ResponseInterface<Service>>(
@@ -24,15 +36,14 @@ export default function ServiceDetailPage() {
             headers: { 'Content-Type': 'application/json' },
           },
         );
-        // ==========================================
 
         if (response.data.success) {
           const currentService = response.data.data;
+          serviceCache.set(cacheKey, currentService);
           setService(currentService);
         } else {
           throw new Error('Service not found');
         }
-        // ==========================================
       } catch (err) {
         console.error('Error fetching service data:', err);
         setService(null);
@@ -41,9 +52,7 @@ export default function ServiceDetailPage() {
       }
     };
 
-    if (serviceId) {
-      fetchService();
-    }
+    fetchService();
   }, [serviceId]);
 
   if (loading) {
@@ -157,17 +166,29 @@ export default function ServiceDetailPage() {
             </div>
           )}
 
-          {/* Back Button */}
-          <ActionButton
-            buttonType="outline"
-            buttonColor="blue"
-            className="cursor-pointer my-8"
-            onClick={() => {
-              window.location.href = '/account/service';
-            }}
-          >
-            Back
-          </ActionButton>
+          <div className="flex justify-end gap-4 my-8">
+            {/* Edit Button */}
+            <ActionButton
+              buttonType="outline"
+              className="cursor-pointer"
+              onClick={() => {
+                navigate(`/service/${service._id}/edit`);
+              }}
+            >
+              Edit
+            </ActionButton>
+            {/* Back Button */}
+            <ActionButton
+              buttonType="outline"
+              buttonColor="red"
+              className="cursor-pointer"
+              onClick={() => {
+                navigate('/account/service');
+              }}
+            >
+              Back
+            </ActionButton>
+          </div>
         </div>
       </main>
       <Footer />
