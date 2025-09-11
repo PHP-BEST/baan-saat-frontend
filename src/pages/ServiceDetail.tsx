@@ -2,10 +2,9 @@ import type { Service } from '@/interfaces/Service';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import { mockServices } from '@/mock/services';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
-import { API_ROOT } from '@/config/api';
+import { API_ROOT, type ResponseInterface } from '@/config/api';
 import ActionButton from '@/components/our-components/actionButton';
 import { convertTagsToLabels } from '@/utils/function';
 import { Loader, Phone } from 'lucide-react';
@@ -19,23 +18,24 @@ export default function ServiceDetailPage() {
     const fetchService = async () => {
       try {
         setLoading(true);
-        // == Waiting for API endpoint to be ready ==
-        const response = await axios.get(`${API_ROOT}/services/${serviceId}`, {
-          headers: { 'Content-Type': 'application/json' },
-        });
+        const response = await axios.get<ResponseInterface<Service>>(
+          `${API_ROOT}/services/${serviceId}`,
+          {
+            headers: { 'Content-Type': 'application/json' },
+          },
+        );
         // ==========================================
 
-        if (response.status === 200 && response.data) {
-          console.log('Fetched service data:', response.data);
-          setService(response.data);
+        if (response.data.success) {
+          const currentService = response.data.data;
+          setService(currentService);
         } else {
           throw new Error('Service not found');
         }
         // ==========================================
       } catch (err) {
         console.error('Error fetching service data:', err);
-        const foundService = mockServices.find((s) => s._id === serviceId);
-        setService(foundService || null);
+        setService(null);
       } finally {
         setLoading(false);
       }

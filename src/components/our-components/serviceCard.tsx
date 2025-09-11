@@ -7,7 +7,7 @@ interface ServiceCardProps {
 
 export default function ServiceCard({ service }: ServiceCardProps) {
   return (
-    <Link to={`/account/service/${service._id}`}>
+    <Link to={`/service/${service._id}`}>
       <div className="w-full max-w-[300px] h-[250px] flex flex-col items-center bg-white border rounded-2xl shadow-sm m-0">
         {service.coverPhotoUrl ? (
           <img

@@ -13,6 +13,11 @@ if (NODE_ENV === 'development') {
   API_ROOT = API_ROOT_LOCAL;
 }
 
+export interface ResponseInterface<T> {
+  success: boolean;
+  data: T;
+}
+
 export async function apiFetch<T>(
   url: string,
   options?: RequestInit,
