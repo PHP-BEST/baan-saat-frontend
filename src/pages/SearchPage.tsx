@@ -3,12 +3,14 @@ import { useState, useEffect, useRef } from 'react';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import ServiceCard from '@/components/our-components/serviceCard';
+import { useQuery } from '@tanstack/react-query';
+import { fetchJobs } from '@/config/api';
 
-interface ExtendedServiceCardProps {
+export interface ExtendedServiceCardProps {
   title: string;
   img: string;
   priceRating: string;
-  rating: string;
+  rating: number;
   providerName: string;
 }
 
@@ -42,72 +44,26 @@ export default function SearchPage() {
   });
   const inputRef = useRef(null);
 
-  const allJobs = [
-    {
-      title: 'Software Engineer',
-      img: 'https://picsum.photos/300/150?random=1',
-      priceRating: '100$',
-      rating: 4.5,
-      providerName: 'Tech Corp',
-    },
-    {
-      title: 'Data Scientist',
-      img: 'https://picsum.photos/300/150?random=2',
-      priceRating: '200$$',
-      rating: 4.8,
-      providerName: 'Data Inc.',
-    },
-    {
-      title: 'Product Manager',
-      img: 'https://picsum.photos/300/150?random=3',
-      priceRating: '140$',
-      rating: 4.2,
-      providerName: 'Innovate Ltd.',
-    },
-    {
-      title: 'UI/UX Designer',
-      img: 'https://picsum.photos/300/150?random=4',
-      priceRating: '90$',
-      rating: 4.7,
-      providerName: 'Creative Studio',
-    },
-    {
-      title: 'DevOps Engineer',
-      img: 'https://picsum.photos/300/150?random=5',
-      priceRating: '700$$',
-      rating: 4.6,
-      providerName: 'CloudOps Co.',
-    },
-    {
-      title: 'Mobile App Developer',
-      img: 'https://picsum.photos/300/150?random=6',
-      priceRating: '300$',
-      rating: 4.4,
-      providerName: 'Appify',
-    },
-    {
-      title: 'Cybersecurity Analyst',
-      img: 'https://picsum.photos/300/150?random=7',
-      priceRating: '$450$',
-      rating: 4.9,
-      providerName: 'SecureTech',
-    },
-    {
-      title: 'Cloud Solutions Architect',
-      img: 'https://picsum.photos/300/150?random=8',
-      priceRating: '890$',
-      rating: 4.8,
-      providerName: 'Cloudify',
-    },
-  ];
+  const { data: jobsData } = useQuery({
+    queryKey: ['jobs'],
+    queryFn: () => fetchJobs(),
+  });
 
+  const allJobs: ExtendedServiceCardProps[] = Array.isArray(jobsData)
+    ? jobsData
+    : []; // Ensure allJobs is always an array
   const handleSearch = () => {
-    // This function will now simply trigger a re-render by updating the state,
-    // which the filteredJobs array will react to.
-    // const inputRef = useRef<HTMLInputElement>(null);
+    // Simply force a re-render (already happens with searchInput state)
+    setSearchInput((prev) => prev.trim());
+
+    // Optionally blur the input after searching
+    if (inputRef.current) {
+      (inputRef.current as HTMLInputElement).blur();
+    }
   };
 
   const handleFilterChange = (e: {
+    // event type for filter change
     target: { name: string; value: string };
   }) => {
     const { name, value } = e.target;
@@ -118,6 +74,7 @@ export default function SearchPage() {
   };
 
   useEffect(() => {
+    // display none on search header
     const Search_header = document.getElementById('Searchbar-header');
     if (Search_header) {
       Search_header.style.display = 'none';
@@ -132,20 +89,21 @@ export default function SearchPage() {
         job.providerName.toLowerCase().includes(searchInput.toLowerCase());
 
       // Price filter
-      const priceValue = parseInt(job.priceRating.replace(/[^0-9]/g, ''), 10);
+      const priceValue = parseInt(job.priceRating.replace(/[^0-9]/g, ''), 10); // extract numeric value from priceRating
       const matchesPrice =
         activeFilters.price === 'all' ||
-        (activeFilters.price === 'cheap' && priceValue < 150) ||
-        (activeFilters.price === 'moderate' &&
-          priceValue >= 150 &&
-          priceValue < 400) ||
-        (activeFilters.price === 'expensive' && priceValue >= 400);
+        (activeFilters.price === '0-300' && priceValue <= 300) ||
+        (activeFilters.price === '300-600' &&
+          priceValue >= 301 &&
+          priceValue < 601) ||
+        (activeFilters.price === '600+' && priceValue >= 601);
 
       // Rating filter
       const matchesRating =
         activeFilters.rating === 'all' ||
         (activeFilters.rating === '4+' && job.rating >= 4) ||
-        (activeFilters.rating === '3+' && job.rating >= 3);
+        (activeFilters.rating === '3+' && job.rating >= 3) ||
+        (activeFilters.rating === '2+' && job.rating >= 2);
 
       // Provider name filter (case-insensitive)
       const matchesProvider =
@@ -158,7 +116,7 @@ export default function SearchPage() {
     });
   };
 
-  const filteredJobs = filterJobs();
+  const filteredJobs = filterJobs().slice(0, 20); // Limit to first 20 results
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 font-sans text-gray-800">
@@ -224,9 +182,9 @@ export default function SearchPage() {
                   className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                 >
                   <option value="all">All</option>
-                  <option value="cheap">Cheap ($)</option>
-                  <option value="moderate">Moderate ($$)</option>
-                  <option value="expensive">Expensive ($$$)</option>
+                  <option value="0-300">0-300</option>
+                  <option value="300-600">300-600</option>
+                  <option value="600+">600+</option>
                 </select>
               </div>
               <div>
@@ -246,6 +204,7 @@ export default function SearchPage() {
                   <option value="all">All</option>
                   <option value="4+">4+ Stars</option>
                   <option value="3+">3+ Stars</option>
+                  <option value="2+">2+ Stars</option>
                 </select>
               </div>
               <div>
@@ -278,7 +237,7 @@ export default function SearchPage() {
                 title={job.title}
                 img={job.img}
                 priceRating={job.priceRating}
-                rating={job.rating.toString()}
+                rating={job.rating}
                 providerName={job.providerName}
               />
             ))

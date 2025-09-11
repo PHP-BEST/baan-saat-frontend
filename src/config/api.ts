@@ -1,5 +1,6 @@
 import { API_ROOT_DEV, API_ROOT_LOCAL, API_ROOT_PROD, NODE_ENV } from './env';
 import axios from 'axios';
+import type { ExtendedServiceCardProps } from '@/pages/SearchPage';
 export let API_ROOT: string;
 
 if (NODE_ENV === 'development') {
@@ -49,7 +50,7 @@ interface GetProfileData {
 // Fetch data by ID
 export async function fetchData(id: string): Promise<GetProfileData['data']> {
   try {
-    const response = await axios.get(`http://localhost:3000/profile/${id}`, {
+    const response = await axios.get(`${API_ROOT}/profile/${id}`, {
       withCredentials: false,
     });
     return response.data;
@@ -69,19 +70,32 @@ export async function updateData(
   newData: GetProfileData['data'],
 ): Promise<GetProfileData['data']> {
   try {
-    const response = await axios.put(
-      `http://localhost:3000/profile/${id}`,
-      newData,
-      {
-        withCredentials: false,
-      },
-    );
+    const response = await axios.put(`${API_ROOT}/profile/${id}`, newData, {
+      withCredentials: false,
+    });
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       console.error('Axios error updating data:', error.message);
     } else {
       console.error('Unknown error updating data:', error);
+    }
+    throw error;
+  }
+}
+
+//Fetch Jobs
+export async function fetchJobs(): Promise<ExtendedServiceCardProps[]> {
+  try {
+    const response = await axios.get('${API_ROOT}/jobs', {
+      withCredentials: false,
+    });
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error('Axios error fetching jobs:', error.message);
+    } else {
+      console.error('Unknown error fetching jobs:', error);
     }
     throw error;
   }

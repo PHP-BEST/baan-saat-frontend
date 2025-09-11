@@ -2,7 +2,7 @@ interface ServiceCardProps {
   title: string;
   img: string;
   priceRating: string;
-  rating: string;
+  rating: number;
 }
 
 export default function ServiceCard({
