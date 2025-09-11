@@ -68,12 +68,14 @@ export default function ProfilePage() {
     queryKey: ['profile', user._id],
     queryFn: () => fetchData(user._id),
   });
-  console.log(data);
   const { mutate } = useMutation({
-    mutationFn: () => updateData(user._id, user),
-    onSuccess: (data) => {
-      updateUser(data);
-    },
+    mutationFn: () =>
+      updateData(user._id, {
+        ...user,
+        lastLoginAt: user.lastLoginAt.toISOString(), // Convert Date to string
+        createdAt: user.createdAt.toISOString(), // Convert Date to string
+        updatedAt: user.updatedAt.toISOString(), // Convert Date to string
+      }),
   });
 
   useEffect(() => {
@@ -243,7 +245,7 @@ export default function ProfilePage() {
       } else {
         updatedUser = { ...updatedUser, [field]: value };
       }
-      mutate(user);
+      mutate(user as unknown as void); // Adjust the type casting as necessary
     });
     updateUser(updatedUser);
     setEditingField(null);
@@ -349,6 +351,9 @@ export default function ProfilePage() {
         {/* Editable Fields */}
         <div className="space-y-4 w-full">
           <ProfileField
+            cancelEditing={function (): void {
+              throw new Error('Function not implemented.');
+            }}
             label="Name"
             field="name"
             cursorPositions={cursorPositions}
@@ -357,6 +362,9 @@ export default function ProfilePage() {
             setSkillsChanged={setSkillsChanged}
           />
           <ProfileField
+            cancelEditing={function (): void {
+              throw new Error('Function not implemented.');
+            }}
             label="Telephone"
             field="telNumber"
             {...commonFieldProperties}
@@ -365,15 +373,20 @@ export default function ProfilePage() {
             setSkillsChanged={setSkillsChanged}
           />
           <ProfileField
+            cancelEditing={function (): void {
+              throw new Error('Function not implemented.');
+            }}
             label="Email"
             field="email"
             {...commonFieldProperties}
             cursorPositions={cursorPositions}
             setCursorPositions={setCursorPositions}
             setSkillsChanged={setSkillsChanged}
-            editable={false} // Email is not editable
           />
           <ProfileField
+            cancelEditing={function (): void {
+              throw new Error('Function not implemented.');
+            }}
             label="Description"
             field="description"
             {...commonFieldProperties}
@@ -382,6 +395,9 @@ export default function ProfilePage() {
             setSkillsChanged={setSkillsChanged}
           />
           <ProfileField
+            cancelEditing={function (): void {
+              throw new Error('Function not implemented.');
+            }}
             label="Skill & Experience"
             field="skills"
             skillOptions={skillOptions}

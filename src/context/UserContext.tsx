@@ -23,7 +23,7 @@ interface UserProviderProps {
 
 export const UserProvider = ({ children }: UserProviderProps) => {
   const [user, setUser] = useState<User>({
-    _id: '1',
+    _id: '',
     name: '',
     role: 'customer',
     telNumber: '',

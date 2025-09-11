@@ -120,7 +120,7 @@ export default function ProfileField({
                       checked={isChecked}
                       onChange={(e) => {
                         setSkillsChanged(true);
-                        let newSkills;
+                        let newSkills: Array<string> = [];
                         if (e.target.checked) {
                           newSkills = [...currentSkills, skillOption.value];
                         } else {

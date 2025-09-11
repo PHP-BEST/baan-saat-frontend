@@ -28,44 +28,61 @@ export async function apiFetch<T>(
   return res.json();
 }
 interface GetProfileData {
-  name: string;
-  email: string;
-  telNumber: string;
-  avatarUrl: string;
-  role: 'customer' | 'provider';
-  providerProfile?: {
-    title: string;
-    description: string;
-    skills: string[]; // Corrected to be an array of strings, as skills are a list.
+  data: {
+    name: string;
+    _id: string;
+    email: string;
+    telNumber: string;
+    avatarUrl: string;
+    role: 'customer' | 'provider';
+    providerProfile?: {
+      title: string;
+      description: string;
+      skills: string[]; // Array of strings for skills
+    };
+    lastLoginAt: string;
+    createdAt: string;
+    updatedAt: string;
   };
-  lastLoginAt: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
-export async function fetchData(id: number): Promise<GetProfileData['data']> {
+// Fetch data by ID
+export async function fetchData(id: string): Promise<GetProfileData['data']> {
   try {
-    const response = await axios.get(`${API_ROOT}/${id}`, {
+    const response = await axios.get(`http://localhost:3000/profile/${id}`, {
       withCredentials: false,
     });
     return response.data;
-  } catch (error) {
-    console.error('Error fetching data:', error);
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error('Axios error fetching data:', error.message);
+    } else {
+      console.error('Unknown error fetching data:', error);
+    }
     throw error;
   }
 }
 
+// Update data by ID
 export async function updateData(
-  id: number,
-  newData: Partial<GetProfileData['data']>,
+  id: string,
+  newData: GetProfileData['data'],
 ): Promise<GetProfileData['data']> {
   try {
-    const response = await axios.put(`${API_ROOT}/${id}`, newData, {
-      withCredentials: false,
-    });
+    const response = await axios.put(
+      `http://localhost:3000/profile/${id}`,
+      newData,
+      {
+        withCredentials: false,
+      },
+    );
     return response.data;
-  } catch (error) {
-    console.error('Error updating data:', error);
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error('Axios error updating data:', error.message);
+    } else {
+      console.error('Unknown error updating data:', error);
+    }
     throw error;
   }
 }
