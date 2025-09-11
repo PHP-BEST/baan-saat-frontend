@@ -18,7 +18,7 @@ export default function ServiceCard({
         <p className="text-xl">
           <strong>{title}</strong>
         </p>
-        <p className="text-xs">price rating: {priceRating}</p>
+        <p className="text-xs">price: {priceRating}</p>
         <p className="text-xs">rating: {rating}</p>
       </div>
     </div>

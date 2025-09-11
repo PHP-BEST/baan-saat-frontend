@@ -9,6 +9,8 @@ import ServiceListProfilePage from './pages/ServiceListProfilePage';
 import ServiceListAllPage from './pages/ServiceListAllPage';
 import SearchPage from './pages/SearchPage';
 import ServiceRequestPage from './pages/ServiceRequest';
+import ServiceRequestEditPage from './pages/ServiceRequestEdit';
+import YourRequestPage from './pages/YourRequest';
 export const router = createBrowserRouter([
   {
     path: '',
@@ -22,6 +24,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '', element: <ProfilePage /> },
       { path: 'service', element: <YourServicePage /> },
+      { path: 'request', element: <YourRequestPage /> },
     ],
   },
   {
@@ -47,6 +50,11 @@ export const router = createBrowserRouter([
   {
     path: 'ServiceRequest',
     element: <ServiceRequestPage />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: 'ServiceRequestEdit',
+    element: <ServiceRequestEditPage />,
     errorElement: <ErrorPage />,
   },
 ]);
