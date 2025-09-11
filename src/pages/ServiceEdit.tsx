@@ -259,7 +259,7 @@ export default function ServiceEditPage() {
     if (canSubmit) {
       setUpdating(true);
       try {
-        console.log('Form Data: ', formData);
+        // console.log('Form Data: ', formData);
         const response = await axios.put<ResponseInterface<Service>>(
           `${API_ROOT}/services/${serviceId}`,
           {
