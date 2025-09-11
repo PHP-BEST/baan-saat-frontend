@@ -5,7 +5,6 @@ import React, {
   type FormEvent,
 } from 'react';
 import { useParams } from 'react-router-dom';
-import { buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import Header from '@/components/our-components/header';
@@ -17,6 +16,7 @@ import { API_ROOT, type ResponseInterface } from '@/config/api';
 import { serviceValidator } from '@/utils/serviceValidator';
 import axios from 'axios';
 import { Loader, AlertCircle } from 'lucide-react';
+import { getCompressedImageUrl } from '@/utils/function';
 
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
@@ -78,6 +78,7 @@ export default function ServiceEditPage() {
   const { serviceId } = useParams<{ serviceId: string }>();
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const [formData, setFormData] = useState<FormInterface>({
     serviceTitle: '',
     description: '',
@@ -227,30 +228,76 @@ export default function ServiceEditPage() {
     }));
   };
 
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
+      try {
+        const compressedCoverPhotoUrl = await getCompressedImageUrl(
+          file,
+          600,
+          0.6,
+        );
+
         setFormData((prev) => ({
           ...prev,
-          coverPhotoUrl: reader.result as string,
+          coverPhotoUrl: compressedCoverPhotoUrl,
         }));
-      };
-      reader.readAsDataURL(file);
+      } catch (err) {
+        console.error('Error processing image:', err);
+      }
     }
   };
 
   const canSubmit =
     Object.keys(validationErrors).length === 0 &&
-    !isFormDataSameAsOldService(formData, service);
+    !isFormDataSameAsOldService(formData, service) &&
+    !updating;
 
-  const handleSubmit = (e?: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e?: FormEvent<HTMLFormElement>) => {
     if (e) e.preventDefault();
 
     if (canSubmit) {
-      alert(`Form Submitted:\n${JSON.stringify(formData, null, 2)}`);
-      window.location.href = `/service/${serviceId}`;
+      setUpdating(true);
+      try {
+        console.log('Form Data: ', formData);
+        const response = await axios.put<ResponseInterface<Service>>(
+          `${API_ROOT}/services/${serviceId}`,
+          {
+            title: formData.serviceTitle,
+            description: formData.description,
+            tags: formData.tags,
+            budget: formData.budget,
+            location: formData.location,
+            coverPhotoUrl: formData.coverPhotoUrl,
+          },
+          {
+            headers: { 'Content-Type': 'application/json' },
+          },
+        );
+
+        if (response.data.success) {
+          // Update cache
+          const updatedService = response.data.data;
+          serviceCache.set(`service-${serviceId}`, updatedService);
+          alert('Service updated successfully!');
+          setFormData({
+            serviceTitle: '',
+            description: '',
+            tags: [],
+            budget: 0,
+            location: '',
+            coverPhotoUrl: '',
+          });
+          window.location.href = `/service/${serviceId}`;
+        } else {
+          alert('Failed to update service. Please try again.');
+        }
+      } catch (err) {
+        console.error('Error updating service:', err);
+        alert('An error occurred while updating the service.');
+      } finally {
+        setUpdating(false);
+      }
     }
   };
 
@@ -276,6 +323,7 @@ export default function ServiceEditPage() {
                 placeholder="Service Title"
                 value={formData.serviceTitle}
                 onChange={handleInputChange}
+                disabled={updating}
                 className={`border-gray-300 ${
                   validationErrors.serviceTitle
                     ? 'border-red-500 focus:ring-red-200'
@@ -305,6 +353,7 @@ export default function ServiceEditPage() {
                 placeholder="Description"
                 value={formData.description}
                 onChange={handleInputChange}
+                disabled={updating}
                 className={`${
                   validationErrors.description
                     ? 'border-red-500 focus:ring-red-200'
@@ -338,6 +387,7 @@ export default function ServiceEditPage() {
                       onChange={(e) =>
                         handleTagChange(tagOption.value, e.target.checked)
                       }
+                      disabled={updating}
                       className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                     <span className="text-sm text-gray-700">
@@ -370,6 +420,7 @@ export default function ServiceEditPage() {
                   placeholder="Budget"
                   value={formData.budget}
                   onChange={handleInputChange}
+                  disabled={updating}
                   className={`border-gray-300 ${
                     validationErrors.budget
                       ? 'border-red-500 focus:ring-red-200'
@@ -397,6 +448,7 @@ export default function ServiceEditPage() {
                   placeholder="Location"
                   value={formData.location}
                   onChange={handleInputChange}
+                  disabled={updating}
                   className={`border-gray-300 ${
                     validationErrors.location
                       ? 'border-red-500 focus:ring-red-200'
@@ -430,15 +482,20 @@ export default function ServiceEditPage() {
                     <span className="text-xs text-gray-500">Preview</span>
                   )}
                 </div>
-                <label
-                  htmlFor="cover-photo-upload"
-                  className={cn(
-                    buttonVariants({ variant: 'outline', size: 'default' }),
-                    'cursor-pointer text-green-500 bg-white border-green-500 hover:bg-green-50 hover:text-green-800',
-                  )}
+                <ActionButton
+                  type="button"
+                  onClick={() => {
+                    if (!updating) {
+                      document.getElementById('cover-photo-upload')?.click();
+                    }
+                  }}
+                  buttonType="outline"
+                  buttonColor="green"
+                  disabled={updating}
+                  className={`${updating ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                 >
                   Upload
-                </label>
+                </ActionButton>
                 <input
                   id="cover-photo-upload"
                   name="cover-photo-upload"
@@ -446,6 +503,7 @@ export default function ServiceEditPage() {
                   className="sr-only"
                   onChange={handleImageUpload}
                   accept="image/*"
+                  disabled={updating}
                 />
               </div>
             </div>
@@ -456,17 +514,28 @@ export default function ServiceEditPage() {
                 type="submit"
                 buttonColor="blue"
                 buttonType="filled"
-                className={`${canSubmit ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
+                disabled={!canSubmit || updating}
+                className={`${canSubmit && !updating ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
               >
-                Submit
+                {updating ? (
+                  <div className="flex justify-center items-center gap-2">
+                    <Loader className="animate-spin" size={16} />
+                    <span>Updating...</span>
+                  </div>
+                ) : (
+                  'Submit'
+                )}
               </ActionButton>
               <ActionButton
                 type="button"
                 buttonColor="red"
                 buttonType="outline"
-                className="cursor-pointer"
+                disabled={updating}
+                className={`${!updating ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
                 onClick={() => {
-                  window.history.back();
+                  if (!updating) {
+                    window.location.href = `/service/${serviceId}`;
+                  }
                 }}
               >
                 Cancel

@@ -14,3 +14,30 @@ export function convertTagsToLabels(tags: ServiceTag[]): string[] {
 
   return tags.map((tag) => tagLabelMap[tag] || tag);
 }
+
+export const getCompressedImageUrl = (
+  file: File,
+  maxWidth: number = 800,
+  quality: number = 0.7,
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      reject(new Error('Canvas not supported'));
+      return;
+    }
+
+    const img = new Image();
+    img.onload = () => {
+      const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
+      canvas.width = img.width * ratio;
+      canvas.height = img.height * ratio;
+
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => reject(new Error('Failed to load image'));
+    img.src = URL.createObjectURL(file);
+  });
+};
