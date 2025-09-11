@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import type { User } from '@/interfaces/User';
+import { MOCK_USER } from '@/mock/user';
 
 interface UserContextType {
   user: User;
@@ -22,23 +23,7 @@ interface UserProviderProps {
 }
 
 export const UserProvider = ({ children }: UserProviderProps) => {
-  const [user, setUser] = useState<User>({
-    _id: '',
-    name: '',
-    role: 'customer',
-    telNumber: '',
-    avatarUrl: '',
-    email: '',
-    address: '',
-    providerProfile: {
-      title: '',
-      description: '',
-      skills: [],
-    },
-    lastLoginAt: new Date(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
+  const [user, setUser] = useState<User>(MOCK_USER);
 
   const updateUser = (newUser: User) => {
     setUser(newUser);
