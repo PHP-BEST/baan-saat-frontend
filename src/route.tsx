@@ -30,7 +30,7 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
   },
   {
-    path: 'service/:serviceId',
+    path: 'account/service/:serviceId',
     element: <ServiceDetailPage />,
     errorElement: <ErrorPage />,
   },
