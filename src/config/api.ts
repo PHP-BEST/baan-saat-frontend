@@ -86,3 +86,16 @@ export async function updateData(
     throw error;
   }
 }
+export async function getServices() {
+  try{
+    const response = await axios.get('http://localhost:3000/api/service')
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error('Axios error updating data:', error.message);
+    } else {
+      console.error('Unknown error updating data:', error);
+    }
+    throw error;
+  }
+}

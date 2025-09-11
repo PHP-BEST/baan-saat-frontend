@@ -16,7 +16,7 @@ import {
   DialogClose,
   DialogFooter,
 } from '@/components/ui/dialog';
-// type Service = { รอ endpoint from backend
+// type Service = {
 
 // }
 type RequestProps = {
@@ -25,8 +25,18 @@ type RequestProps = {
   date: string;
 };
 export default function ServiceListProfilePage() {
-  // const [services, setServices] = useState<Service[]>([]);
-  const [requests, setRequests] = useState<RequestProps[]>([
+//   const {
+//     data: services,
+//     isLoading,
+//     error
+//   } = useQuery<Service[]>({
+//     queryKey: ["services"],
+//     queryFn: getServices,
+// });
+
+// if (isLoading) return <p>Loading...</p>
+// if (error) return <p>Error loading services</p>
+  const [requests] = useState<RequestProps[]>([
     { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
     { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
     { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
@@ -56,7 +66,6 @@ export default function ServiceListProfilePage() {
     { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
   ]);
   useEffect(() => {
-    setRequests(requests);
     const body = document.body;
     const observer = new MutationObserver(() => {
       if (body.hasAttribute('data-scroll-locked')) {
