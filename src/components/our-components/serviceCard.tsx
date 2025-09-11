@@ -13,7 +13,12 @@ export default function ServiceCard({
 }: ServiceCardProps) {
   return (
     <div className="rounded-lg p-2">
-      <img src={img} width="100%" className="rounded-xl" />
+      <img
+        src={img}
+        width="100%"
+        className="rounded-xl transition-transform duration-300 hover:scale-105 cursor-pointer"
+        alt={title}
+      />
       <div>
         <p className="text-xl">
           <strong>{title}</strong>

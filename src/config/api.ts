@@ -27,19 +27,24 @@ export async function apiFetch<T>(
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
-
-interface Getprofile {
-  success: boolean;
-  data: {
-    name: string;
-    email: string;
-    phone: string;
+interface GetProfileData {
+  name: string;
+  email: string;
+  telNumber: string;
+  avatarUrl: string;
+  role: 'customer' | 'provider';
+  providerProfile?: {
+    title: string;
     description: string;
-    skills: string;
-    profilePicture: string;
+    skills: string[]; // Corrected to be an array of strings, as skills are a list.
   };
+  lastLoginAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
-export async function fetchData(id: number): Promise<Getprofile['data']> {
+
+
+export async function fetchData(id: number): Promise<GetProfileData['data']> {
   try {
     const response = await axios.get(`${API_ROOT}/${id}`, {
       withCredentials: false,
@@ -53,8 +58,8 @@ export async function fetchData(id: number): Promise<Getprofile['data']> {
 
 export async function updateData(
   id: number,
-  newData: Partial<Getprofile['data']>,
-): Promise<Getprofile['data']> {
+  newData: Partial<GetProfileData['data']>,
+): Promise<GetProfileData['data']> {
   try {
     const response = await axios.put(`${API_ROOT}/${id}`, newData, {
       withCredentials: false,
