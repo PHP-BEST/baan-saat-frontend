@@ -44,9 +44,9 @@ interface GetProfileData {
 }
 
 
-export async function fetchData(id: number): Promise<Getprofile['data']> {
+export async function fetchData(id: number): Promise<GetProfileData['data']> {
   try {
-    const response = await axios.get(`http://localhost:3000/profile/${id}`, {
+    const response = await axios.get(`${API_ROOT}/${id}`, {
       withCredentials: false,
     });
     return response.data;
@@ -58,10 +58,10 @@ export async function fetchData(id: number): Promise<Getprofile['data']> {
 
 export async function updateData(
   id: number,
-  newData: Partial<Getprofile['data']>,
-): Promise<Getprofile['data']> {
+  newData: Partial<GetProfileData['data']>,
+): Promise<GetProfileData['data']> {
   try {
-    const response = await axios.put(`http://localhost:3000/profile/${id}`, newData, {
+    const response = await axios.put(`${API_ROOT}/${id}`, newData, {
       withCredentials: false,
     });
     return response.data;
