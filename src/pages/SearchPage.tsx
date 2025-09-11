@@ -89,7 +89,7 @@ export default function SearchPage() {
         <div className="flex justify-between items-center w-[80%] mx-auto mt-6">
           <p className="text-lg font-medium">Showing {jobs.length} results</p>
           <button
-            className="flex items-center gap-1 text-blue-500 hover:underline"
+            className="flex items-center gap-1 text-blue-500 hover:underline cursor-pointer"
             onClick={() => setShowFilter(!showFilter)}
           >
             <Filter size={18} /> Filter

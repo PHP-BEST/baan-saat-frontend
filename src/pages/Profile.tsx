@@ -3,7 +3,7 @@ import { Pencil, Save, X } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import ActionButton from '@/components/our-components/actionButton';
 import ProfileField from '@/components/our-components/profileField';
-import { useQuery ,useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { profileValidator } from '@/utils/profileValidator';
 import type { SkillsType } from '@/interfaces/User';
 import { fetchData, updateData } from '@/config/api';
@@ -33,21 +33,25 @@ export default function ProfilePage() {
   const [hasChanges, setHasChanges] = useState(false);
   const [skillsChanged, setSkillsChanged] = useState(false);
   const [tempAvatarUrl, setTempAvatarUrl] = useState<string>('');
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const [cursorPositions, setCursorPositions] = useState<Record<string, number>>({});
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
+  const [cursorPositions, setCursorPositions] = useState<
+    Record<string, number>
+  >({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const emailFieldRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Find the pencil button inside the email field and hide it
     if (emailFieldRef.current) {
-      const pencilButton = emailFieldRef.current.querySelector("button");
+      const pencilButton = emailFieldRef.current.querySelector('button');
       if (pencilButton) {
-        pencilButton.style.display = "none";
+        pencilButton.style.display = 'none';
       }
     }
   }, []);
-  
+
   useEffect(() => {
     const hasUnsavedChanges =
       Object.keys(tempValues).length > 0 ||
@@ -61,20 +65,22 @@ export default function ProfilePage() {
     error: fetchError,
     data,
   } = useQuery({
-    queryKey: ['profile',user._id],
+    queryKey: ['profile', user._id],
     queryFn: () => fetchData(user._id),
   });
   console.log(data);
-  const {mutate} = useMutation({
-    mutationFn:() => updateData(user._id, user),
+  const { mutate } = useMutation({
+    mutationFn: () => updateData(user._id, user),
     onSuccess: (data) => {
       updateUser(data);
-    }
+    },
   });
 
   useEffect(() => {
     if (!data) return;
-    const skillsArray: string[] = Array.isArray(data.providerProfile?.skills) ? data.providerProfile.skills : [];
+    const skillsArray: string[] = Array.isArray(data.providerProfile?.skills)
+      ? data.providerProfile.skills
+      : [];
     updateUser({
       ...user, // Preserve existing user data
       name: data.name ?? '',
@@ -88,8 +94,6 @@ export default function ProfilePage() {
       },
     });
   }, [data]);
-
-
 
   const getFieldValue = (field: string): string => {
     switch (field) {
@@ -274,7 +278,6 @@ export default function ProfilePage() {
     <>
       <h1 className="text-2xl font-bold mb-2">Profile</h1>
       <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
-
         {/* Avatar Section */}
         <div className="relative flex flex-col items-center mb-6">
           <div className="relative w-28 h-28 rounded-full bg-background-sidebar flex items-center justify-center overflow-hidden">
@@ -313,24 +316,23 @@ export default function ProfilePage() {
               </button>
               {(tempAvatarUrl || user.avatarUrl) && (
                 <button
-                onClick={() => {
-                  // setTempAvatarUrl('');
-                  // setEditingField(null);
-                  // setHasChanges(true); // ✅ Reset unsaved changes
-                  // setTempValues({});
-                  // setSkillsChanged(false);
-                  // setValidationErrors({});
-                  updateUser({ ...user, avatarUrl: '' });
+                  onClick={() => {
+                    // setTempAvatarUrl('');
+                    // setEditingField(null);
+                    // setHasChanges(true); // ✅ Reset unsaved changes
+                    // setTempValues({});
+                    // setSkillsChanged(false);
+                    // setValidationErrors({});
+                    updateUser({ ...user, avatarUrl: '' });
 
-                  setTempAvatarUrl(''); 
-                  setHasChanges(true); 
-                  setEditingField(null);
-                }}
-                className="px-3 py-1 rounded-lg bg-red-500 text-white hover:bg-red-600"
-              >
-                Delete
-              </button>
-              
+                    setTempAvatarUrl('');
+                    setHasChanges(true);
+                    setEditingField(null);
+                  }}
+                  className="px-3 py-1 rounded-lg bg-red-500 text-white hover:bg-red-600"
+                >
+                  Delete
+                </button>
               )}
             </div>
           )}
@@ -370,7 +372,6 @@ export default function ProfilePage() {
             setCursorPositions={setCursorPositions}
             setSkillsChanged={setSkillsChanged}
             editable={false} // Email is not editable
-
           />
           <ProfileField
             label="Description"

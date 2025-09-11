@@ -43,7 +43,6 @@ interface GetProfileData {
   updatedAt: string;
 }
 
-
 export async function fetchData(id: number): Promise<GetProfileData['data']> {
   try {
     const response = await axios.get(`${API_ROOT}/${id}`, {
