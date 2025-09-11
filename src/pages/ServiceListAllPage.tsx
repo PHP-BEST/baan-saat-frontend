@@ -38,43 +38,43 @@ export default function ServiceListAllPage() {
             title="Job title"
             img="https://f.ptcdn.info/507/064/000/pt5twn97vd8F72T5PEY-o.png"
             priceRating="5"
-            rating="5"
+            rating={5}
           ></ServiceCard>
           <ServiceCard
             title="Job title"
             img="https://f.ptcdn.info/507/064/000/pt5twn97vd8F72T5PEY-o.png"
             priceRating="5"
-            rating="5"
+            rating={5}
           ></ServiceCard>
           <ServiceCard
             title="Job title"
             img="https://f.ptcdn.info/507/064/000/pt5twn97vd8F72T5PEY-o.png"
             priceRating="5"
-            rating="5"
+            rating={5}
           ></ServiceCard>
           <ServiceCard
             title="Job title"
             img="https://f.ptcdn.info/507/064/000/pt5twn97vd8F72T5PEY-o.png"
             priceRating="5"
-            rating="5"
+            rating={5}
           ></ServiceCard>
           <ServiceCard
             title="Job title"
             img="https://f.ptcdn.info/507/064/000/pt5twn97vd8F72T5PEY-o.png"
             priceRating="5"
-            rating="5"
+            rating={5}
           ></ServiceCard>
           <ServiceCard
             title="Job title"
             img="https://f.ptcdn.info/507/064/000/pt5twn97vd8F72T5PEY-o.png"
             priceRating="5"
-            rating="5"
+            rating={5}
           ></ServiceCard>
           <ServiceCard
             title="Job title"
             img="https://f.ptcdn.info/507/064/000/pt5twn97vd8F72T5PEY-o.png"
             priceRating="5"
-            rating="5"
+            rating={5}
           ></ServiceCard>
           {/* {services.map((service) => (
             <ServiceCard
