@@ -6,6 +6,7 @@ import LandingPage from './pages/Landing';
 import YourServicePage from './pages/YourService';
 import LoginPage from './pages/Login';
 import ProfilePage from './pages/Profile';
+import ProtectedRoute from './components/our-components/protectedRoute';
 
 export const router = createBrowserRouter([
   {
@@ -19,7 +20,11 @@ export const router = createBrowserRouter([
       },
       {
         path: 'account',
-        element: <AccountLayout />,
+        element: (
+          <ProtectedRoute>
+            <AccountLayout />,
+          </ProtectedRoute>
+        ),
         children: [
           { path: '', element: <ProfilePage /> },
           { path: 'service', element: <YourServicePage /> },

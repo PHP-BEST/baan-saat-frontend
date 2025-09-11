@@ -1,8 +1,10 @@
+import { API_ROOT } from '@/config/api';
 import Axios from 'axios';
 
 Axios.interceptors.request.use((config) => {
     // Do something before request is sent
     config.withCredentials = true;
+    config.baseURL = API_ROOT;
     return config;
   }, (error) => {
     // Do something with request error

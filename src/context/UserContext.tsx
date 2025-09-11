@@ -2,10 +2,11 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import type { User } from '@/interfaces/User';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
-import Axios from '@/auth/interceptor';
+import Axios from '@/api/Axios';
 
 interface UserContextType {
   user: User;
+  isLoading: boolean;
   updateUser: (user: User) => void;
   updateAvatarUrl: (avatarUrl: string) => void;
 }
@@ -22,7 +23,7 @@ export const useUser = () => {
 
 const fetchSession = async (): Promise<User | null> => {
   try {
-    const response = await Axios.get<User>('http://localhost:5000/api/user/session');
+    const response = await Axios.get<User>('/api/users/session');
     if (response.status === 200) {
       return response.data;
     }
@@ -97,7 +98,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   }
 
   return (
-    <UserContext.Provider value={{ user, updateUser, updateAvatarUrl }}>
+    <UserContext.Provider value={{ user, isLoading, updateUser, updateAvatarUrl }}>
       {children}
     </UserContext.Provider>
   );
