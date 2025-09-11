@@ -59,28 +59,6 @@ export const validateBudget = (budget: number | string): ValidationResult => {
   return { isValid: true };
 };
 
-export const validateCoverPhotoUrl = (url: string): ValidationResult => {
-  if (url === '') {
-    return { isValid: true };
-  }
-
-  if (url.length > 2000) {
-    return {
-      isValid: false,
-      error: 'Cover photo URL must be 2000 characters or less',
-    };
-  }
-
-  // Basic URL validation
-  try {
-    new URL(url.startsWith('http') ? url : `https://${url}`);
-  } catch {
-    return { isValid: false, error: 'Please fill in a valid cover photo URL' };
-  }
-
-  return { isValid: true };
-};
-
 export const validateTelNumber = (telNumber: string): ValidationResult => {
   if (telNumber === '') {
     return { isValid: false, error: 'Telephone number cannot be empty' };
@@ -166,8 +144,6 @@ export const serviceValidator = (
       return validateDescription(value as string);
     case 'budget':
       return validateBudget(value as number | string);
-    case 'coverPhotoUrl':
-      return validateCoverPhotoUrl(value as string);
     case 'telNumber':
       return validateTelNumber(value as string);
     case 'location':
@@ -219,13 +195,6 @@ export const validateService = (service: {
     const budgetValidation = validateBudget(service.budget);
     if (!budgetValidation.isValid) {
       errors.budget = budgetValidation.error!;
-    }
-  }
-
-  if (service.coverPhotoUrl) {
-    const urlValidation = validateCoverPhotoUrl(service.coverPhotoUrl);
-    if (!urlValidation.isValid) {
-      errors.coverPhotoUrl = urlValidation.error!;
     }
   }
 
