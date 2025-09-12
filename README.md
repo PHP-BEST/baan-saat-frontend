@@ -29,7 +29,7 @@ This guide outlines how to set up, develop, test, and maintain the `baan-saat-fr
    ```bash
    npm install
    npm install husky --save-dev
-   npx husky install
+   npx husky
    ```
 
 ## Environment Setup
@@ -53,82 +53,6 @@ This guide outlines how to set up, develop, test, and maintain the `baan-saat-fr
 So... No need to use `production` but if you changes something in the backend, I recommend using `test` mode to check the result immediately
 
 ## Project Structure
-
-```
-src/
-  api/          # API service functions and type definitions
-  assets/       # Static assets (images, icons, etc.)
-  components/   # React components
-    our-components/  # Custom application components
-    ui/         # Reusable UI components (shadcn/ui)
-  config/       # Configuration files (API, environment)
-  hooks/        # Custom React hooks
-  layouts/      # Layout components
-  lib/          # Utility functions and helpers
-  pages/        # Page components for routing
-  tests/        # Jest and React Testing Library tests
-  App.tsx       # Main App component with routing
-  main.tsx      # Application entry point
-  index.css     # Global styles and Tailwind imports
-  ...
-```
-
-### File Index and Naming Conventions
-
-#### `/src/api/` - API Services
-
-**Purpose**: API service functions, request/response handlers, and TypeScript type definitions
-**Naming Convention**: `<resource-name>.ts`
-
-#### `/src/assets/` - Static Assets
-
-**Purpose**: Images, icons, SVGs, and other static files
-**Naming Convention**: `<asset-name>.<extension>`
-
-#### `/src/components/` - React Components
-
-**Purpose**: Reusable React components organized by category
-**Naming Convention**: `<ComponentName>.tsx` (PascalCase)
-
-##### `/src/components/our-components/` - Custom Components
-
-##### `/src/components/ui/` - UI Components (shadcn/ui)
-
-#### `/src/config/` - Configuration Files
-
-**Purpose**: Environment configuration, API setup, and app-wide settings
-**Naming Convention**: `<config-type>.ts`
-
-#### `/src/hooks/` - Custom React Hooks
-
-**Purpose**: Reusable stateful logic and side effects
-**Naming Convention**: `use<HookName>.ts`
-
-### /src/layouts/ - Layout Components
-
-**Purpose**: Components that wrap pages to provide consistent layout (header, footer, background, etc.)
-**Naming Convention**: `<LayoutName>.tsx`
-
-#### `/src/lib/` - Utility Functions
-
-**Purpose**: Helper functions, utilities, and shared logic
-**Naming Convention**: `<utility-name>.ts`
-
-#### `/src/pages/` - Page Components
-
-**Purpose**: Top-level page components for routing
-**Naming Convention**: `<PageName>Page.tsx`
-
-#### `/src/tests/` - Test Files
-
-**Purpose**: Jest and React Testing Library unit and integration tests
-**Naming Convention**: `<component-name>.test.ts` or `<hook-name>.test.ts`
-
-#### Root Files
-
-- `App.tsx` - Main application component with React Router setup
-- `main.tsx` - Application entry point with React root rendering
-- `index.css` - Global styles, Tailwind CSS imports, and CSS custom properties
 
 🚧🚧 **Under Construction** 🚧🚧
 

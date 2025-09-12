@@ -1,27 +1,28 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@/context/UserContext';
 
-const AvatarImage = () => {
+interface AccountImageProps {
+  width?: number;
+}
+
+const AvatarImage = ({ width = 52 }: AccountImageProps) => {
   const navigate = useNavigate();
-  const [avatarUrl, setAvatarUrl] = useState<string>('');
+  const { user } = useUser();
 
   const handleClick = () => {
     alert('Go to Account Page to see Your Account');
     navigate('/account');
-
-    // Avoiding no-unused-vars problems, I will remove later... - Best
-    setAvatarUrl('');
-    // ===============================================================
   };
 
   return (
     <div
-      className="w-[52px] h-[52px] bg-background-profile rounded-full mx-auto flex items-center justify-center overflow-hidden cursor-pointer"
+      className={`bg-background-profile rounded-full flex items-center justify-center overflow-hidden cursor-pointer`}
       onClick={handleClick}
+      style={{ width: width, height: width }}
     >
-      {avatarUrl ? (
+      {user.avatarUrl ? (
         <img
-          src={avatarUrl}
+          src={user.avatarUrl}
           alt="Avatar Image"
           className="w-full h-full object-cover"
         />
