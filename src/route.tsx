@@ -5,12 +5,14 @@ import LandingPage from './pages/Landing';
 import YourServicePage from './pages/YourService';
 import LoginPage from './pages/Login';
 import ProfilePage from './pages/Profile';
+import CustomerRequestPage from './pages/CustomerRequest';
 import ServiceListProfilePage from './pages/ServiceListProfilePage';
 import ServiceListAllPage from './pages/ServiceListAllPage';
 import SearchPage from './pages/SearchPage';
 import ServiceRequestPage from './pages/ServiceRequest';
 import ServiceRequestEditPage from './pages/ServiceRequestEdit';
 import YourRequestPage from './pages/YourRequest';
+
 export const router = createBrowserRouter([
   {
     path: '',
@@ -23,6 +25,7 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { path: '', element: <ProfilePage /> },
+      { path: 'requests', element: <CustomerRequestPage /> },
       { path: 'service', element: <YourServicePage /> },
       { path: 'request', element: <YourRequestPage /> },
     ],
