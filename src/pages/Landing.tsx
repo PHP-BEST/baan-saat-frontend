@@ -56,6 +56,16 @@ export default function LandingPage() {
           <Link to="/login">Login</Link>
         </ActionButton>
 
+        <ActionButton
+          buttonColor="blue"
+          buttonType="filled"
+          onClick={() => {
+            alert('Create Service button clicked');
+          }}
+        >
+          <Link to="/CreateService">Create Service</Link>
+        </ActionButton>
+
         <ActionButton buttonColor="red" buttonType="outline">
           Sign out
         </ActionButton>

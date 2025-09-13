@@ -2,13 +2,23 @@ export interface Service {
   _id: string;
   customerId: string;
   title: string;
-  description: string;
+  description?: string;
   budget: number;
-  coverPhotoUrl: string;
   telNumber: string;
   location: string;
-  tags: string[];
-  date: string;
-  createdAt: string;
-  updatedAt: string;
+  tags?: ServiceTag[];
+  date: Date;
+  coverPhotoUrl?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
+
+export type ServiceTag =
+  | 'houseCleaning'
+  | 'houseRepair'
+  | 'plumbing'
+  | 'electrical'
+  | 'hvac'
+  | 'painting'
+  | 'landscaping'
+  | 'others';

@@ -14,6 +14,10 @@ const AvatarImage = ({ width = 52 }: AccountImageProps) => {
     navigate('/account');
   };
 
+  if (!width) {
+    width = 52;
+  }
+
   return (
     <div
       className={`bg-background-profile rounded-full flex items-center justify-center overflow-hidden cursor-pointer`}

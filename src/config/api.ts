@@ -13,6 +13,11 @@ if (NODE_ENV === 'development') {
   API_ROOT = API_ROOT_LOCAL;
 }
 
+export interface ResponseInterface<T> {
+  success: boolean;
+  data: T;
+}
+
 export async function apiFetch<T>(
   url: string,
   options?: RequestInit,
@@ -27,41 +32,58 @@ export async function apiFetch<T>(
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
-
-interface Getprofile {
-  success: boolean;
+interface GetProfileData {
   data: {
     name: string;
+    _id: string;
     email: string;
-    phone: string;
-    description: string;
-    skills: string;
-    profilePicture: string;
+    telNumber: string;
+    avatarUrl: string;
+    role: 'customer' | 'provider';
+    providerProfile?: {
+      title: string;
+      description: string;
+      skills: string[]; // Array of strings for skills
+    };
+    lastLoginAt: string;
+    createdAt: string;
+    updatedAt: string;
   };
 }
-export async function fetchData(id: number): Promise<Getprofile['data']> {
+
+// Fetch data by ID
+export async function fetchData(id: string): Promise<GetProfileData['data']> {
   try {
-    const response = await axios.get(`${API_ROOT}/${id}`, {
+    const response = await axios.get(`${API_ROOT}/users/${id}`, {
       withCredentials: false,
     });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching data:', error);
+    return response.data.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error('Axios error fetching data:', error.message);
+    } else {
+      console.error('Unknown error fetching data:', error);
+    }
     throw error;
   }
 }
 
+// Update data by ID
 export async function updateData(
-  id: number,
-  newData: Partial<Getprofile['data']>,
-): Promise<Getprofile['data']> {
+  id: string,
+  newData: GetProfileData['data'],
+): Promise<GetProfileData['data']> {
   try {
-    const response = await axios.put(`${API_ROOT}/${id}`, newData, {
+    const response = await axios.put(`${API_ROOT}/users/${id}`, newData, {
       withCredentials: false,
     });
-    return response.data;
-  } catch (error) {
-    console.error('Error updating data:', error);
+    return response.data.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error('Axios error updating data:', error.message);
+    } else {
+      console.error('Unknown error updating data:', error);
+    }
     throw error;
   }
 }
