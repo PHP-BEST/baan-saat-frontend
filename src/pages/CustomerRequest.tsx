@@ -11,12 +11,12 @@ export default function CustomerRequestPage() {
           <table className="table-fixed w-full border-collapse border border-gray-200">
             <thead className="sticky top-0 bg-table-row-header">
               <tr>
-                <th className="border border-gray-200 p-2 w-1/4">
-                  Service Name
+                <th className="border border-gray-200 p-2 w-2/5">
+                  Service Title
                 </th>
-                <th className="border border-gray-200 p-2 w-1/4">Requestor</th>
-                <th className="border border-gray-200 p-2 w-1/4">Date</th>
-                <th className="border border-gray-200 p-2 w-1/4">Status</th>
+                <th className="border border-gray-200 p-2 w-1/5">Requestor</th>
+                <th className="border border-gray-200 p-2 w-1/5">Date</th>
+                <th className="border border-gray-200 p-2 w-1/5">Status</th>
               </tr>
             </thead>
             <tbody>
