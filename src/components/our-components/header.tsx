@@ -42,7 +42,10 @@ const Header = () => {
         />
 
         {/* Search Box */}
-        <div className="bg-white w-full h-[50px] flex gap-1 items-center pl-1 pr-3">
+        <div
+          className="bg-white w-full h-[50px] flex gap-1 items-center pl-1 pr-3 "
+          id="Searchbar-header"
+        >
           <Search
             width={28}
             height={28}
