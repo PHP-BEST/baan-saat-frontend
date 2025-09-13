@@ -50,6 +50,7 @@ export const router = createBrowserRouter([
     element: <ServiceEditPage />,
     errorElement: <ErrorPage />,
   },
+  {
     path: '/register',
     element: <ProfileCreationPage />,
     errorElement: <ErrorPage />,
