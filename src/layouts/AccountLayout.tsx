@@ -12,7 +12,8 @@ const SidebarMenu: SidebarItem[] = [
   { name: 'Profile', path: '/' },
   { name: 'Account Setting', path: '/setting' },
   { name: 'Privacy', path: '/privacy' },
-  { name: 'Your Request', path: '/request' },
+  { name: 'Your Request', path: '/your-request' },
+  { name: 'Requests', path: '/requests' },
   { name: 'Your Service', path: '/service' },
 ];
 
@@ -24,7 +25,7 @@ export default function AccountLayout() {
         {/* Sidebar */}
         <div className="flex flex-col w-1/4 min-w-[160px] max-w-[240px]">
           <h1 className="text-2xl font-bold mb-2">Your Account</h1>
-          <div className="w-full h-full bg-white border rounded-2xl px-4 pb-4 pt-8 flex flex-col gap-4 shadow-sm text-center">
+          <div className="w-full h-full bg-background-sidebar border border-border-sidebar rounded-2xl px-4 pb-4 pt-8 flex flex-col gap-4 shadow-sm text-center ">
             {SidebarMenu.map((item: SidebarItem) => (
               <div key={item.name}>
                 <NavLink
@@ -34,7 +35,7 @@ export default function AccountLayout() {
                 >
                   {item.name}
                 </NavLink>
-                {(item.name === 'Privacy' || item.name === 'Your Service') && (
+                {(item.name === 'Privacy' || item.name === 'Requests') && (
                   <hr className="my-2" />
                 )}
               </div>

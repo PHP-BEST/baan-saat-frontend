@@ -23,7 +23,7 @@ interface UserProviderProps {
 
 export const UserProvider = ({ children }: UserProviderProps) => {
   const [user, setUser] = useState<User>({
-    userId: '',
+    _id: '68c2e4b9dacf38dd2cbaed3c', // Just an example of user ID that I get from MongoDB
     name: '',
     role: 'customer',
     telNumber: '',
