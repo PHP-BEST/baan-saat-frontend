@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import YourRequest from '@/components/our-components/youRequest';
+import YourRequest from '@/components/our-components/yourRequest';
 interface RequestProps {
   serviceName: string;
   serviceProvider: string;
