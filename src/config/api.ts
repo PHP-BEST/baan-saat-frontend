@@ -49,7 +49,7 @@ interface GetProfileData {
 // Fetch data by ID
 export async function fetchData(id: string): Promise<GetProfileData['data']> {
   try {
-    const response = await axios.get(`http://localhost:3000/profile/${id}`, {
+    const response = await axios.get(`${API_ROOT}/profile/${id}`, {
       withCredentials: false,
     });
     return response.data;
@@ -69,13 +69,9 @@ export async function updateData(
   newData: GetProfileData['data'],
 ): Promise<GetProfileData['data']> {
   try {
-    const response = await axios.put(
-      `http://localhost:3000/profile/${id}`,
-      newData,
-      {
-        withCredentials: false,
-      },
-    );
+    const response = await axios.put(`${API_ROOT}/profile/${id}`, newData, {
+      withCredentials: false,
+    });
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
@@ -86,10 +82,10 @@ export async function updateData(
     throw error;
   }
 }
-export async function getServices() {
-  try{
-    const response = await axios.get('http://localhost:3000/api/service')
-    return response.data;
+export async function getServices(id: string) {
+  try {
+    const response = await axios.get(`${API_ROOT}/services/${id}`);
+    return response.data.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       console.error('Axios error updating data:', error.message);
