@@ -2,10 +2,7 @@ import { Search, Filter } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
-import ServiceCard from '@/components/our-components/serviceCard';
 import FilterBar from '@/components/our-components/filterBar';
-import { useQuery } from '@tanstack/react-query';
-import { fetchJobs } from '@/config/api';
 export interface ExtendedServiceCardProps {
   title: string;
   img: string;
@@ -20,22 +17,23 @@ interface JobsProp {
   rating: number;
   providerName: string;
 }
+
 function ExtendedServiceCard({
-  title,
-  img,
-  priceRating,
-  rating,
+  // title,
+  // img,
+  // priceRating,
+  // rating,
   providerName,
 }: ExtendedServiceCardProps) {
   return (
     <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
       <p className="text-sm text-gray-500 mb-2">By {providerName}</p>
-      <ServiceCard
+      {/* <ServiceCard
         title={title}
         img={img}
         priceRating={priceRating}
         rating={rating}
-      />
+      /> */}
     </div>
   );
 }
@@ -46,14 +44,7 @@ export default function SearchPage() {
   const [filteredJobs, setFilteredJobs] = useState<JobsProp[]>([]);
   const inputRef = useRef(null);
 
-  const { data: jobsData } = useQuery({
-    queryKey: ['jobs'],
-    queryFn: () => fetchJobs(),
-  });
-
-  const allJobs: ExtendedServiceCardProps[] = Array.isArray(jobsData)
-    ? jobsData
-    : []; // Ensure allJobs is always an array
+  const allJobs: ExtendedServiceCardProps[] = [];
   const handleSearch = () => {
     // Simply force a re-render (already happens with searchInput state)
     setSearchInput((prev) => prev.trim());

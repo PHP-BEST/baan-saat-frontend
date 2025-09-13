@@ -1,21 +1,11 @@
-import ServiceCard from '@/components/our-components/serviceCard';
+// import ServiceCard from '@/components/our-components/serviceCard';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Filter } from 'lucide-react';
 import FilterBar from '@/components/our-components/filterBar';
-// type Service = {
-//   id: string;
-//   title: string;
-//   description: string;
-//   budget: number;
-//   coverPhoto: string;
-//   telNumber: string;
-//   location: string;
-//   tags: string[];
-//   date: Date;
-// };
+
 interface JobsProp {
   title: string;
   img: string;
@@ -105,16 +95,15 @@ export default function ServiceListAllPage() {
           />
         </div>
         <div className="mt-4 ps-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredServices &&
+          {/* {filteredServices &&
             filteredServices.map((service, index) => (
-              <ServiceCard
-                key={index}
-                title={service.title}
-                img={service.img}
-                priceRating={service.priceRating}
-                rating={service.rating}
-              ></ServiceCard>
-            ))}
+              // <ServiceCard
+              //   key={index}
+              //   img={service.img}
+              //   priceRating={service.priceRating}
+              //   rating={service.rating}
+              // ></ServiceCard>
+            ))} */}
         </div>
       </div>
       <Footer />

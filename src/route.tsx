@@ -5,9 +5,11 @@ import LandingPage from './pages/Landing';
 import YourServicePage from './pages/YourService';
 import LoginPage from './pages/Login';
 import ProfilePage from './pages/Profile';
+import CustomerRequestPage from './pages/CustomerRequest';
+import ServiceDetailPage from './pages/ServiceDetail';
+import ServiceEditPage from './pages/ServiceEdit';
 import ProfileCreationPage from './pages/ProfileCreationPage';
 import ServiceCreationPage from './pages/ServiceCreationPage';
-import CustomerRequestPage from './pages/CustomerRequest';
 import ServiceListProfilePage from './pages/ServiceListProfilePage';
 import ServiceListAllPage from './pages/ServiceListAllPage';
 import SearchPage from './pages/SearchPage';
@@ -38,6 +40,16 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
   },
   {
+    path: 'service/:serviceId',
+    element: <ServiceDetailPage />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: 'service/:serviceId/edit',
+    element: <ServiceEditPage />,
+    errorElement: <ErrorPage />,
+  },
+  {
     path: '/register',
     element: <ProfileCreationPage />,
     errorElement: <ErrorPage />,
@@ -46,7 +58,7 @@ export const router = createBrowserRouter([
     path: '/CreateService',
     element: <ServiceCreationPage />,
     errorElement: <ErrorPage />,
-  }, 
+  },
   {
     path: 'servicelist',
     element: <ServiceListProfilePage />,
