@@ -45,6 +45,7 @@ export const router = createBrowserRouter([
     element: <BookingPage />,
     errorElement: <ErrorPage />,
   },
+  {
     path: 'service/:serviceId',
     element: <ServiceDetailPage />,
     errorElement: <ErrorPage />,
