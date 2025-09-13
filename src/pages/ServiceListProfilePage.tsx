@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import { useEffect } from 'react';
-import ServiceCard from '@/components/our-components/serviceCard';
+// import ServiceCard from '@/components/our-components/serviceCard';
 import RequestList from '@/components/our-components/requestList';
 import AvatarImage from '@/components/our-components/accountImage';
 import { useQuery } from '@tanstack/react-query';
@@ -68,36 +68,36 @@ export default function ServiceListProfilePage() {
     });
     return () => observer.disconnect();
   }, []);
-  const allJobs = [
-    {
-      title: 'Software Engineer',
-      img: 'https://picsum.photos/300/150?random=1',
-      priceRating: '100$',
-      rating: 4.5,
-      providerName: 'Tech Corp',
-    },
-    {
-      title: 'Data Scientist',
-      img: 'https://picsum.photos/300/150?random=2',
-      priceRating: '200$$',
-      rating: 4.8,
-      providerName: 'Data Inc.',
-    },
-    {
-      title: 'Product Manager',
-      img: 'https://picsum.photos/300/150?random=3',
-      priceRating: '140$',
-      rating: 4.2,
-      providerName: 'Innovate Ltd.',
-    },
-    {
-      title: 'UI/UX Designer',
-      img: 'https://picsum.photos/300/150?random=4',
-      priceRating: '90$',
-      rating: 4.7,
-      providerName: 'Creative Studio',
-    },
-  ];
+  // const allJobs = [
+  //   {
+  //     title: 'Software Engineer',
+  //     img: 'https://picsum.photos/300/150?random=1',
+  //     priceRating: '100$',
+  //     rating: 4.5,
+  //     providerName: 'Tech Corp',
+  //   },
+  //   {
+  //     title: 'Data Scientist',
+  //     img: 'https://picsum.photos/300/150?random=2',
+  //     priceRating: '200$$',
+  //     rating: 4.8,
+  //     providerName: 'Data Inc.',
+  //   },
+  //   {
+  //     title: 'Product Manager',
+  //     img: 'https://picsum.photos/300/150?random=3',
+  //     priceRating: '140$',
+  //     rating: 4.2,
+  //     providerName: 'Innovate Ltd.',
+  //   },
+  //   {
+  //     title: 'UI/UX Designer',
+  //     img: 'https://picsum.photos/300/150?random=4',
+  //     priceRating: '90$',
+  //     rating: 4.7,
+  //     providerName: 'Creative Studio',
+  //   },
+  // ];
   const [requests] = useState<RequestProps[]>([
     { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
     { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
@@ -242,16 +242,16 @@ export default function ServiceListProfilePage() {
             </Link>
           </div>
           <div className="mt-4 ps-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {allJobs &&
+            {/* {allJobs &&
               allJobs.map((service, index) => (
-                <ServiceCard
-                  key={index}
-                  title={service.title}
-                  img={service.img}
-                  priceRating={service.priceRating}
-                  rating={service.rating}
-                ></ServiceCard>
-              ))}
+                // <ServiceCard
+                //   key={index}
+                //   title={service.title}
+                //   img={service.img}
+                //   priceRating={service.priceRating}
+                //   rating={service.rating}
+                // ></ServiceCard>
+              ))} */}
           </div>
         </div>
       </div>
