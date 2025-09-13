@@ -3,7 +3,11 @@ import { useState } from 'react';
 import AvatarImage from './accountImage';
 import { useNavigate } from 'react-router-dom';
 
-const Header = () => {
+interface HeaderProps {
+  isHideSearchBar?: boolean;
+}
+
+const Header = ({ isHideSearchBar = false }: HeaderProps) => {
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState<string>('');
 
@@ -42,25 +46,27 @@ const Header = () => {
         />
 
         {/* Search Box */}
-        <div
-          className="bg-white w-full h-[50px] flex gap-1 items-center pl-1 pr-3 "
-          id="Searchbar-header"
-        >
-          <Search
-            width={28}
-            height={28}
-            className={`${searchInput ? 'cursor-pointer' : ''}`}
-            onClick={handleSearch}
-          />
-          <input
-            type="text"
-            className="w-full focus:outline-none focus:border-none"
-            onChange={(e) => {
-              e.preventDefault();
-              setSearchInput(e.target.value);
-            }}
-          />
-        </div>
+        {!isHideSearchBar && (
+          <div
+            className="bg-white w-full h-[50px] flex gap-1 items-center pl-1 pr-3 "
+            id="Searchbar-header"
+          >
+            <Search
+              width={28}
+              height={28}
+              className={`${searchInput ? 'cursor-pointer' : ''}`}
+              onClick={handleSearch}
+            />
+            <input
+              type="text"
+              className="w-full focus:outline-none focus:border-none"
+              onChange={(e) => {
+                e.preventDefault();
+                setSearchInput(e.target.value);
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Right Side */}

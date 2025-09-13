@@ -61,7 +61,7 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
   },
   {
-    path: '/CreateService',
+    path: 'service/create',
     element: <ServiceCreationPage />,
     errorElement: <ErrorPage />,
   },

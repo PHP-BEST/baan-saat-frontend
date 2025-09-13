@@ -3,12 +3,27 @@ import { Link } from 'react-router-dom';
 
 interface ServiceCardProps {
   service: Service;
+  size?: 'S' | 'M' | 'L';
 }
 
-export default function ServiceCard({ service }: ServiceCardProps) {
+const sizeMap = {
+  S: { width: 200, height: 160, title: 'text-base', desc: 'text-xs' },
+  M: { width: 300, height: 250, title: 'text-lg', desc: 'text-sm' },
+  L: { width: 400, height: 340, title: 'text-xl', desc: 'text-base' },
+};
+
+export default function ServiceCard({ service, size = 'M' }: ServiceCardProps) {
+  const cardWidth = sizeMap[size].width;
+  const cardHeight = sizeMap[size].height;
+  const titleClass = sizeMap[size].title;
+  const descClass = sizeMap[size].desc;
+
   return (
     <Link to={`/service/${service._id}`}>
-      <div className="w-full max-w-[300px] h-[250px] flex flex-col items-center bg-white border rounded-2xl shadow-sm m-0">
+      <div
+        className="w-full flex flex-col items-center bg-white border rounded-2xl shadow-sm m-0"
+        style={{ maxWidth: `${cardWidth}px`, height: `${cardHeight}px` }}
+      >
         {service.coverPhotoUrl ? (
           <img
             src={service.coverPhotoUrl}
@@ -19,10 +34,14 @@ export default function ServiceCard({ service }: ServiceCardProps) {
           <div className="w-full h-2/3 bg-service-blank-cover rounded-t-2xl" />
         )}
         <div className="w-full h-1/3 flex flex-col justify-start px-4 py-2">
-          <h2 className="text-lg font-bold text-ellipsis overflow-hidden whitespace-nowrap mb-1">
+          <h2
+            className={`${titleClass} font-bold text-ellipsis overflow-hidden whitespace-nowrap mb-1`}
+          >
             {service.title}
           </h2>
-          <p className="text-sm text-gray-600 text-ellipsis overflow-hidden line-clamp-2">
+          <p
+            className={`${descClass} text-gray-600 text-ellipsis overflow-hidden line-clamp-2`}
+          >
             {service.description || 'No description provided.'}
           </p>
         </div>
