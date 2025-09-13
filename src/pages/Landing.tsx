@@ -63,48 +63,12 @@ export default function LandingPage() {
           {/* Service Grid */}
           <div className="flex justify-center mb-6">
             <div className=" w-[65%] grid grid-cols-2 md:grid-cols-3 gap-6">
-              <ServiceCardLanding
-                title="บริการล้างจานทั่วกรุงเทพ"
-                img="https://f.ptcdn.info/507/064/000/pt5twn97vd8F72T5PEY-o.png"
-                provider="John"
-                priceRating="300฿"
-                rating={4}
-              />
-              <ServiceCardLanding
-                title="บริการซักผ้า"
-                img="https://f.ptcdn.info/507/064/000/pt5twn97vd8F72T5PEY-o.png"
-                provider="John"
-                priceRating="300฿"
-                rating={5}
-              />
-              <ServiceCardLanding
-                title="บริการทำความสะอาดบ้าน"
-                img="https://f.ptcdn.info/507/064/000/pt5twn97vd8F72T5PEY-o.png"
-                provider="John"
-                priceRating="300฿"
-                rating={4}
-              />
-              <ServiceCardLanding
-                title="บริการทำอาหาร"
-                img="https://f.ptcdn.info/507/064/000/pt5twn97vd8F72T5PEY-o.png"
-                provider="John"
-                priceRating="300฿"
-                rating={5}
-              />
-              <ServiceCardLanding
-                title="บริการซ่อมแซมบ้าน"
-                img="https://f.ptcdn.info/507/064/000/pt5twn97vd8F72T5PEY-o.png"
-                provider="John"
-                priceRating="300฿"
-                rating={4}
-              />
-              <ServiceCardLanding
-                title="บริการประปา"
-                img="https://f.ptcdn.info/507/064/000/pt5twn97vd8F72T5PEY-o.png"
-                provider="John"
-                priceRating="300฿"
-                rating={3}
-              />
+              <ServiceCardLanding serviceId={'64a7f3f4e4b0c9b1f4d6c8a1'} />
+              <ServiceCardLanding serviceId={'64a7f3f4e4b0c9b1f4d6c8a1'} />
+              <ServiceCardLanding serviceId={'64a7f3f4e4b0c9b1f4d6c8a1'} />
+              <ServiceCardLanding serviceId={'64a7f3f4e4b0c9b1f4d6c8a1'} />
+              <ServiceCardLanding serviceId={'64a7f3f4e4b0c9b1f4d6c8a1'} />
+              <ServiceCardLanding serviceId={'64a7f3f4e4b0c9b1f4d6c8a1'} />
             </div>
           </div>
         </div>
