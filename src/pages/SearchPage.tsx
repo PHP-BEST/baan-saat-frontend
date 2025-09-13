@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import ServiceCard from '@/components/our-components/serviceCard';
-
+import FilterBar from '@/components/our-components/filterBar';
 interface ExtendedServiceCardProps {
   title: string;
   img: string;
@@ -11,7 +11,13 @@ interface ExtendedServiceCardProps {
   rating: string;
   providerName: string;
 }
-
+interface JobsProp {
+  title: string;
+  img: string;
+  priceRating: string;
+  rating: number;
+  providerName: string;
+}
 function ExtendedServiceCard({
   title,
   img,
@@ -35,11 +41,7 @@ function ExtendedServiceCard({
 export default function SearchPage() {
   const [searchInput, setSearchInput] = useState('');
   const [showFilter, setShowFilter] = useState(false);
-  const [activeFilters, setActiveFilters] = useState({
-    price: 'all',
-    rating: 'all',
-    providerName: '',
-  });
+  const [filteredJobs, setFilteredJobs] = useState<JobsProp[]>([]);
   const inputRef = useRef(null);
 
   const allJobs = [
@@ -106,17 +108,6 @@ export default function SearchPage() {
     // which the filteredJobs array will react to.
     // const inputRef = useRef<HTMLInputElement>(null);
   };
-
-  const handleFilterChange = (e: {
-    target: { name: string; value: string };
-  }) => {
-    const { name, value } = e.target;
-    setActiveFilters((prevFilters) => ({
-      ...prevFilters,
-      [name]: value,
-    }));
-  };
-
   useEffect(() => {
     const Search_header = document.getElementById('Searchbar-header');
     if (Search_header) {
@@ -124,41 +115,6 @@ export default function SearchPage() {
     }
   }, []);
 
-  const filterJobs = () => {
-    return allJobs.filter((job) => {
-      // Search bar filter
-      const matchesSearch =
-        job.title.toLowerCase().includes(searchInput.toLowerCase()) ||
-        job.providerName.toLowerCase().includes(searchInput.toLowerCase());
-
-      // Price filter
-      const priceValue = parseInt(job.priceRating.replace(/[^0-9]/g, ''), 10);
-      const matchesPrice =
-        activeFilters.price === 'all' ||
-        (activeFilters.price === 'cheap' && priceValue < 150) ||
-        (activeFilters.price === 'moderate' &&
-          priceValue >= 150 &&
-          priceValue < 400) ||
-        (activeFilters.price === 'expensive' && priceValue >= 400);
-
-      // Rating filter
-      const matchesRating =
-        activeFilters.rating === 'all' ||
-        (activeFilters.rating === '4+' && job.rating >= 4) ||
-        (activeFilters.rating === '3+' && job.rating >= 3);
-
-      // Provider name filter (case-insensitive)
-      const matchesProvider =
-        activeFilters.providerName === '' ||
-        job.providerName
-          .toLowerCase()
-          .includes(activeFilters.providerName.toLowerCase());
-
-      return matchesSearch && matchesPrice && matchesRating && matchesProvider;
-    });
-  };
-
-  const filteredJobs = filterJobs();
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 font-sans text-gray-800">
@@ -188,7 +144,7 @@ export default function SearchPage() {
               Showing {filteredJobs.length} results
             </p>
             <button
-              className="flex items-center gap-1 text-blue-500 hover:text-blue-600 transition-colors duration-200 font-medium"
+              className="flex items-center gap-1 text-blue-500 hover:text-blue-600 transition-colors duration-200 font-medium cursor-pointer"
               onClick={() => setShowFilter(!showFilter)}
             >
               <Filter size={18} /> Filter
@@ -197,78 +153,13 @@ export default function SearchPage() {
         </div>
 
         {/* Filter panel */}
-        <div
-          className={`w-full max-w-2xl mt-4 px-4 overflow-hidden transition-all duration-500 ease-in-out ${showFilter ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
-        >
-          <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-semibold text-xl text-gray-800">Filters</h2>
-              <X
-                className="cursor-pointer text-gray-500 hover:text-gray-700 transition-colors duration-200"
-                onClick={() => setShowFilter(false)}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label
-                  htmlFor="price-filter"
-                  className="font-medium text-gray-700 block mb-1"
-                >
-                  Price Range
-                </label>
-                <select
-                  id="price-filter"
-                  name="price"
-                  value={activeFilters.price}
-                  onChange={handleFilterChange}
-                  className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                >
-                  <option value="all">All</option>
-                  <option value="cheap">Cheap ($)</option>
-                  <option value="moderate">Moderate ($$)</option>
-                  <option value="expensive">Expensive ($$$)</option>
-                </select>
-              </div>
-              <div>
-                <label
-                  htmlFor="rating-filter"
-                  className="font-medium text-gray-700 block mb-1"
-                >
-                  Rating
-                </label>
-                <select
-                  id="rating-filter"
-                  name="rating"
-                  value={activeFilters.rating}
-                  onChange={handleFilterChange}
-                  className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                >
-                  <option value="all">All</option>
-                  <option value="4+">4+ Stars</option>
-                  <option value="3+">3+ Stars</option>
-                </select>
-              </div>
-              <div>
-                <label
-                  htmlFor="provider-filter"
-                  className="font-medium text-gray-700 block mb-1"
-                >
-                  Provider
-                </label>
-                <input
-                  type="text"
-                  id="provider-filter"
-                  name="providerName"
-                  placeholder="Provider name..."
-                  value={activeFilters.providerName}
-                  onChange={handleFilterChange}
-                  className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
+        <FilterBar
+          showFilter={showFilter}
+          setShowFilter={setShowFilter}
+          allJobs={allJobs}
+          searchInput={searchInput}
+          setFilteredJobs={setFilteredJobs}
+        />
         {/* Job cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl mt-8 mb-12 px-4 md:px-0">
           {filteredJobs.length > 0 ? (
