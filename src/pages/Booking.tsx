@@ -164,6 +164,7 @@ export default function BookingPage() {
                   setShowConfirm(null);
                   if (showConfirm === 'submit') {
                     alert('ส่งคำขอสำเร็จ');
+                    navigate(-1);
                   } else {
                     navigate(-1);
                   }
