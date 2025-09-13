@@ -1,6 +1,6 @@
 interface ProviderProfile {
   title: string;
-  skills: SkillsType[];
+  skills: string[];
   description: string;
 }
 
