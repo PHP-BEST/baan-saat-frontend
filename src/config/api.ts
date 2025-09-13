@@ -49,7 +49,7 @@ interface GetProfileData {
 // Fetch data by ID
 export async function fetchData(id: string): Promise<GetProfileData['data']> {
   try {
-    const response = await axios.get(`${API_ROOT}/profile/${id}`, {
+    const response = await axios.get(`${API_ROOT}/users/${id}`, {
       withCredentials: false,
     });
     return response.data;
@@ -69,7 +69,7 @@ export async function updateData(
   newData: GetProfileData['data'],
 ): Promise<GetProfileData['data']> {
   try {
-    const response = await axios.put(`${API_ROOT}/profile/${id}`, newData, {
+    const response = await axios.put(`${API_ROOT}/users/${id}`, newData, {
       withCredentials: false,
     });
     return response.data;

@@ -8,7 +8,7 @@ interface ExtendedServiceCardProps {
   title: string;
   img: string;
   priceRating: string;
-  rating: string;
+  rating: number;
   providerName: string;
 }
 interface JobsProp {
@@ -45,6 +45,62 @@ export default function SearchPage() {
   const inputRef = useRef(null);
 
   const allJobs = [
+    {
+      title: 'Software Engineer',
+      img: 'https://picsum.photos/300/150?random=1',
+      priceRating: '100$',
+      rating: 4.5,
+      providerName: 'Tech Corp',
+    },
+    {
+      title: 'Data Scientist',
+      img: 'https://picsum.photos/300/150?random=2',
+      priceRating: '200$$',
+      rating: 4.8,
+      providerName: 'Data Inc.',
+    },
+    {
+      title: 'Product Manager',
+      img: 'https://picsum.photos/300/150?random=3',
+      priceRating: '140$',
+      rating: 4.2,
+      providerName: 'Innovate Ltd.',
+    },
+    {
+      title: 'UI/UX Designer',
+      img: 'https://picsum.photos/300/150?random=4',
+      priceRating: '90$',
+      rating: 4.7,
+      providerName: 'Creative Studio',
+    },
+    {
+      title: 'DevOps Engineer',
+      img: 'https://picsum.photos/300/150?random=5',
+      priceRating: '700$$',
+      rating: 4.6,
+      providerName: 'CloudOps Co.',
+    },
+    {
+      title: 'Mobile App Developer',
+      img: 'https://picsum.photos/300/150?random=6',
+      priceRating: '300$',
+      rating: 4.4,
+      providerName: 'Appify',
+    },
+    {
+      title: 'Cybersecurity Analyst',
+      img: 'https://picsum.photos/300/150?random=7',
+      priceRating: '$450$',
+      rating: 4.9,
+      providerName: 'SecureTech',
+    },
+    {
+      title: 'Cloud Solutions Architect',
+      img: 'https://picsum.photos/300/150?random=8',
+      priceRating: '890$',
+      rating: 4.8,
+      providerName: 'Cloudify',
+    },
     {
       title: 'Software Engineer',
       img: 'https://picsum.photos/300/150?random=1',
@@ -169,7 +225,7 @@ export default function SearchPage() {
                 title={job.title}
                 img={job.img}
                 priceRating={job.priceRating}
-                rating={job.rating.toString()}
+                rating={job.rating}
                 providerName={job.providerName}
               />
             ))

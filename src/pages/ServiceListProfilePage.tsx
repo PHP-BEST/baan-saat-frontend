@@ -20,17 +20,17 @@ import {
   DialogClose,
   DialogFooter,
 } from '@/components/ui/dialog';
-type Service = {
-  id: string;
-  title: string;
-  description: string;
-  budget: number;
-  coverPhoto: string;
-  telNumber: string;
-  location: string;
-  tags: string[];
-  date: Date;
-};
+// type Service = {
+//   id: string;
+//   title: string;
+//   description: string;
+//   budget: number;
+//   coverPhoto: string;
+//   telNumber: string;
+//   location: string;
+//   tags: string[];
+//   date: Date;
+// };
 type RequestProps = {
   serviceName: string;
   price: string;
@@ -45,16 +45,16 @@ export default function ServiceListProfilePage() {
     error: fetchProfileError,
   } = useQuery({
     queryKey: ['userห', user._id],
-    queryFn: () => fetchData(user._id || '1'),
+    queryFn: () => fetchData(user._id),
   });
-  const {
-    data: services,
-    isLoading: isServicesLoading,
-    error: fetchServicesError,
-  } = useQuery<Service[]>({
-    queryKey: ['services', user._id],
-    queryFn: () => getServices(user._id || '1'),
-  });
+  // const {
+  //   data: services,
+  //   isLoading: isServicesLoading,
+  //   error: fetchServicesError,
+  // } = useQuery<Service[]>({
+  //   queryKey: ['services', user._id],
+  //   queryFn: () => getServices(user._id),
+  // });
   useEffect(() => {
     const body = document.body;
     const observer = new MutationObserver(() => {
@@ -62,29 +62,483 @@ export default function ServiceListProfilePage() {
         body.style.setProperty('margin-right', '0px', 'important');
       }
     });
-    
+
     observer.observe(body, {
       attributes: true,
       attributeFilter: ['data-scroll-locked'],
     });
-    
     return () => observer.disconnect();
   }, []);
+  const allJobs = [
+    {
+      title: 'Software Engineer',
+      img: 'https://picsum.photos/300/150?random=1',
+      priceRating: '100$',
+      rating: 4.5,
+      providerName: 'Tech Corp',
+    },
+    {
+      title: 'Data Scientist',
+      img: 'https://picsum.photos/300/150?random=2',
+      priceRating: '200$$',
+      rating: 4.8,
+      providerName: 'Data Inc.',
+    },
+    {
+      title: 'Product Manager',
+      img: 'https://picsum.photos/300/150?random=3',
+      priceRating: '140$',
+      rating: 4.2,
+      providerName: 'Innovate Ltd.',
+    },
+    {
+      title: 'UI/UX Designer',
+      img: 'https://picsum.photos/300/150?random=4',
+      priceRating: '90$',
+      rating: 4.7,
+      providerName: 'Creative Studio',
+    },
+    {
+      title: 'DevOps Engineer',
+      img: 'https://picsum.photos/300/150?random=5',
+      priceRating: '700$$',
+      rating: 4.6,
+      providerName: 'CloudOps Co.',
+    },
+    {
+      title: 'Mobile App Developer',
+      img: 'https://picsum.photos/300/150?random=6',
+      priceRating: '300$',
+      rating: 4.4,
+      providerName: 'Appify',
+    },
+    {
+      title: 'Cybersecurity Analyst',
+      img: 'https://picsum.photos/300/150?random=7',
+      priceRating: '$450$',
+      rating: 4.9,
+      providerName: 'SecureTech',
+    },
+    {
+      title: 'Cloud Solutions Architect',
+      img: 'https://picsum.photos/300/150?random=8',
+      priceRating: '890$',
+      rating: 4.8,
+      providerName: 'Cloudify',
+    },
+    {
+      title: 'Software Engineer',
+      img: 'https://picsum.photos/300/150?random=1',
+      priceRating: '100$',
+      rating: 4.5,
+      providerName: 'Tech Corp',
+    },
+    {
+      title: 'Data Scientist',
+      img: 'https://picsum.photos/300/150?random=2',
+      priceRating: '200$$',
+      rating: 4.8,
+      providerName: 'Data Inc.',
+    },
+    {
+      title: 'Product Manager',
+      img: 'https://picsum.photos/300/150?random=3',
+      priceRating: '140$',
+      rating: 4.2,
+      providerName: 'Innovate Ltd.',
+    },
+    {
+      title: 'UI/UX Designer',
+      img: 'https://picsum.photos/300/150?random=4',
+      priceRating: '90$',
+      rating: 4.7,
+      providerName: 'Creative Studio',
+    },
+    {
+      title: 'DevOps Engineer',
+      img: 'https://picsum.photos/300/150?random=5',
+      priceRating: '700$$',
+      rating: 4.6,
+      providerName: 'CloudOps Co.',
+    },
+    {
+      title: 'Mobile App Developer',
+      img: 'https://picsum.photos/300/150?random=6',
+      priceRating: '300$',
+      rating: 4.4,
+      providerName: 'Appify',
+    },
+    {
+      title: 'Cybersecurity Analyst',
+      img: 'https://picsum.photos/300/150?random=7',
+      priceRating: '$450$',
+      rating: 4.9,
+      providerName: 'SecureTech',
+    },
+    {
+      title: 'Cloud Solutions Architect',
+      img: 'https://picsum.photos/300/150?random=8',
+      priceRating: '890$',
+      rating: 4.8,
+      providerName: 'Cloudify',
+    },
+    {
+      title: 'Software Engineer',
+      img: 'https://picsum.photos/300/150?random=1',
+      priceRating: '100$',
+      rating: 4.5,
+      providerName: 'Tech Corp',
+    },
+    {
+      title: 'Data Scientist',
+      img: 'https://picsum.photos/300/150?random=2',
+      priceRating: '200$$',
+      rating: 4.8,
+      providerName: 'Data Inc.',
+    },
+    {
+      title: 'Product Manager',
+      img: 'https://picsum.photos/300/150?random=3',
+      priceRating: '140$',
+      rating: 4.2,
+      providerName: 'Innovate Ltd.',
+    },
+    {
+      title: 'UI/UX Designer',
+      img: 'https://picsum.photos/300/150?random=4',
+      priceRating: '90$',
+      rating: 4.7,
+      providerName: 'Creative Studio',
+    },
+    {
+      title: 'DevOps Engineer',
+      img: 'https://picsum.photos/300/150?random=5',
+      priceRating: '700$$',
+      rating: 4.6,
+      providerName: 'CloudOps Co.',
+    },
+    {
+      title: 'Mobile App Developer',
+      img: 'https://picsum.photos/300/150?random=6',
+      priceRating: '300$',
+      rating: 4.4,
+      providerName: 'Appify',
+    },
+    {
+      title: 'Cybersecurity Analyst',
+      img: 'https://picsum.photos/300/150?random=7',
+      priceRating: '$450$',
+      rating: 4.9,
+      providerName: 'SecureTech',
+    },
+    {
+      title: 'Cloud Solutions Architect',
+      img: 'https://picsum.photos/300/150?random=8',
+      priceRating: '890$',
+      rating: 4.8,
+      providerName: 'Cloudify',
+    },
+    {
+      title: 'Software Engineer',
+      img: 'https://picsum.photos/300/150?random=1',
+      priceRating: '100$',
+      rating: 4.5,
+      providerName: 'Tech Corp',
+    },
+    {
+      title: 'Data Scientist',
+      img: 'https://picsum.photos/300/150?random=2',
+      priceRating: '200$$',
+      rating: 4.8,
+      providerName: 'Data Inc.',
+    },
+    {
+      title: 'Product Manager',
+      img: 'https://picsum.photos/300/150?random=3',
+      priceRating: '140$',
+      rating: 4.2,
+      providerName: 'Innovate Ltd.',
+    },
+    {
+      title: 'UI/UX Designer',
+      img: 'https://picsum.photos/300/150?random=4',
+      priceRating: '90$',
+      rating: 4.7,
+      providerName: 'Creative Studio',
+    },
+    {
+      title: 'DevOps Engineer',
+      img: 'https://picsum.photos/300/150?random=5',
+      priceRating: '700$$',
+      rating: 4.6,
+      providerName: 'CloudOps Co.',
+    },
+    {
+      title: 'Mobile App Developer',
+      img: 'https://picsum.photos/300/150?random=6',
+      priceRating: '300$',
+      rating: 4.4,
+      providerName: 'Appify',
+    },
+    {
+      title: 'Cybersecurity Analyst',
+      img: 'https://picsum.photos/300/150?random=7',
+      priceRating: '$450$',
+      rating: 4.9,
+      providerName: 'SecureTech',
+    },
+    {
+      title: 'Cloud Solutions Architect',
+      img: 'https://picsum.photos/300/150?random=8',
+      priceRating: '890$',
+      rating: 4.8,
+      providerName: 'Cloudify',
+    },
+    {
+      title: 'Software Engineer',
+      img: 'https://picsum.photos/300/150?random=1',
+      priceRating: '100$',
+      rating: 4.5,
+      providerName: 'Tech Corp',
+    },
+    {
+      title: 'Data Scientist',
+      img: 'https://picsum.photos/300/150?random=2',
+      priceRating: '200$$',
+      rating: 4.8,
+      providerName: 'Data Inc.',
+    },
+    {
+      title: 'Product Manager',
+      img: 'https://picsum.photos/300/150?random=3',
+      priceRating: '140$',
+      rating: 4.2,
+      providerName: 'Innovate Ltd.',
+    },
+    {
+      title: 'UI/UX Designer',
+      img: 'https://picsum.photos/300/150?random=4',
+      priceRating: '90$',
+      rating: 4.7,
+      providerName: 'Creative Studio',
+    },
+    {
+      title: 'DevOps Engineer',
+      img: 'https://picsum.photos/300/150?random=5',
+      priceRating: '700$$',
+      rating: 4.6,
+      providerName: 'CloudOps Co.',
+    },
+    {
+      title: 'Mobile App Developer',
+      img: 'https://picsum.photos/300/150?random=6',
+      priceRating: '300$',
+      rating: 4.4,
+      providerName: 'Appify',
+    },
+    {
+      title: 'Cybersecurity Analyst',
+      img: 'https://picsum.photos/300/150?random=7',
+      priceRating: '$450$',
+      rating: 4.9,
+      providerName: 'SecureTech',
+    },
+    {
+      title: 'Cloud Solutions Architect',
+      img: 'https://picsum.photos/300/150?random=8',
+      priceRating: '890$',
+      rating: 4.8,
+      providerName: 'Cloudify',
+    },
+    {
+      title: 'Software Engineer',
+      img: 'https://picsum.photos/300/150?random=1',
+      priceRating: '100$',
+      rating: 4.5,
+      providerName: 'Tech Corp',
+    },
+    {
+      title: 'Data Scientist',
+      img: 'https://picsum.photos/300/150?random=2',
+      priceRating: '200$$',
+      rating: 4.8,
+      providerName: 'Data Inc.',
+    },
+    {
+      title: 'Product Manager',
+      img: 'https://picsum.photos/300/150?random=3',
+      priceRating: '140$',
+      rating: 4.2,
+      providerName: 'Innovate Ltd.',
+    },
+    {
+      title: 'UI/UX Designer',
+      img: 'https://picsum.photos/300/150?random=4',
+      priceRating: '90$',
+      rating: 4.7,
+      providerName: 'Creative Studio',
+    },
+    {
+      title: 'DevOps Engineer',
+      img: 'https://picsum.photos/300/150?random=5',
+      priceRating: '700$$',
+      rating: 4.6,
+      providerName: 'CloudOps Co.',
+    },
+    {
+      title: 'Mobile App Developer',
+      img: 'https://picsum.photos/300/150?random=6',
+      priceRating: '300$',
+      rating: 4.4,
+      providerName: 'Appify',
+    },
+    {
+      title: 'Cybersecurity Analyst',
+      img: 'https://picsum.photos/300/150?random=7',
+      priceRating: '$450$',
+      rating: 4.9,
+      providerName: 'SecureTech',
+    },
+    {
+      title: 'Cloud Solutions Architect',
+      img: 'https://picsum.photos/300/150?random=8',
+      priceRating: '890$',
+      rating: 4.8,
+      providerName: 'Cloudify',
+    },
+    {
+      title: 'Software Engineer',
+      img: 'https://picsum.photos/300/150?random=1',
+      priceRating: '100$',
+      rating: 4.5,
+      providerName: 'Tech Corp',
+    },
+    {
+      title: 'Data Scientist',
+      img: 'https://picsum.photos/300/150?random=2',
+      priceRating: '200$$',
+      rating: 4.8,
+      providerName: 'Data Inc.',
+    },
+    {
+      title: 'Product Manager',
+      img: 'https://picsum.photos/300/150?random=3',
+      priceRating: '140$',
+      rating: 4.2,
+      providerName: 'Innovate Ltd.',
+    },
+    {
+      title: 'UI/UX Designer',
+      img: 'https://picsum.photos/300/150?random=4',
+      priceRating: '90$',
+      rating: 4.7,
+      providerName: 'Creative Studio',
+    },
+    {
+      title: 'DevOps Engineer',
+      img: 'https://picsum.photos/300/150?random=5',
+      priceRating: '700$$',
+      rating: 4.6,
+      providerName: 'CloudOps Co.',
+    },
+    {
+      title: 'Mobile App Developer',
+      img: 'https://picsum.photos/300/150?random=6',
+      priceRating: '300$',
+      rating: 4.4,
+      providerName: 'Appify',
+    },
+    {
+      title: 'Cybersecurity Analyst',
+      img: 'https://picsum.photos/300/150?random=7',
+      priceRating: '$450$',
+      rating: 4.9,
+      providerName: 'SecureTech',
+    },
+    {
+      title: 'Cloud Solutions Architect',
+      img: 'https://picsum.photos/300/150?random=8',
+      priceRating: '890$',
+      rating: 4.8,
+      providerName: 'Cloudify',
+    },
+    {
+      title: 'Software Engineer',
+      img: 'https://picsum.photos/300/150?random=1',
+      priceRating: '100$',
+      rating: 4.5,
+      providerName: 'Tech Corp',
+    },
+    {
+      title: 'Data Scientist',
+      img: 'https://picsum.photos/300/150?random=2',
+      priceRating: '200$$',
+      rating: 4.8,
+      providerName: 'Data Inc.',
+    },
+    {
+      title: 'Product Manager',
+      img: 'https://picsum.photos/300/150?random=3',
+      priceRating: '140$',
+      rating: 4.2,
+      providerName: 'Innovate Ltd.',
+    },
+    {
+      title: 'UI/UX Designer',
+      img: 'https://picsum.photos/300/150?random=4',
+      priceRating: '90$',
+      rating: 4.7,
+      providerName: 'Creative Studio',
+    },
+    {
+      title: 'DevOps Engineer',
+      img: 'https://picsum.photos/300/150?random=5',
+      priceRating: '700$$',
+      rating: 4.6,
+      providerName: 'CloudOps Co.',
+    },
+    {
+      title: 'Mobile App Developer',
+      img: 'https://picsum.photos/300/150?random=6',
+      priceRating: '300$',
+      rating: 4.4,
+      providerName: 'Appify',
+    },
+    {
+      title: 'Cybersecurity Analyst',
+      img: 'https://picsum.photos/300/150?random=7',
+      priceRating: '$450$',
+      rating: 4.9,
+      providerName: 'SecureTech',
+    },
+    {
+      title: 'Cloud Solutions Architect',
+      img: 'https://picsum.photos/300/150?random=8',
+      priceRating: '890$',
+      rating: 4.8,
+      providerName: 'Cloudify',
+    },
+  ];
   const [requests] = useState<RequestProps[]>([
     { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
     { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
     { serviceName: 'House cleaning', price: '500 THB', date: '20/06/2024' },
   ]);
-  if (isProfileLoading || isServicesLoading) return <p>Loading...</p>
-  if (fetchProfileError) return <p>Error loading profile: {fetchProfileError.message}</p>
-  if (fetchServicesError) return <p>Error loading services: {fetchServicesError.message}</p>;
+  // if (isProfileLoading || isServicesLoading) return <p>Loading...</p>
+  // if (fetchProfileError) return <p>Error loading profile: {fetchProfileError.message}</p>
+  // if (fetchServicesError) return <p>Error loading services: {fetchServicesError.message}</p>;
+  if (isProfileLoading) return <p>Loading...</p>;
+  if (fetchProfileError)
+    return <p>Error loading profile: {fetchProfileError.message}</p>;
   return (
     <>
       <Header />
       <div className="px-16 pt-6 pb-18 bg-white">
         <div className="my-10 flex gap-6 items-center">
           <AvatarImage />
-          {profile && <h1 className="text-4xl font-bold">{profile.name}’s Profile</h1>}
+          {profile && (
+            <h1 className="text-4xl font-bold">{profile.name}’s Profile</h1>
+          )}
         </div>
         <div className="border border-gray-400 rounded-3xl p-8">
           {profile ? (
@@ -109,20 +563,22 @@ export default function ServiceListProfilePage() {
                 <br />
                 {profile.providerProfile?.description}
               </p>
-              <p className="my-2 text-sm">
+              <div className="my-2 text-sm">
                 <strong>Skill & Experience</strong>
                 <br />
                 <div className="flex flex-wrap">
-                  {profile.providerProfile?.skills.map((skill: string, index) => (
+                  {profile.providerProfile?.skills.map(
+                    (skill: string, index: number) => (
                       <span
                         key={index}
                         className="me-2 my-2 rounded-full bg-[#c4d0f8] px-3 py-1"
                       >
                         {skill}
                       </span>
-                  ))}
+                    ),
+                  )}
                 </div>
-              </p>
+              </div>
               <div className="flex justify-end">
                 <Dialog>
                   <DialogTrigger asChild>
@@ -206,15 +662,16 @@ export default function ServiceListProfilePage() {
               View All →
             </Link>
           </div>
-          <div className="mt-4 ps-12 grid grid-cols-3 gap-[4%] ">
-            {services &&
-              services.map((service, index) => (
+          <div
+            className="mt-4 ps-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {allJobs &&
+              allJobs.map((service, index) => (
                 <ServiceCard
                   key={index}
                   title={service.title}
-                  img={service.coverPhoto}
-                  priceRating={service.budget.toString()}
-                  rating="5"
+                  img={service.img}
+                  priceRating={service.priceRating}
+                  rating={service.rating}
                 ></ServiceCard>
               ))}
           </div>
