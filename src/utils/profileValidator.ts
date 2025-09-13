@@ -1,9 +1,11 @@
+import type { ServiceFieldValue } from './type';
+
 export interface ValidationResult {
   isValid: boolean;
   error?: string;
 }
 
-export const validateName = (name: string): ValidationResult => {
+const validateName = (name: string): ValidationResult => {
   if (name === '') {
     return { isValid: false, error: 'Name cannot be empty' };
   }
@@ -19,7 +21,7 @@ export const validateName = (name: string): ValidationResult => {
   return { isValid: true };
 };
 
-export const validateEmail = (email: string): ValidationResult => {
+const validateEmail = (email: string): ValidationResult => {
   if (email === '') {
     return { isValid: false, error: 'Email cannot be empty' };
   }
@@ -36,7 +38,7 @@ export const validateEmail = (email: string): ValidationResult => {
   return { isValid: true };
 };
 
-export const validateTelNumber = (telNumber: string): ValidationResult => {
+const validateTelNumber = (telNumber: string): ValidationResult => {
   if (telNumber === '') {
     return { isValid: false, error: 'Telephone number cannot be empty' };
   }
@@ -69,7 +71,7 @@ export const validateTelNumber = (telNumber: string): ValidationResult => {
   return { isValid: true };
 };
 
-export const validateDescription = (description: string): ValidationResult => {
+const validateDescription = (description: string): ValidationResult => {
   if (description.length > 2000) {
     return {
       isValid: false,
@@ -82,17 +84,17 @@ export const validateDescription = (description: string): ValidationResult => {
 
 export const profileValidator = (
   field: string,
-  value: string,
+  value: ServiceFieldValue,
 ): ValidationResult => {
   switch (field) {
     case 'name':
-      return validateName(value);
+      return validateName(value as string);
     case 'email':
-      return validateEmail(value);
+      return validateEmail(value as string);
     case 'telNumber':
-      return validateTelNumber(value);
+      return validateTelNumber(value as string);
     case 'description':
-      return validateDescription(value);
+      return validateDescription(value as string);
     default:
       return { isValid: true };
   }
