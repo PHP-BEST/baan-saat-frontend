@@ -21,7 +21,7 @@ export default function FilterBar({
   allJobs,
   searchInput,
   setFilteredJobs,
-  searchName = true
+  searchName = true,
 }: FilterProps) {
   const [activeFilters, setActiveFilters] = useState({
     price: 'all',

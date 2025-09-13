@@ -1,10 +1,12 @@
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import ServiceCard from '@/components/our-components/serviceCard';
 import FilterBar from '@/components/our-components/filterBar';
-interface ExtendedServiceCardProps {
+import { useQuery } from '@tanstack/react-query';
+import { fetchJobs } from '@/config/api';
+export interface ExtendedServiceCardProps {
   title: string;
   img: string;
   priceRating: string;
@@ -44,133 +46,30 @@ export default function SearchPage() {
   const [filteredJobs, setFilteredJobs] = useState<JobsProp[]>([]);
   const inputRef = useRef(null);
 
-  const allJobs = [
-    {
-      title: 'Software Engineer',
-      img: 'https://picsum.photos/300/150?random=1',
-      priceRating: '100$',
-      rating: 4.5,
-      providerName: 'Tech Corp',
-    },
-    {
-      title: 'Data Scientist',
-      img: 'https://picsum.photos/300/150?random=2',
-      priceRating: '200$$',
-      rating: 4.8,
-      providerName: 'Data Inc.',
-    },
-    {
-      title: 'Product Manager',
-      img: 'https://picsum.photos/300/150?random=3',
-      priceRating: '140$',
-      rating: 4.2,
-      providerName: 'Innovate Ltd.',
-    },
-    {
-      title: 'UI/UX Designer',
-      img: 'https://picsum.photos/300/150?random=4',
-      priceRating: '90$',
-      rating: 4.7,
-      providerName: 'Creative Studio',
-    },
-    {
-      title: 'DevOps Engineer',
-      img: 'https://picsum.photos/300/150?random=5',
-      priceRating: '700$$',
-      rating: 4.6,
-      providerName: 'CloudOps Co.',
-    },
-    {
-      title: 'Mobile App Developer',
-      img: 'https://picsum.photos/300/150?random=6',
-      priceRating: '300$',
-      rating: 4.4,
-      providerName: 'Appify',
-    },
-    {
-      title: 'Cybersecurity Analyst',
-      img: 'https://picsum.photos/300/150?random=7',
-      priceRating: '$450$',
-      rating: 4.9,
-      providerName: 'SecureTech',
-    },
-    {
-      title: 'Cloud Solutions Architect',
-      img: 'https://picsum.photos/300/150?random=8',
-      priceRating: '890$',
-      rating: 4.8,
-      providerName: 'Cloudify',
-    },
-    {
-      title: 'Software Engineer',
-      img: 'https://picsum.photos/300/150?random=1',
-      priceRating: '100$',
-      rating: 4.5,
-      providerName: 'Tech Corp',
-    },
-    {
-      title: 'Data Scientist',
-      img: 'https://picsum.photos/300/150?random=2',
-      priceRating: '200$$',
-      rating: 4.8,
-      providerName: 'Data Inc.',
-    },
-    {
-      title: 'Product Manager',
-      img: 'https://picsum.photos/300/150?random=3',
-      priceRating: '140$',
-      rating: 4.2,
-      providerName: 'Innovate Ltd.',
-    },
-    {
-      title: 'UI/UX Designer',
-      img: 'https://picsum.photos/300/150?random=4',
-      priceRating: '90$',
-      rating: 4.7,
-      providerName: 'Creative Studio',
-    },
-    {
-      title: 'DevOps Engineer',
-      img: 'https://picsum.photos/300/150?random=5',
-      priceRating: '700$$',
-      rating: 4.6,
-      providerName: 'CloudOps Co.',
-    },
-    {
-      title: 'Mobile App Developer',
-      img: 'https://picsum.photos/300/150?random=6',
-      priceRating: '300$',
-      rating: 4.4,
-      providerName: 'Appify',
-    },
-    {
-      title: 'Cybersecurity Analyst',
-      img: 'https://picsum.photos/300/150?random=7',
-      priceRating: '$450$',
-      rating: 4.9,
-      providerName: 'SecureTech',
-    },
-    {
-      title: 'Cloud Solutions Architect',
-      img: 'https://picsum.photos/300/150?random=8',
-      priceRating: '890$',
-      rating: 4.8,
-      providerName: 'Cloudify',
-    },
-  ];
+  const { data: jobsData } = useQuery({
+    queryKey: ['jobs'],
+    queryFn: () => fetchJobs(),
+  });
 
+  const allJobs: ExtendedServiceCardProps[] = Array.isArray(jobsData)
+    ? jobsData
+    : []; // Ensure allJobs is always an array
   const handleSearch = () => {
-    // This function will now simply trigger a re-render by updating the state,
-    // which the filteredJobs array will react to.
-    // const inputRef = useRef<HTMLInputElement>(null);
+    // Simply force a re-render (already happens with searchInput state)
+    setSearchInput((prev) => prev.trim());
+
+    // Optionally blur the input after searching
+    if (inputRef.current) {
+      (inputRef.current as HTMLInputElement).blur();
+    }
   };
   useEffect(() => {
+    // display none on search header
     const Search_header = document.getElementById('Searchbar-header');
     if (Search_header) {
       Search_header.style.display = 'none';
     }
   }, []);
-
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 font-sans text-gray-800">

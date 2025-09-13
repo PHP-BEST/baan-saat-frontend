@@ -1,5 +1,6 @@
 import { API_ROOT_DEV, API_ROOT_LOCAL, API_ROOT_PROD, NODE_ENV } from './env';
 import axios from 'axios';
+import type { ExtendedServiceCardProps } from '@/pages/SearchPage';
 export let API_ROOT: string;
 
 if (NODE_ENV === 'development') {
@@ -52,7 +53,7 @@ export async function fetchData(id: string): Promise<GetProfileData['data']> {
     const response = await axios.get(`${API_ROOT}/users/${id}`, {
       withCredentials: false,
     });
-    return response.data;
+    return response.data.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       console.error('Axios error fetching data:', error.message);
@@ -72,7 +73,7 @@ export async function updateData(
     const response = await axios.put(`${API_ROOT}/users/${id}`, newData, {
       withCredentials: false,
     });
-    return response.data;
+    return response.data.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       console.error('Axios error updating data:', error.message);
@@ -91,6 +92,23 @@ export async function getServices(id: string) {
       console.error('Axios error updating data:', error.message);
     } else {
       console.error('Unknown error updating data:', error);
+    }
+    throw error;
+  }
+}
+
+//Fetch Jobs
+export async function fetchJobs(): Promise<ExtendedServiceCardProps[]> {
+  try {
+    const response = await axios.get('${API_ROOT}/jobs', {
+      withCredentials: false,
+    });
+    return response.data.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error('Axios error fetching jobs:', error.message);
+    } else {
+      console.error('Unknown error fetching jobs:', error);
     }
     throw error;
   }
