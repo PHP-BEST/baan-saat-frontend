@@ -60,10 +60,10 @@ export default function LandingPage() {
           buttonColor="blue"
           buttonType="filled"
           onClick={() => {
-            alert('ServiceRequest button clicked');
+            alert('Create Service button clicked');
           }}
         >
-          <Link to="/ServiceRequest">Service Request</Link>
+          <Link to="/CreateService">Create Service</Link>
         </ActionButton>
 
         <ActionButton buttonColor="red" buttonType="outline">
