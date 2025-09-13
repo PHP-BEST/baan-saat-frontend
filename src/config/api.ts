@@ -1,6 +1,5 @@
 import { API_ROOT_DEV, API_ROOT_LOCAL, API_ROOT_PROD, NODE_ENV } from './env';
 import axios from 'axios';
-import type { ExtendedServiceCardProps } from '@/pages/SearchPage';
 export let API_ROOT: string;
 
 if (NODE_ENV === 'development') {
@@ -84,36 +83,6 @@ export async function updateData(
       console.error('Axios error updating data:', error.message);
     } else {
       console.error('Unknown error updating data:', error);
-    }
-    throw error;
-  }
-}
-export async function getServices(id: string) {
-  try {
-    const response = await axios.get(`${API_ROOT}/services/${id}`);
-    return response.data.data;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      console.error('Axios error updating data:', error.message);
-    } else {
-      console.error('Unknown error updating data:', error);
-    }
-    throw error;
-  }
-}
-
-//Fetch Jobs
-export async function fetchJobs(): Promise<ExtendedServiceCardProps[]> {
-  try {
-    const response = await axios.get('${API_ROOT}/jobs', {
-      withCredentials: false,
-    });
-    return response.data.data;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      console.error('Axios error fetching jobs:', error.message);
-    } else {
-      console.error('Unknown error fetching jobs:', error);
     }
     throw error;
   }

@@ -10,7 +10,6 @@ import ServiceDetailPage from './pages/ServiceDetail';
 import ServiceEditPage from './pages/ServiceEdit';
 import ProfileCreationPage from './pages/ProfileCreationPage';
 import ServiceCreationPage from './pages/ServiceCreationPage';
-import CustomerRequestPage from './pages/CustomerRequest';
 import ServiceListProfilePage from './pages/ServiceListProfilePage';
 import ServiceListAllPage from './pages/ServiceListAllPage';
 import SearchPage from './pages/SearchPage';
@@ -59,7 +58,7 @@ export const router = createBrowserRouter([
     path: '/CreateService',
     element: <ServiceCreationPage />,
     errorElement: <ErrorPage />,
-  }, 
+  },
   {
     path: 'servicelist',
     element: <ServiceListProfilePage />,
