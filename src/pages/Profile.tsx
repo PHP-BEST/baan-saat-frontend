@@ -319,7 +319,7 @@ export default function ProfilePage() {
               setSkillsChanged={setSkillsChanged}
             />
             <ProfileField
-              label="Skill & Experience"
+              label="Skill & Experiences"
               field="skills"
               skillOptions={skillOptions}
               {...commonFieldProperties}

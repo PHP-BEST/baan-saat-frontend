@@ -111,7 +111,7 @@ export default function ServiceDetailPage() {
             <p
               className="text-lg font-semibold text-button-action hover:underline cursor-pointer"
               onClick={() => {
-                alert('Service provider profile page is under development.');
+                navigate(`/user/${providerUser?._id}`);
               }}
             >
               {providerUser ? providerUser.name : 'Unknown'}

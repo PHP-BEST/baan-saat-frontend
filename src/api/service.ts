@@ -65,6 +65,32 @@ export const getServiceById = async (
   }
 };
 
+export const getServicesByUserId = async (
+  userId: string,
+): Promise<Service[]> => {
+  try {
+    const response = await axios.get<ResponseInterface<Service[]>>(
+      `${API_BASE}/user/${userId}`,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+
+    if (response.data.success) {
+      const services: Service[] = response.data.data;
+      return services;
+    } else {
+      return [];
+    }
+  } catch (err) {
+    console.log(
+      'Error fetching services by user ID in getServicesByUserId:',
+      err,
+    );
+    return [];
+  }
+};
+
 export const searchServices = async (query: string): Promise<Service[]> => {
   try {
     const response = await axios.get<ResponseInterface<Service[]>>(
