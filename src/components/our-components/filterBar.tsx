@@ -7,18 +7,20 @@ interface JobsProp {
   rating: number;
   providerName: string;
 }
+
 type FilterProps = {
   showFilter: boolean;
   setShowFilter: React.Dispatch<React.SetStateAction<boolean>>;
-  allJobs: JobsProp[];
+  services: JobsProp[];
   searchInput?: string;
   setFilteredJobs: React.Dispatch<React.SetStateAction<JobsProp[]>>;
   searchName?: boolean;
 };
+
 export default function FilterBar({
   showFilter,
   setShowFilter,
-  allJobs,
+  services: allJobs,
   searchInput,
   setFilteredJobs,
   searchName = true,

@@ -9,24 +9,20 @@ interface HeaderProps {
 
 const Header = ({ isHideSearchBar = false }: HeaderProps) => {
   const navigate = useNavigate();
-  const [searchInput, setSearchInput] = useState<string>('');
+  const [query, setQuery] = useState<string>('');
 
   const handleSearch = () => {
-    if (searchInput) {
-      alert(`You're searching this: ${searchInput}`);
-    } else {
-      alert("There's nothing...");
+    if (query) {
+      navigate(`/search?query=${encodeURIComponent(query)}`);
     }
   };
 
   const handleClickChat = () => {
-    alert('Go to Account Page to see Chats');
-    navigate('/account');
+    alert('Chat feature is coming soon!');
   };
 
   const handleClickRequest = () => {
-    alert('Go to Account Page to see Requests');
-    navigate('/account');
+    navigate('/account/request');
   };
 
   return (
@@ -54,7 +50,7 @@ const Header = ({ isHideSearchBar = false }: HeaderProps) => {
             <Search
               width={28}
               height={28}
-              className={`${searchInput ? 'cursor-pointer' : ''}`}
+              className={`${query ? 'cursor-pointer' : ''}`}
               onClick={handleSearch}
             />
             <input
@@ -62,7 +58,12 @@ const Header = ({ isHideSearchBar = false }: HeaderProps) => {
               className="w-full focus:outline-none focus:border-none"
               onChange={(e) => {
                 e.preventDefault();
-                setSearchInput(e.target.value);
+                setQuery(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch();
+                }
               }}
             />
           </div>

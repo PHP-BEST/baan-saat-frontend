@@ -7,9 +7,10 @@ import Footer from '@/components/our-components/footer';
 import { API_ROOT, type ResponseInterface } from '@/config/api';
 import ActionButton from '@/components/our-components/actionButton';
 import { convertTagsToLabels } from '@/utils/function';
-import { Loader, Phone } from 'lucide-react';
+import { Phone } from 'lucide-react';
 import { serviceCache } from '@/utils/cache';
 import { useUser } from '@/context/UserContext';
+import Loading from '@/components/our-components/loading';
 
 export default function ServiceDetailPage() {
   const navigate = useNavigate();
@@ -62,11 +63,7 @@ export default function ServiceDetailPage() {
       <div>
         <Header />
         <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
-          {/* Loading Text */}
-          <div className="flex justify-center gap-2 items-center">
-            <p className="text-2xl font-semibold">Loading</p>
-            <Loader className="animate-spin" size={24} />
-          </div>
+          <Loading />
         </div>
         <Footer />
       </div>
@@ -187,10 +184,10 @@ export default function ServiceDetailPage() {
               buttonColor="red"
               className="cursor-pointer"
               onClick={() => {
-                navigate('/');
+                navigate(-1);
               }}
             >
-              Back to Home
+              Back
             </ActionButton>
           </div>
         </div>
