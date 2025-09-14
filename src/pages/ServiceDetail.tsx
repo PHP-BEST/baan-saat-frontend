@@ -9,6 +9,8 @@ import { Calendar, Phone } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import Loading from '@/components/our-components/loading';
 import { getServiceById } from '@/api/service';
+import type { User } from '@/interfaces/User';
+import { getUserById } from '@/api/user';
 
 export default function ServiceDetailPage() {
   const navigate = useNavigate();
@@ -16,6 +18,7 @@ export default function ServiceDetailPage() {
   const { user } = useUser();
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(false);
+  const [providerUser, setProviderUser] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchService = async () => {
@@ -23,6 +26,10 @@ export default function ServiceDetailPage() {
       if (!serviceId) return;
       const service = await getServiceById(serviceId);
       setService(service);
+      if (service) {
+        const user = await getUserById(service.customerId);
+        setProviderUser(user);
+      }
       setLoading(false);
     };
 
@@ -95,6 +102,19 @@ export default function ServiceDetailPage() {
             <h2 className="text-2xl font-semibold">Description</h2>
             <p className="text-lg text-gray-700">
               {service.description || 'No description provided.'}
+            </p>
+          </div>
+
+          {/* Service Provider Name */}
+          <div className="w-full flex flex-col gap-2">
+            <h2 className="text-2xl font-semibold">Posted By</h2>
+            <p
+              className="text-lg font-semibold text-button-action hover:underline cursor-pointer"
+              onClick={() => {
+                alert('Service provider profile page is under development.');
+              }}
+            >
+              {providerUser ? providerUser.name : 'Unknown'}
             </p>
           </div>
 

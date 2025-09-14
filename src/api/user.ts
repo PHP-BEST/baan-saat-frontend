@@ -31,6 +31,27 @@ export interface UpdateUserParams {
   };
 }
 
+export const getUserById = async (userId: string): Promise<User | null> => {
+  try {
+    const response = await Axios.get<ResponseInterface<User>>(
+      `${API_BASE}/${userId}`,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+
+    if (response.data.success) {
+      const user: User = response.data.data;
+      return user;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error('Error fetching user by ID:', error);
+    return null;
+  }
+};
+
 export const updateUser = async (
   userId: string,
   formData: UpdateUserParams,
