@@ -62,7 +62,7 @@ export const router = createBrowserRouter([
         element: <ServiceEditPage />,
       },
       {
-        path: '/register',
+        path: 'register',
         element: <ProfileCreationPage />,
       },
       {

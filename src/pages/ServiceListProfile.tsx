@@ -39,12 +39,14 @@ type RequestProps = {
 
 export default function ServiceListProfilePage() {
   const { user } = useUser();
+  if (!user) return;
+
   const {
     data: profile,
     isLoading: isProfileLoading,
     error: fetchProfileError,
   } = useQuery({
-    queryKey: ['userห', user._id],
+    queryKey: ['user', user._id],
     queryFn: () => fetchData(user._id),
   });
   // const {

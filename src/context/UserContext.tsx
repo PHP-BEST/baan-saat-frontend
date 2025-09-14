@@ -8,7 +8,7 @@ import {
 import { type User } from '@/interfaces/User';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
-import Axios from '@/config/Axios';
+import Axios from '@/config/axios-config';
 
 interface UserContextType {
   user: User | null;

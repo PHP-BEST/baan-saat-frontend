@@ -1,22 +1,14 @@
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import ActionButton from '@/components/our-components/actionButton';
 
 export default function ErrorPage() {
   return (
-    <div>
-      <p className="text-bold text-2xl">This is Error Page</p>
-      <Button
-        variant="secondary"
-        onClick={() => {
-          alert('Error button clicked... Go to Landing Page');
-        }}
-        asChild
-        className="bg-black text-white hover:bg-gray-800 transition duration-300"
-      >
-        <Link to="/">
-          <p>Go Back</p>
-        </Link>
-      </Button>
-    </div>
+    <main className="bg-background min-h-screen w-full px-10 py-10 flex flex-col justify-center items-center">
+      <h1 className="font-bold text-start text-xl md:text-2xl lg:text-3xl xl:text-4xl">
+        ERROR 404 Not Found
+      </h1>
+      <ActionButton onClick={() => window.history.back()} className="mt-8">
+        Back
+      </ActionButton>
+    </main>
   );
 }
