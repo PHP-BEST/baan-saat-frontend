@@ -74,7 +74,7 @@ export const validateTelNumber = (telNumber: string): ValidationResult => {
   if (!/^0\d{8,9}$/.test(telNumber)) {
     return {
       isValid: false,
-      error: 'Please fill in a valid telephone number (must start with 0)',
+      error: 'Please fill in a valid telephone number',
     };
   }
 

@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { Pencil, AlertCircle, Check } from 'lucide-react';
+import { Pencil, Check, AlertCircle } from 'lucide-react';
 import { profileValidator } from '@/utils/profileValidator';
 
 interface SkillOption {
@@ -21,7 +21,6 @@ interface ProfileFieldProps {
   getPlaceholderText: (field: string) => string;
   startEditing: (field: string) => void;
   saveEditing: (field: string) => void;
-  cancelEditing: () => void;
   setTempValues: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   setCursorPositions: React.Dispatch<
     React.SetStateAction<Record<string, number>>
@@ -81,14 +80,10 @@ export default function ProfileField({
       <span className="font-semibold flex items-center">
         {label}
         {editingField === field ? (
-          <div className="flex items-center gap-2 ml-2">
-            <button
-              onClick={() => saveEditing(field)}
-              className="text-green-600 hover:text-green-800"
-            >
-              <Check className="w-4 h-4" />
-            </button>
-          </div>
+          <Check
+            onClick={() => saveEditing(field)}
+            className="w-4 h-4 ml-2 text-green-600 cursor-pointer hover:text-green-700"
+          />
         ) : (
           <Pencil
             onClick={() => startEditing(field)}
@@ -120,7 +115,7 @@ export default function ProfileField({
                       checked={isChecked}
                       onChange={(e) => {
                         setSkillsChanged(true);
-                        let newSkills: Array<string> = [];
+                        let newSkills;
                         if (e.target.checked) {
                           newSkills = [...currentSkills, skillOption.value];
                         } else {
@@ -160,9 +155,7 @@ export default function ProfileField({
                 }}
                 value={tempValues[field] || ''}
                 onChange={(e) => {
-                  const newValue = (
-                    e.target as HTMLTextAreaElement
-                  ).value.slice(0, 100); // limit 100 chars
+                  const newValue = (e.target as HTMLTextAreaElement).value;
                   const cursorPos =
                     (e.target as HTMLTextAreaElement).selectionStart ?? 0;
                   setTempValues((prev) => ({ ...prev, [field]: newValue }));
@@ -184,6 +177,26 @@ export default function ProfileField({
                       return newErrors;
                     });
                   }
+                }}
+                onKeyUp={(e) => {
+                  const target = e.target as HTMLTextAreaElement;
+                  setCursorPositions((prev) => ({
+                    ...prev,
+                    [field]: target.selectionStart || 0,
+                  }));
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.ctrlKey) {
+                    e.preventDefault();
+                    saveEditing('description');
+                  }
+                }}
+                onClick={(e) => {
+                  const target = e.target as HTMLTextAreaElement;
+                  setCursorPositions((prev) => ({
+                    ...prev,
+                    [field]: target.selectionStart || 0,
+                  }));
                 }}
                 rows={4}
                 className={`
@@ -208,18 +221,10 @@ export default function ProfileField({
                 ref={(el) => {
                   inputRefs.current[field] = el;
                 }}
-                type={field === 'telNumber' ? 'tel' : 'text'}
+                type="text"
                 value={tempValues[field] || ''}
                 onChange={(e) => {
-                  let newValue = e.target.value;
-
-                  if (field === 'telNumber') {
-                    newValue = newValue.replace(/\D/g, '');
-                    if (newValue.length > 10) {
-                      newValue = newValue.slice(0, 10);
-                    }
-                  }
-
+                  const newValue = e.target.value;
                   const cursorPos = e.target.selectionStart || 0;
                   setTempValues((prev) => ({ ...prev, [field]: newValue }));
                   setCursorPositions((prev) => ({
@@ -234,6 +239,26 @@ export default function ProfileField({
                       return newErrors;
                     });
                   }
+                }}
+                onKeyUp={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  setCursorPositions((prev) => ({
+                    ...prev,
+                    [field]: target.selectionStart || 0,
+                  }));
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveEditing(field);
+                  }
+                }}
+                onClick={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  setCursorPositions((prev) => ({
+                    ...prev,
+                    [field]: target.selectionStart || 0,
+                  }));
                 }}
                 className={`border rounded px-2 py-1 flex-1 focus:outline-none focus:ring-2 ${
                   validationErrors[field]

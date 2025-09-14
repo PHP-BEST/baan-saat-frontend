@@ -18,12 +18,16 @@ import {
 } from '@/interfaces/Service';
 import { serviceValidator } from '@/utils/serviceValidator';
 import { Loader, AlertCircle } from 'lucide-react';
-import { formatDateToDisplay, getCompressedImageUrl } from '@/utils/function';
+import {
+  formatDateToDisplay,
+  getCompressedImageUrl,
+  isInvalidServiceForm,
+} from '@/utils/function';
 import Loading from '@/components/our-components/loading';
 import {
   getServiceById,
   updateService,
-  type FormInterface,
+  type ServiceFormInterface,
 } from '@/api/service';
 import MyDatePicker from '@/components/ui/calendar';
 
@@ -45,7 +49,20 @@ const Textarea = React.forwardRef<
   );
 });
 
-function isFormDataSameAsOldService(formData: FormInterface, service: Service) {
+function isFormDataSameAsOldService(
+  formData: ServiceFormInterface,
+  service: Service | null,
+) {
+  if (!service) return false;
+
+  // Handle date comparison separately
+  const formDateStr = formData.date
+    ? new Date(formData.date).toISOString().split('T')[0]
+    : null;
+  const serviceDateStr = service.date
+    ? new Date(service.date).toISOString().split('T')[0]
+    : null;
+
   return (
     formData.title === service.title &&
     formData.description === service.description &&
@@ -54,7 +71,8 @@ function isFormDataSameAsOldService(formData: FormInterface, service: Service) {
     formData.budget === service.budget &&
     formData.location === service.location &&
     formData.coverPhotoUrl === service.coverPhotoUrl &&
-    formData.date === service.date
+    formDateStr === serviceDateStr &&
+    formData.telNumber === service.telNumber
   );
 }
 
@@ -63,13 +81,15 @@ export default function ServiceEditPage() {
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
-  const [formData, setFormData] = useState<FormInterface>({
+  const [canSubmit, setCanSubmit] = useState(false);
+  const [formData, setFormData] = useState<ServiceFormInterface>({
     title: '',
     description: '',
     tags: [],
     budget: 0,
     location: '',
     coverPhotoUrl: '',
+    telNumber: '',
     date: null,
   });
 
@@ -83,7 +103,6 @@ export default function ServiceEditPage() {
 
       setLoading(true);
       const currentService = await getServiceById(serviceId);
-      console.log(currentService);
       setService(currentService);
       setFormData({
         title: currentService?.title || '',
@@ -92,6 +111,7 @@ export default function ServiceEditPage() {
         budget: currentService?.budget || 0,
         location: currentService?.location || '',
         coverPhotoUrl: currentService?.coverPhotoUrl || '',
+        telNumber: currentService?.telNumber || '',
         date: currentService?.date || null,
       });
 
@@ -100,6 +120,19 @@ export default function ServiceEditPage() {
 
     fetchService();
   }, [serviceId]);
+
+  useEffect(() => {
+    if (
+      Object.keys(validationErrors).length === 0 &&
+      !updating &&
+      !isInvalidServiceForm(formData) &&
+      !isFormDataSameAsOldService(formData, service)
+    ) {
+      setCanSubmit(true);
+    } else {
+      setCanSubmit(false);
+    }
+  }, [formData, validationErrors]);
 
   if (loading) {
     return (
@@ -223,33 +256,50 @@ export default function ServiceEditPage() {
     }
   };
 
-  const canSubmit =
-    Object.keys(validationErrors).length === 0 &&
-    !isFormDataSameAsOldService(formData, service) &&
-    !updating;
-
   const handleSubmit = async (e?: FormEvent<HTMLFormElement>) => {
     if (!serviceId) return;
     if (e) e.preventDefault();
 
-    if (canSubmit) {
+    // Validate all fields before submission
+    const fieldsToValidate = {
+      title: formData.title,
+      description: formData.description,
+      budget: formData.budget,
+      location: formData.location,
+      telNumber: formData.telNumber,
+      date: formData.date,
+    };
+
+    const newErrors: Record<string, string> = {};
+
+    // Validate each field
+    Object.entries(fieldsToValidate).forEach(([field, value]) => {
+      if (value === null) {
+        newErrors[field] = `${field} is required`;
+      } else {
+        const validation = serviceValidator(field, value);
+        if (!validation.isValid) {
+          newErrors[field] = validation.error || '';
+        }
+      }
+    });
+
+    // Update validation errors state
+    setValidationErrors(newErrors);
+
+    // Only proceed if there are no validation errors
+    if (Object.keys(newErrors).length === 0 && canSubmit) {
       setUpdating(true);
       const success = await updateService(serviceId, formData);
       if (success) {
-        setFormData({
-          title: '',
-          description: '',
-          tags: [],
-          budget: 0,
-          location: '',
-          coverPhotoUrl: '',
-          date: null,
-        });
         window.location.href = `/account/service`;
       } else {
         alert('Failed to update service. Please try again.');
       }
       setUpdating(false);
+    } else {
+      const firstErrorField = document.querySelector('.text-red-500');
+      firstErrorField?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
 
@@ -415,6 +465,36 @@ export default function ServiceEditPage() {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* Contact Number */}
+            <div>
+              <label
+                htmlFor="contact"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Contact Number
+              </label>
+              <Input
+                id="telNumber"
+                name="telNumber"
+                type="text"
+                placeholder="Contact Number"
+                value={formData.telNumber}
+                onChange={handleInputChange}
+                disabled={updating}
+                className={`border-gray-300 ${
+                  validationErrors.telNumber
+                    ? 'border-red-500 focus:ring-red-200'
+                    : 'focus:ring-blue-200'
+                }`}
+              />
+              {validationErrors.telNumber && (
+                <div className="flex items-center gap-1 text-red-500 text-sm mt-1">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{validationErrors.telNumber}</span>
+                </div>
+              )}
             </div>
 
             {/* Cover Photo */}

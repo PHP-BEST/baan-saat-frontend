@@ -1,3 +1,4 @@
+import type { ServiceFormInterface } from '@/api/service';
 import type { ServiceTag } from '@/interfaces/Service';
 
 export function convertTagsToLabels(tags: ServiceTag[]): string[] {
@@ -64,4 +65,13 @@ export function formatDateToDisplay(date: Date): string {
   const monthName = monthNames[month - 1];
   const year = d.getFullYear() + 543;
   return `${day} ${monthName} ${year}`;
+}
+
+export function isInvalidServiceForm(formData: ServiceFormInterface): boolean {
+  return (
+    formData.title.trim() === '' ||
+    formData.budget === 0 ||
+    formData.telNumber.trim() === '' ||
+    formData.date === null
+  );
 }

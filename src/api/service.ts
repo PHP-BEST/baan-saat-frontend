@@ -1,16 +1,10 @@
 import { API_ROOT, type ResponseInterface } from '@/config/api';
 import type { Service, ServiceTag, TagsOption } from '@/interfaces/Service';
-import { serviceCache, servicesCache } from '@/utils/cache';
 import axios from 'axios';
 
 const API_BASE = `${API_ROOT}/api/services`;
 
 export const getAllServices = async (): Promise<Service[]> => {
-  const cacheKey = 'all-services';
-  if (servicesCache.has(cacheKey)) {
-    return servicesCache.get(cacheKey)!;
-  }
-
   try {
     const response = await axios.get<ResponseInterface<Service[]>>(
       `${API_BASE}`,
@@ -21,7 +15,6 @@ export const getAllServices = async (): Promise<Service[]> => {
 
     if (response.data.success) {
       const services: Service[] = response.data.data;
-      servicesCache.set(cacheKey, services);
       return services;
     } else {
       return [];
@@ -33,11 +26,6 @@ export const getAllServices = async (): Promise<Service[]> => {
 };
 
 export const getUserServices = async (userId: string): Promise<Service[]> => {
-  const cacheKey = `user-${userId}-services`;
-  if (servicesCache.has(cacheKey)) {
-    return servicesCache.get(cacheKey)!;
-  }
-
   try {
     const allServices = await getAllServices();
     if (allServices.length === 0) {
@@ -46,7 +34,6 @@ export const getUserServices = async (userId: string): Promise<Service[]> => {
     const userServices: Service[] = allServices.filter(
       (svc: Service) => svc.customerId === userId,
     );
-    servicesCache.set(cacheKey, userServices);
     return userServices;
   } catch (err) {
     console.log('Error fetching user services in getUserServices:', err);
@@ -58,13 +45,6 @@ export const getServiceById = async (
   serviceId: string,
 ): Promise<Service | null> => {
   if (!serviceId) return null;
-
-  const cacheKey = `service-${serviceId}`;
-
-  if (serviceCache.has(cacheKey)) {
-    return serviceCache.get(cacheKey)!;
-  }
-
   try {
     const response = await axios.get<ResponseInterface<Service>>(
       `${API_BASE}/${serviceId}`,
@@ -75,7 +55,6 @@ export const getServiceById = async (
 
     if (response.data.success) {
       const currentService = response.data.data;
-      serviceCache.set(cacheKey, currentService);
       return currentService;
     } else {
       throw new Error('Service not found');
@@ -145,10 +124,11 @@ export const filterServices = async (
   }
 };
 
-export interface FormInterface {
+export interface ServiceFormInterface {
   title: string;
   description: string;
   tags: ServiceTag[];
+  telNumber: string;
   budget: number;
   location: string;
   coverPhotoUrl?: string;
@@ -157,7 +137,7 @@ export interface FormInterface {
 
 export const createService = async (
   userId: string,
-  formData: FormInterface,
+  formData: ServiceFormInterface,
 ): Promise<boolean> => {
   try {
     const response = await axios.post<ResponseInterface<Service>>(
@@ -169,9 +149,6 @@ export const createService = async (
     );
 
     if (response.data.success) {
-      const service = response.data.data;
-      const serviceId = response.data.data._id;
-      serviceCache.set(`service-${serviceId}`, service);
       return true;
     } else {
       throw new Error('Failed to create service');
@@ -184,7 +161,7 @@ export const createService = async (
 
 export const updateService = async (
   serviceId: string,
-  formData: FormInterface,
+  formData: ServiceFormInterface,
 ): Promise<boolean> => {
   try {
     const response = await axios.put<ResponseInterface<Service>>(
@@ -196,8 +173,6 @@ export const updateService = async (
     );
 
     if (response.data.success) {
-      const updatedService = response.data.data;
-      serviceCache.set(`service-${serviceId}`, updatedService);
       return true;
     } else {
       throw new Error('Failed to update service');

@@ -3,19 +3,15 @@ import { Pencil, Save, X } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import ActionButton from '@/components/our-components/actionButton';
 import ProfileField from '@/components/our-components/profileField';
-import { useQuery, useMutation } from '@tanstack/react-query';
 import { profileValidator } from '@/utils/profileValidator';
 import type { SkillsType } from '@/interfaces/User';
-import { fetchData, updateData } from '@/config/api';
-
-const DEFAULT_SKILLS: SkillsType[] = [];
+import { updateUser } from '@/api/user';
 
 interface SkillOption {
   label: string;
   value: string;
   order: number;
 }
-
 const skillOptions: SkillOption[] = [
   { label: 'การทำความสะอาด', value: 'houseCleaning', order: 1 },
   { label: 'การซ่อมแซม', value: 'houseRepair', order: 2 },
@@ -28,7 +24,7 @@ const skillOptions: SkillOption[] = [
 ];
 
 export default function ProfilePage() {
-  const { user, updateUser } = useUser();
+  const { user } = useUser();
   if (!user) return;
 
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -43,17 +39,6 @@ export default function ProfilePage() {
     Record<string, number>
   >({});
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const emailFieldRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Find the pencil button inside the email field and hide it
-    if (emailFieldRef.current) {
-      const pencilButton = emailFieldRef.current.querySelector('button');
-      if (pencilButton) {
-        pencilButton.style.display = 'none';
-      }
-    }
-  }, []);
 
   useEffect(() => {
     const hasUnsavedChanges =
@@ -62,43 +47,6 @@ export default function ProfilePage() {
       tempAvatarUrl !== '';
     setHasChanges(hasUnsavedChanges);
   }, [tempValues, skillsChanged, tempAvatarUrl]);
-
-  const {
-    isLoading,
-    error: fetchError,
-    data,
-  } = useQuery({
-    queryKey: ['profile', user._id],
-    queryFn: () => fetchData(user._id),
-  });
-  const { mutate } = useMutation({
-    mutationFn: () =>
-      updateData(user._id, {
-        ...user,
-        lastLoginAt: user.lastLoginAt.toISOString(), // Convert Date to string
-        createdAt: user.createdAt.toISOString(), // Convert Date to string
-        updatedAt: user.updatedAt.toISOString(), // Convert Date to string
-      }),
-  });
-
-  useEffect(() => {
-    if (!data) return;
-    const skillsArray: string[] = Array.isArray(data.providerProfile?.skills)
-      ? data.providerProfile.skills
-      : [];
-    updateUser({
-      ...user, // Preserve existing user data
-      name: data.name ?? '',
-      telNumber: data.telNumber ?? '',
-      email: data.email ?? '', // Fetch and update email
-      avatarUrl: data.avatarUrl ?? '',
-      providerProfile: {
-        title: data.providerProfile?.title ?? '',
-        description: data.providerProfile?.description ?? '',
-        skills: skillsArray.length > 0 ? skillsArray : DEFAULT_SKILLS,
-      },
-    });
-  }, [data]);
 
   const getFieldValue = (field: string): string => {
     switch (field) {
@@ -140,9 +88,11 @@ export default function ProfilePage() {
   };
 
   const startEditing = (field: string) => {
+    // If already editing another field, validate current field first
     if (editingField && editingField !== field) {
       const currentValue = tempValues[editingField] || '';
       const validation = profileValidator(editingField, currentValue);
+
       if (!validation.isValid) {
         setValidationErrors((prev) => ({
           ...prev,
@@ -150,8 +100,11 @@ export default function ProfilePage() {
         }));
         return;
       }
+
+      // Save current field if valid
       saveEditing(editingField);
     }
+
     setEditingField(field);
     setTempValues((prev) => ({ ...prev, [field]: getDisplayValue(field) }));
   };
@@ -160,6 +113,8 @@ export default function ProfilePage() {
     if (editingField === field) {
       const currentValue = tempValues[field] || '';
       const originalValue = getFieldValue(field);
+
+      // If value is same as original, remove from temp values
       if (currentValue === originalValue) {
         setTempValues((prev) => {
           const newValues = { ...prev };
@@ -167,10 +122,16 @@ export default function ProfilePage() {
           return newValues;
         });
         setEditingField(null);
-        if (field === 'skills') setSkillsChanged(false);
+
+        if (field === 'skills') {
+          setSkillsChanged(false);
+        }
+
         return;
       }
+
       const validation = profileValidator(field, currentValue);
+
       if (!validation.isValid) {
         setValidationErrors((prev) => ({
           ...prev,
@@ -178,11 +139,13 @@ export default function ProfilePage() {
         }));
         return;
       }
+
       setValidationErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[field];
         return newErrors;
       });
+
       setEditingField(null);
     }
   };
@@ -196,6 +159,13 @@ export default function ProfilePage() {
     setValidationErrors({});
   };
 
+  const handleAvatarClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  };
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -204,64 +174,58 @@ export default function ProfilePage() {
     }
   };
 
-  const submitAllChanges = () => {
-    let hasErrors = false;
-    const newValidationErrors: Record<string, string> = {};
-    Object.entries(tempValues).forEach(([field, value]) => {
-      const validation = profileValidator(field, value);
-      if (!validation.isValid) {
-        newValidationErrors[field] = validation.error || '';
-        hasErrors = true;
-      }
-    });
-    if (hasErrors) {
-      setValidationErrors(newValidationErrors);
-      alert('Please fix validation errors before saving.');
-      return;
-    }
-    let updatedUser = { ...user };
+  const submitAllChanges = async () => {
+    let userForm = { ...user };
+
+    // Apply avatar change if exists
     if (tempAvatarUrl) {
-      updatedUser = { ...updatedUser, avatarUrl: tempAvatarUrl };
+      userForm = { ...userForm, avatarUrl: tempAvatarUrl };
     }
+
     Object.entries(tempValues).forEach(([field, value]) => {
       if (field === 'description') {
-        updatedUser = {
-          ...updatedUser,
+        userForm = {
+          ...userForm,
           providerProfile: {
-            title: updatedUser.providerProfile?.title || '',
+            title: userForm.providerProfile?.title || '',
             description: value,
-            skills: updatedUser.providerProfile?.skills || [],
+            skills: userForm.providerProfile?.skills || [],
           },
         };
       } else if (field === 'skills') {
         const skillsArray = value
           ? value.split(', ').filter((s) => s.trim() !== '')
           : [];
-        updatedUser = {
-          ...updatedUser,
+        userForm = {
+          ...userForm,
           providerProfile: {
-            title: updatedUser.providerProfile?.title || '',
-            description: updatedUser.providerProfile?.description || '',
+            title: userForm.providerProfile?.title || '',
+            description: userForm.providerProfile?.description || '',
             skills: skillsArray as SkillsType[],
           },
         };
       } else {
-        updatedUser = { ...updatedUser, [field]: value };
+        userForm = { ...userForm, [field]: value };
       }
-      mutate(user as unknown as void); // Adjust the type casting as necessary
     });
-    updateUser(updatedUser);
-    setEditingField(null);
-    setTempValues({});
-    setHasChanges(false);
-    setSkillsChanged(false);
-    setTempAvatarUrl('');
-    setValidationErrors({});
-    alert('Profile updated successfully!');
+
+    const success = await updateUser(user._id, userForm);
+
+    if (success) {
+      setEditingField(null);
+      setTempValues({});
+      setHasChanges(false);
+      setSkillsChanged(false);
+      setTempAvatarUrl('');
+      setValidationErrors({});
+      window.location.reload();
+    } else {
+      alert('Failed to update profile. Please try again.');
+      return;
+    }
   };
 
-  // FIXED HERE: remove "editingField === null" condition
-  const canSave = hasChanges;
+  const canSave = hasChanges && editingField === null;
 
   const commonFieldProperties = {
     editingField,
@@ -276,72 +240,41 @@ export default function ProfilePage() {
     setValidationErrors,
   };
 
-  if (isLoading) return <p>Loading...</p>;
-  if (fetchError) return <p>Error loading profile</p>;
-
   return (
     <>
+      {/* Header */}
       <h1 className="text-2xl font-bold mb-2">Profile</h1>
+
+      {/* Content */}
       <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
-        {/* Avatar Section */}
-        <div className="relative flex flex-col items-center mb-6">
-          <div className="relative w-28 h-28 rounded-full bg-background-sidebar flex items-center justify-center overflow-hidden">
-            {tempAvatarUrl || user.avatarUrl ? (
+        {/* Avatar */}
+        <div
+          onClick={handleAvatarClick}
+          className="w-28 h-28 rounded-full bg-background-sidebar flex items-center justify-center mb-6 cursor-pointer hover:bg-background-header-footer transition-colors overflow-hidden relative group"
+        >
+          {tempAvatarUrl || user.avatarUrl ? (
+            <>
               <img
                 src={tempAvatarUrl || user.avatarUrl}
                 alt="Profile Avatar"
                 className="w-full h-full object-cover rounded-full"
               />
-            ) : (
-              <Pencil
-                className="w-8 h-8 text-gray-400 cursor-pointer"
-                onClick={() => fileInputRef.current?.click()}
-              />
-            )}
-
-            {(tempAvatarUrl || user.avatarUrl) && (
-              <button
-                onClick={() =>
-                  setEditingField(editingField === 'avatar' ? null : 'avatar')
-                }
-                className="absolute bottom-1 right-1 p-2 rounded-full bg-white shadow hover:bg-gray-100"
-              >
-                <Pencil className="w-4 h-4 text-gray-600" />
-              </button>
-            )}
-          </div>
-
-          {editingField === 'avatar' && (
-            <div className="mt-3 flex gap-2">
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="px-3 py-1 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
-              >
-                Upload
-              </button>
-              {(tempAvatarUrl || user.avatarUrl) && (
-                <button
-                  onClick={() => {
-                    // setTempAvatarUrl('');
-                    // setEditingField(null);
-                    // setHasChanges(true); // ✅ Reset unsaved changes
-                    // setTempValues({});
-                    // setSkillsChanged(false);
-                    // setValidationErrors({});
-                    updateUser({ ...user, avatarUrl: '' });
-
-                    setTempAvatarUrl('');
-                    setHasChanges(true);
-                    setEditingField(null);
-                  }}
-                  className="px-3 py-1 rounded-lg bg-red-500 text-white hover:bg-red-600"
-                >
-                  Delete
-                </button>
+              {/* Hover overlay */}
+              <div className="absolute inset-0 bg-black bg-opacity-70 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Pencil className="w-6 h-6 text-white" />
+              </div>
+              {/* Change indicator */}
+              {tempAvatarUrl && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-button-upload rounded-full border-2 border-white"></div>
               )}
-            </div>
+            </>
+          ) : (
+            <Pencil className="w-6 h-6 text-gray-500" />
           )}
+        </div>
 
+        <div className="pb-16 w-full">
+          {/* Hidden file input */}
           <input
             ref={fileInputRef}
             type="file"
@@ -349,70 +282,56 @@ export default function ProfilePage() {
             onChange={handleFileChange}
             className="hidden"
           />
+
+          {/* Editable Fields */}
+          <div className="space-y-4 w-full">
+            <ProfileField
+              label="Name"
+              field="name"
+              cursorPositions={cursorPositions}
+              setCursorPositions={setCursorPositions}
+              {...commonFieldProperties}
+              setSkillsChanged={setSkillsChanged}
+            />
+
+            <ProfileField
+              label="Telephone"
+              field="telNumber"
+              {...commonFieldProperties}
+              cursorPositions={cursorPositions}
+              setCursorPositions={setCursorPositions}
+              setSkillsChanged={setSkillsChanged}
+            />
+            <ProfileField
+              label="Email"
+              field="email"
+              {...commonFieldProperties}
+              cursorPositions={cursorPositions}
+              setCursorPositions={setCursorPositions}
+              setSkillsChanged={setSkillsChanged}
+            />
+            <ProfileField
+              label="Description"
+              field="description"
+              {...commonFieldProperties}
+              cursorPositions={cursorPositions}
+              setCursorPositions={setCursorPositions}
+              setSkillsChanged={setSkillsChanged}
+            />
+            <ProfileField
+              label="Skill & Experience"
+              field="skills"
+              skillOptions={skillOptions}
+              {...commonFieldProperties}
+              cursorPositions={cursorPositions}
+              setCursorPositions={setCursorPositions}
+              setSkillsChanged={setSkillsChanged}
+              userSkills={user.providerProfile?.skills}
+            />
+          </div>
         </div>
 
-        {/* Editable Fields */}
-        <div className="space-y-4 w-full">
-          <ProfileField
-            cancelEditing={function (): void {
-              throw new Error('Function not implemented.');
-            }}
-            label="Name"
-            field="name"
-            cursorPositions={cursorPositions}
-            setCursorPositions={setCursorPositions}
-            {...commonFieldProperties}
-            setSkillsChanged={setSkillsChanged}
-          />
-          <ProfileField
-            cancelEditing={function (): void {
-              throw new Error('Function not implemented.');
-            }}
-            label="Telephone"
-            field="telNumber"
-            {...commonFieldProperties}
-            cursorPositions={cursorPositions}
-            setCursorPositions={setCursorPositions}
-            setSkillsChanged={setSkillsChanged}
-          />
-          <ProfileField
-            cancelEditing={function (): void {
-              throw new Error('Function not implemented.');
-            }}
-            label="Email"
-            field="email"
-            {...commonFieldProperties}
-            cursorPositions={cursorPositions}
-            setCursorPositions={setCursorPositions}
-            setSkillsChanged={setSkillsChanged}
-          />
-          <ProfileField
-            cancelEditing={function (): void {
-              throw new Error('Function not implemented.');
-            }}
-            label="Description"
-            field="description"
-            {...commonFieldProperties}
-            cursorPositions={cursorPositions}
-            setCursorPositions={setCursorPositions}
-            setSkillsChanged={setSkillsChanged}
-          />
-          <ProfileField
-            cancelEditing={function (): void {
-              throw new Error('Function not implemented.');
-            }}
-            label="Skill & Experience"
-            field="skills"
-            skillOptions={skillOptions}
-            {...commonFieldProperties}
-            cursorPositions={cursorPositions}
-            setCursorPositions={setCursorPositions}
-            setSkillsChanged={setSkillsChanged}
-            userSkills={user.providerProfile?.skills}
-          />
-        </div>
-
-        {/* Save/Cancel */}
+        {/* Submit Button */}
         {canSave && (
           <div className="mt-auto flex gap-3">
             <ActionButton
@@ -429,7 +348,7 @@ export default function ProfilePage() {
               onClick={submitAllChanges}
             >
               <Save className="w-4 h-4" />
-              Save Changes
+              Save
             </ActionButton>
           </div>
         )}

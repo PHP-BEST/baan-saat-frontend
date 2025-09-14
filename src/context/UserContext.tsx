@@ -8,12 +8,10 @@ import {
 import { type User } from '@/interfaces/User';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
-import Axios from '@/config/axios-config';
+import { getUserSession } from '@/api/user';
 
 interface UserContextType {
   user: User | null;
-  updateUser: (user: User) => void;
-  updateAvatarUrl: (avatarUrl: string) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -26,19 +24,6 @@ export const useUser = () => {
   return context;
 };
 
-const fetchSession = async (): Promise<User | null> => {
-  try {
-    const response = await Axios.get<User>('/api/users/session');
-    if (response.status === 200) {
-      return response.data;
-    }
-    return null;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-};
-
 interface UserProviderProps {
   children: ReactNode;
 }
@@ -49,7 +34,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   const { isLoading, refetch } = useQuery({
     queryKey: ['session'],
-    queryFn: fetchSession,
+    queryFn: getUserSession,
     enabled: true,
     retry: 1,
     staleTime: 0, // Always stale - refetch every time
@@ -68,26 +53,13 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       }
     }
     handleSession();
-  }, [location.pathname]);
-
-  const updateUser = (newUser: User) => {
-    setUser(newUser);
-  };
-
-  const updateAvatarUrl = (avatarUrl: string) => {
-    if (user) {
-      const updatedUser = { ...user, avatarUrl };
-      setUser(updatedUser);
-    }
-  };
+  }, [location.pathname, user]);
 
   if (isLoading) {
     return <h1>Loading...</h1>;
   }
 
   return (
-    <UserContext.Provider value={{ user, updateUser, updateAvatarUrl }}>
-      {children}
-    </UserContext.Provider>
+    <UserContext.Provider value={{ user }}>{children}</UserContext.Provider>
   );
 };

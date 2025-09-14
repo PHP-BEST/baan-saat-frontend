@@ -1,4 +1,9 @@
-import React, { useState, type ChangeEvent, type FormEvent } from 'react';
+import React, {
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
@@ -10,9 +15,13 @@ import {
   type ServiceTag,
   type TagsOption,
 } from '@/interfaces/Service';
-import { formatDateToDisplay, getCompressedImageUrl } from '@/utils/function';
+import {
+  formatDateToDisplay,
+  getCompressedImageUrl,
+  isInvalidServiceForm,
+} from '@/utils/function';
 import { serviceValidator } from '@/utils/serviceValidator';
-import { createService, type FormInterface } from '@/api/service';
+import { createService, type ServiceFormInterface } from '@/api/service';
 import { AlertCircle, Loader } from 'lucide-react';
 import MyDatePicker from '@/components/ui/calendar';
 import { useUser } from '@/context/UserContext';
@@ -36,23 +45,26 @@ const Textarea = React.forwardRef<
 });
 
 export const ServiceCreatePage: React.FC = () => {
-  const [formData, setFormData] = useState<FormInterface>({
+  const { user } = useUser();
+  if (!user) return;
+
+  const [formData, setFormData] = useState<ServiceFormInterface>({
     title: '',
     description: '',
     tags: [],
     budget: 0,
+    telNumber: user?.telNumber || '',
     location: '',
     coverPhotoUrl: '',
     date: null,
   });
-  const { user } = useUser();
-  if (!user) return;
 
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
 
   const [adding, setAdding] = useState(false);
+  const [canSubmit, setCanSubmit] = useState(false);
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -139,6 +151,18 @@ export const ServiceCreatePage: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    if (
+      Object.keys(validationErrors).length === 0 &&
+      !adding &&
+      !isInvalidServiceForm(formData)
+    ) {
+      setCanSubmit(true);
+    } else {
+      setCanSubmit(false);
+    }
+  }, [formData, validationErrors]);
+
   const handleSubmit = async (e?: FormEvent<HTMLFormElement>) => {
     if (e) e.preventDefault();
 
@@ -151,6 +175,7 @@ export const ServiceCreatePage: React.FC = () => {
           description: '',
           tags: [],
           budget: 0,
+          telNumber: user.telNumber || '',
           location: '',
           coverPhotoUrl: '',
           date: null,
@@ -162,8 +187,6 @@ export const ServiceCreatePage: React.FC = () => {
       setAdding(false);
     }
   };
-
-  const canSubmit = Object.keys(validationErrors).length === 0 && !adding;
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -327,6 +350,36 @@ export const ServiceCreatePage: React.FC = () => {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <label
+                htmlFor="contact"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Contact Number
+              </label>
+              <Input
+                id="telNumber"
+                name="telNumber"
+                type="text"
+                placeholder="Contact Number"
+                value={formData.telNumber}
+                onChange={handleInputChange}
+                disabled={adding}
+                className={`border-gray-300 ${
+                  validationErrors.telNumber
+                    ? 'border-red-500 focus:ring-red-200'
+                    : 'focus:ring-blue-200'
+                }`}
+              />
+              {validationErrors.telNumber && (
+                <div className="flex items-center gap-1 text-red-500 text-sm mt-1">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{validationErrors.telNumber}</span>
+                </div>
+              )}
             </div>
 
             {/* Cover Photo */}
