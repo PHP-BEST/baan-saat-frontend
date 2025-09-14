@@ -8,6 +8,19 @@ import LoginPage from './pages/Login';
 import ProfilePage from './pages/Profile';
 import ProtectedRoute from './components/our-components/protectedRoute';
 
+import BookingPage from './pages/Booking';
+import CustomerRequestPage from './pages/CustomerRequest';
+import ServiceDetailPage from './pages/ServiceDetail';
+import ServiceEditPage from './pages/ServiceEdit';
+import ProfileCreationPage from './pages/ProfileCreation';
+import ServiceCreationPage from './pages/ServiceCreation';
+import ServiceListProfilePage from './pages/ServiceListProfile';
+import ServiceListAllPage from './pages/ServiceListAll';
+import SearchPage from './pages/Search';
+import ServiceRequestPage from './pages/ServiceRequest';
+import ServiceRequestEditPage from './pages/ServiceRequestEdit';
+import YourRequestPage from './pages/YourRequest';
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -33,6 +46,50 @@ export const router = createBrowserRouter([
       {
         path: 'login',
         element: <LoginPage />,
+      },
+      { path: '', element: <ProfilePage /> },
+      { path: 'requests', element: <CustomerRequestPage /> },
+      { path: 'service', element: <YourServicePage /> },
+      { path: 'request', element: <YourRequestPage /> },
+      {
+        path: 'booking/:serviceId',
+        element: <BookingPage />,
+      },
+      {
+        path: 'service/:serviceId',
+        element: <ServiceDetailPage />,
+      },
+      {
+        path: 'service/:serviceId/edit',
+        element: <ServiceEditPage />,
+      },
+      {
+        path: '/register',
+        element: <ProfileCreationPage />,
+      },
+      {
+        path: '/create-service',
+        element: <ServiceCreationPage />,
+      },
+      {
+        path: 'servicelist',
+        element: <ServiceListProfilePage />,
+      },
+      {
+        path: 'servicelistall',
+        element: <ServiceListAllPage />,
+      },
+      {
+        path: 'search',
+        element: <SearchPage />,
+      },
+      {
+        path: 'ServiceRequest',
+        element: <ServiceRequestPage />,
+      },
+      {
+        path: 'ServiceRequestEdit',
+        element: <ServiceRequestEditPage />,
       },
     ],
   },

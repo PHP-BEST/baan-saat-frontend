@@ -42,7 +42,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const location = useLocation();
 
   const [user, setUser] = useState<User>({
-    _id: '',
+    _id: '', // Just an example of user ID that I get from MongoDB
     name: '',
     role: 'customer',
     telNumber: '',

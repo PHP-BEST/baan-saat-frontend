@@ -1,102 +1,80 @@
-import { getSamples, type Sample } from '@/api/samples';
-import { testConnection } from '@/api/connection';
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import ActionButton from '@/components/our-components/actionButton';
+import { useState } from 'react';
+
+import Footer from '@/components/our-components/footer';
+import HeaderLanding from '@/components/our-components/headerLanding';
+
+import { Search } from 'lucide-react';
+import ServiceCardLanding from '@/components/our-components/serviceCardLanding';
 
 export default function LandingPage() {
-  const [samples, setSamples] = useState<Sample[]>([]);
-  const [connectionWord, setConnectionWord] = useState<string>('');
-  const [isConnecting, setConnecting] = useState<boolean>(false);
-  const [isFetchingSamples, setFetchingSamples] = useState<boolean>(false);
+  const [searchInput, setSearchInput] = useState<string>('');
 
-  useEffect(() => {
-    async function checkConnection() {
-      setConnecting(true);
-      try {
-        const connection = await testConnection();
-        setConnectionWord(connection);
-      } catch (error) {
-        console.error(error);
-        setConnectionWord('There is something wrong... ');
-      }
-      setConnecting(false);
+  const handleSearch = () => {
+    if (searchInput) {
+      alert(`You're searching this: ${searchInput}`);
+    } else {
+      alert("There's nothing...");
     }
-    checkConnection();
-  }, []);
-
-  useEffect(() => {
-    async function fetchSamples() {
-      setFetchingSamples(true);
-      try {
-        const samplesFromAPI = await getSamples();
-        setSamples(samplesFromAPI);
-      } catch (error) {
-        console.error(error);
-        setSamples([]);
-      }
-      setFetchingSamples(false);
-    }
-    fetchSamples();
-  }, []);
+  };
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-bold text-2xl">This is Landing Page</p>
+      <HeaderLanding />
 
       {/* Buttons */}
-      <div className="flex gap-4">
-        <ActionButton
-          buttonColor="blue"
-          buttonType="filled"
-          onClick={() => {
-            alert('Login button clicked');
-          }}
-        >
-          <Link to="/login">Login</Link>
-        </ActionButton>
+      <div className=" h-[200px] flex gap-4"></div>
 
-        <ActionButton buttonColor="red" buttonType="outline">
-          Sign out
-        </ActionButton>
-
-        <ActionButton
-          buttonColor="green"
-          buttonType="outline"
-          onClick={() => {
-            alert('Upload Successfully');
-          }}
-          fontSize={16}
-        >
-          Upload
-        </ActionButton>
-
-        <ActionButton className="bg-black text-white text-2xl font-semibold">
-          Customize
-        </ActionButton>
+      <div className="flex flex-col gap-10">
+        <div className="items-center justify-center flex flex-col md:flex-row gap-4">
+          <h1 className="text-9xl font-bold">บ้านสะอาด... วันนี้</h1>
+        </div>
+        <div className="items-center justify-center flex">
+          <p className="text-lg text-gray-600 mt-2">
+            ค้นหาผู้ให้บริการทำความสะอาดบ้าน ซักรีด ซ่อมแซม และอื่นๆ อีกมากมาย
+          </p>
+        </div>
       </div>
 
-      {/* API Things */}
-      <p className="text-2xl font-bold">Testing Connection</p>
-      {isConnecting ? <p>Loading...</p> : <p>{connectionWord}</p>}
+      {/* Search Box */}
+      <div className="flex justify-center mt-4">
+        <div className="bg-white min-w-[75px] w-[50%] h-[50px] flex gap-1 items-center pl-1 pr-3">
+          <Search
+            width={28}
+            height={28}
+            className={`${searchInput ? 'cursor-pointer' : ''}`}
+            onClick={handleSearch}
+          />
+          <input
+            type="text"
+            className="w-full focus:outline-none focus:border-none"
+            onChange={(e) => {
+              e.preventDefault();
+              setSearchInput(e.target.value);
+            }}
+          />
+        </div>
+      </div>
+      <div>
+        {/* Service Display  */}
+        <div className="bg-white w-full  px-10 py-10">
+          {/* Title */}
+          <h2 className="text-2xl font-bold mb-6 ml-100">กระทู้คำขอล่าสุด</h2>
 
-      {isFetchingSamples ? (
-        <p>Loading...</p>
-      ) : samples.length == 0 ? (
-        <p>{"There's no Objects!"}</p>
-      ) : (
-        <>
-          <p>{"Here's the objects..."}</p>
-          <ul>
-            {samples.map((s) => (
-              <li key={s._id}>
-                <p>{s.name}</p>
-                <p>{s.description}</p>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
+          {/* Service Grid */}
+          <div className="flex justify-center mb-6">
+            <div className=" w-[65%] grid grid-cols-2 md:grid-cols-3 gap-6">
+              <ServiceCardLanding serviceId={'64a7f3f4e4b0c9b1f4d6c8a1'} />
+              <ServiceCardLanding serviceId={'64a7f3f4e4b0c9b1f4d6c8a1'} />
+              <ServiceCardLanding serviceId={'64a7f3f4e4b0c9b1f4d6c8a1'} />
+              <ServiceCardLanding serviceId={'64a7f3f4e4b0c9b1f4d6c8a1'} />
+              <ServiceCardLanding serviceId={'64a7f3f4e4b0c9b1f4d6c8a1'} />
+              <ServiceCardLanding serviceId={'64a7f3f4e4b0c9b1f4d6c8a1'} />
+            </div>
+          </div>
+        </div>
+
+        <Footer />
+      </div>
     </div>
   );
 }
