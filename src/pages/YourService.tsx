@@ -14,11 +14,39 @@ export default function YourServicePage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchUserServices = async () => {
-      setLoading(true);
-      const userServices = await getUserServices(user._id);
-      setServices(userServices);
-      setLoading(false);
+    const fetchServices = async () => {
+      const cacheKey = `user-${user?._id}-services`;
+      if (servicesCache.has(cacheKey)) {
+        setServices(servicesCache.get(cacheKey)!);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await axios.get<ResponseInterface<Service[]>>(
+          `${API_ROOT}/api/services`,
+          {
+            headers: { 'Content-Type': 'application/json' },
+          },
+        );
+
+        if (response.data.success) {
+          const currentServices: Service[] = response.data.data;
+          const filteredServices = currentServices.filter(
+            (svc: Service) => svc.customerId === user._id,
+          );
+          servicesCache.set(cacheKey, filteredServices);
+          setServices(filteredServices);
+        } else {
+          throw new Error('Service not found');
+        }
+      } catch (err) {
+        console.error('Error fetching service data:', err);
+        setServices([]);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchUserServices();

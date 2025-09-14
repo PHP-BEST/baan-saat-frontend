@@ -1,10 +1,13 @@
 import { createBrowserRouter } from 'react-router-dom';
 import ErrorPage from './pages/Error';
 import AccountLayout from './layouts/AccountLayout';
+import MainLayout from './layouts/MainLayout';
 import LandingPage from './pages/Landing';
 import YourServicePage from './pages/YourService';
 import LoginPage from './pages/Login';
 import ProfilePage from './pages/Profile';
+import ProtectedRoute from './components/our-components/protectedRoute';
+
 import BookingPage from './pages/Booking';
 import CustomerRequestPage from './pages/CustomerRequest';
 import ServiceDetailPage from './pages/ServiceDetail';
@@ -20,74 +23,74 @@ import YourRequestPage from './pages/YourRequest';
 
 export const router = createBrowserRouter([
   {
-    path: '',
-    element: <LandingPage />,
-    errorElement: <ErrorPage />,
-  },
-  {
-    path: 'account',
-    element: <AccountLayout />,
+    path: '/',
+    element: <MainLayout />,
     errorElement: <ErrorPage />,
     children: [
+      {
+        path: '',
+        element: <LandingPage />,
+      },
+      {
+        path: 'account',
+        element: (
+          <ProtectedRoute>
+            <AccountLayout />,
+          </ProtectedRoute>
+        ),
+        children: [
+          { path: '', element: <ProfilePage /> },
+          { path: 'service', element: <YourServicePage /> },
+        ],
+      },
+      {
+        path: 'login',
+        element: <LoginPage />,
+      },
       { path: '', element: <ProfilePage /> },
       { path: 'requests', element: <CustomerRequestPage /> },
       { path: 'service', element: <YourServicePage /> },
       { path: 'request', element: <YourRequestPage /> },
+      {
+        path: 'booking/:serviceId',
+        element: <BookingPage />,
+      },
+      {
+        path: 'service/:serviceId',
+        element: <ServiceDetailPage />,
+      },
+      {
+        path: 'service/:serviceId/edit',
+        element: <ServiceEditPage />,
+      },
+      {
+        path: '/register',
+        element: <ProfileCreationPage />,
+      },
+      {
+        path: '/create-service',
+        element: <ServiceCreationPage />,
+      },
+      {
+        path: 'servicelist',
+        element: <ServiceListProfilePage />,
+      },
+      {
+        path: 'servicelistall',
+        element: <ServiceListAllPage />,
+      },
+      {
+        path: 'search',
+        element: <SearchPage />,
+      },
+      {
+        path: 'ServiceRequest',
+        element: <ServiceRequestPage />,
+      },
+      {
+        path: 'ServiceRequestEdit',
+        element: <ServiceRequestEditPage />,
+      },
     ],
-  },
-  {
-    path: 'login',
-    element: <LoginPage />,
-    errorElement: <ErrorPage />,
-  },
-  {
-    path: 'booking/:serviceId',
-    element: <BookingPage />,
-    errorElement: <ErrorPage />,
-  },
-  {
-    path: 'service/:serviceId',
-    element: <ServiceDetailPage />,
-    errorElement: <ErrorPage />,
-  },
-  {
-    path: 'service/:serviceId/edit',
-    element: <ServiceEditPage />,
-    errorElement: <ErrorPage />,
-  },
-  {
-    path: '/register',
-    element: <ProfileCreationPage />,
-    errorElement: <ErrorPage />,
-  },
-  {
-    path: 'service/create',
-    element: <ServiceCreationPage />,
-    errorElement: <ErrorPage />,
-  },
-  {
-    path: 'servicelist',
-    element: <ServiceListProfilePage />,
-    errorElement: <ErrorPage />,
-  },
-  {
-    path: 'servicelistall',
-    element: <ServiceListAllPage />,
-    errorElement: <ErrorPage />,
-  },
-  {
-    path: 'search',
-    element: <SearchPage />,
-    errorElement: <ErrorPage />,
-  },
-  {
-    path: 'ServiceRequest',
-    element: <ServiceRequestPage />,
-    errorElement: <ErrorPage />,
-  },
-  {
-    path: 'ServiceRequestEdit',
-    element: <ServiceRequestEditPage />,
-    errorElement: <ErrorPage />,
   },
 ]);

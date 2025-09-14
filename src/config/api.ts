@@ -54,7 +54,7 @@ interface GetProfileData {
 // Fetch data by ID
 export async function fetchData(id: string): Promise<GetProfileData['data']> {
   try {
-    const response = await axios.get(`${API_ROOT}/users/${id}`, {
+    const response = await axios.get(`${API_ROOT}/api/users/${id}`, {
       withCredentials: false,
     });
     return response.data.data;

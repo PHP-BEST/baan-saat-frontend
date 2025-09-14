@@ -2,6 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import Footer from '@/components/our-components/footer';
 import Header from '@/components/our-components/header';
 import ActionButton from '@/components/our-components/actionButton';
+import Axios from '@/api/Axios';
 
 interface SidebarItem {
   name: string;
@@ -44,9 +45,12 @@ export default function AccountLayout() {
               <ActionButton
                 buttonColor="red"
                 buttonType="outline"
-                onClick={() => alert('Logging out...')}
+                onClick={() => {
+                  Axios.delete('/logout')
+                  window.location.href = '/login'
+                }}
               >
-                Log out
+                Sign out
               </ActionButton>
             </div>
           </div>
