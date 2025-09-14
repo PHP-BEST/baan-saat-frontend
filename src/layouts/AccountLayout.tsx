@@ -46,8 +46,8 @@ export default function AccountLayout() {
                 buttonColor="red"
                 buttonType="outline"
                 onClick={() => {
-                  Axios.delete('/logout')
-                  window.location.href = '/login'
+                  Axios.delete('/logout');
+                  window.location.href = '/login';
                 }}
               >
                 Sign out

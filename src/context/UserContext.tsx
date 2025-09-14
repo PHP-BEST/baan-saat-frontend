@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react';
 import type { User } from '@/interfaces/User';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
@@ -59,10 +65,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     updatedAt: new Date(),
   });
 
-  const {
-      isLoading,
-      refetch,
-  } = useQuery({
+  const { isLoading, refetch } = useQuery({
     queryKey: ['session'],
     queryFn: fetchSession,
     enabled: true,
@@ -70,7 +73,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     staleTime: 0, // Always stale - refetch every time
     gcTime: 0, // No caching - always fetch fresh data
   });
-  
+
   const getSession = async (): Promise<User | undefined> => {
     const result = await refetch();
     if (result.data) {
@@ -79,7 +82,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     }
     return undefined;
   };
-  
+
   useEffect(() => {
     console.log('UserProvider useEffect runs');
     getSession();
@@ -94,11 +97,13 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   };
 
   if (isLoading) {
-    return <h1>Loading...</h1>
+    return <h1>Loading...</h1>;
   }
 
   return (
-    <UserContext.Provider value={{ user, isLoading, updateUser, updateAvatarUrl }}>
+    <UserContext.Provider
+      value={{ user, isLoading, updateUser, updateAvatarUrl }}
+    >
       {children}
     </UserContext.Provider>
   );

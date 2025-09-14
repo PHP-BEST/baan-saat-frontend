@@ -1,8 +1,10 @@
-import { getUserServices } from '@/api/service';
 import ActionButton from '@/components/our-components/actionButton';
 import ServiceCard from '@/components/our-components/serviceCard';
+import { API_ROOT, type ResponseInterface } from '@/config/api';
 import { useUser } from '@/context/UserContext';
 import type { Service } from '@/interfaces/Service';
+import { servicesCache } from '@/utils/cache';
+import axios from 'axios';
 import { Loader } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +16,7 @@ export default function YourServicePage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchServices = async () => {
+    const fetchUserServices = async () => {
       const cacheKey = `user-${user?._id}-services`;
       if (servicesCache.has(cacheKey)) {
         setServices(servicesCache.get(cacheKey)!);

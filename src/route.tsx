@@ -40,17 +40,15 @@ export const router = createBrowserRouter([
         ),
         children: [
           { path: '', element: <ProfilePage /> },
+          { path: 'requests', element: <CustomerRequestPage /> },
           { path: 'service', element: <YourServicePage /> },
+          { path: 'request', element: <YourRequestPage /> },
         ],
       },
       {
         path: 'login',
         element: <LoginPage />,
       },
-      { path: '', element: <ProfilePage /> },
-      { path: 'requests', element: <CustomerRequestPage /> },
-      { path: 'service', element: <YourServicePage /> },
-      { path: 'request', element: <YourRequestPage /> },
       {
         path: 'booking/:serviceId',
         element: <BookingPage />,

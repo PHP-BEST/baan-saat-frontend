@@ -1,6 +1,6 @@
 import { API_ROOT } from '@/config/api';
 import { useUser } from '../context/UserContext';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
 export default function LoginPage() {
@@ -8,10 +8,10 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user._id !== '') { 
-      navigate(-1) // stay at the same page
+    if (user._id !== '') {
+      navigate(-1); // stay at the same page
     }
-  }, [])
+  }, []);
 
   const handleGoogleSignIn = () => {
     window.location.href = `${API_ROOT}/auth/google`;

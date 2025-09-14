@@ -17,10 +17,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
-      {
-        NODE_ENV !== 'production' &&
+      {NODE_ENV !== 'production' && (
         <ReactQueryDevtools initialIsOpen={false} />
-      }
+      )}
     </QueryClientProvider>
   );
 }
