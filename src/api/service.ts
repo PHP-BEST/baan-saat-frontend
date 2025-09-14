@@ -113,6 +113,7 @@ export const searchServices = async (query: string): Promise<Service[]> => {
 };
 
 export interface FilterServiceParams {
+  userId?: string;
   title?: string;
   tags?: TagsOption[];
   minBudget?: number;

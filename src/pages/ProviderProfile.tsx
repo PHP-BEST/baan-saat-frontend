@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
@@ -21,8 +21,10 @@ import { getServicesByUserId } from '@/api/service';
 import ServiceCard from '@/components/our-components/serviceCard';
 import ActionButton from '@/components/our-components/actionButton';
 import { useUser } from '@/context/UserContext';
+import { ChevronRight } from 'lucide-react';
 
 export default function ProviderProfilePage() {
+  const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
   const { user } = useUser();
   const [providerUser, setProviderUser] = useState<User | null>(null);
@@ -48,7 +50,7 @@ export default function ProviderProfilePage() {
     return (
       <div>
         <Header />
-        <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
+        <div className="px-16 py-10 w-full min-h-screen flex flex-col gap-10 bg-white">
           <Loading />
         </div>
         <Footer />
@@ -60,7 +62,7 @@ export default function ProviderProfilePage() {
     return (
       <div>
         <Header />
-        <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
+        <div className="px-16 py-10 w-full min-h-screen flex flex-col gap-10 bg-white">
           <p className="text-center text-2xl font-semibold">User not found</p>
         </div>
         <Footer />
@@ -227,17 +229,25 @@ export default function ProviderProfilePage() {
             <p>Profile not found</p>
           )}
         </div>
-        {/* Services Section */}
-        <div className="mt-8 pe-14">
+
+        {/* Services */}
+        <div className="flex flex-col gap-4">
+          {/* Header */}
           <div className="flex justify-between">
-            <h2 className="font-bold text-xl">
-              Service by {providerUser.name}
+            <h2 className="font-bold text-2xl">
+              Services by {providerUser.name}
             </h2>
-            <Link className="font-bold pe-2" to="/servicelistall">
-              View All →
-            </Link>
+            <button
+              className="font-bold text-lg cursor-pointer text-button-action flex gap-1 items-center"
+              onClick={() => navigate(`/user/${providerUser._id}/service`)}
+            >
+              <p className="hover:underline">View All</p>
+              <ChevronRight size={24} />
+            </button>
           </div>
-          <div className="mt-4 ps-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          {/* Some Services */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {providerServices.length > 0 ? (
               providerServices
                 .slice(0, 6)

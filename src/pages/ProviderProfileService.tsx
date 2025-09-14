@@ -1,28 +1,30 @@
-import { Filter } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import ServiceCard from '@/components/our-components/serviceCard';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
+import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { ChevronLeft, Filter } from 'lucide-react';
+import type { User } from '@/interfaces/User';
 import {
   TAG_OPTIONS,
   type Service,
   type TagsOption,
 } from '@/interfaces/Service';
-import { useSearchParams } from 'react-router-dom';
+import Loading from '@/components/our-components/loading';
+import { getUserById } from '@/api/user';
 import {
   filterServices,
-  getAllServices,
-  searchServices,
+  getServicesByUserId,
   type FilterServiceParams,
 } from '@/api/service';
-import ServiceCard from '@/components/our-components/serviceCard';
-import Loading from '@/components/our-components/loading';
-import ActionButton from '@/components/our-components/actionButton';
 import { filterValidator } from '@/utils/filterValidator';
+import ActionButton from '@/components/our-components/actionButton';
 
-export default function SearchPage() {
-  const [searchParams] = useSearchParams();
-  const [showFilter, setShowFilter] = useState(false);
+export default function ProviderProfileServicePage() {
+  const { userId } = useParams<{ userId: string }>();
+  const [providerUser, setProviderUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
 
   // Filter states
@@ -35,40 +37,41 @@ export default function SearchPage() {
   const [filterError, setFilterError] = useState<string | undefined>();
 
   useEffect(() => {
-    const fetchInitialServices = async () => {
+    const getProviderUser = async () => {
       setLoading(true);
-      const query = searchParams.get('query') || '';
-      let services = await searchServices(query);
-      if (services.length === 0) {
-        services = await getAllServices();
-        services = services
-          .sort(
-            (a, b) =>
-              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-          )
-          .slice(0, 10);
-      } else {
-        services = services.sort(
-          (a, b) =>
-            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-        );
+      if (!userId) return;
+      const user = await getUserById(userId);
+      setProviderUser(user);
+      if (user) {
+        const services = await getServicesByUserId(userId);
+        setFilteredServices(services);
       }
-      setFilteredServices(services);
       setLoading(false);
     };
-
-    fetchInitialServices();
-  }, [searchParams]);
+    getProviderUser();
+  }, [userId]);
 
   if (loading) {
     return (
-      <>
+      <div>
         <Header />
-        <main className="flex flex-col items-center min-h-screen px-12 py-8 gap-6 bg-gray-50 ">
+        <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
           <Loading />
-        </main>
+        </div>
         <Footer />
-      </>
+      </div>
+    );
+  }
+
+  if (!providerUser) {
+    return (
+      <div>
+        <Header />
+        <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
+          <p className="text-center text-2xl font-semibold">User not found</p>
+        </div>
+        <Footer />
+      </div>
     );
   }
 
@@ -87,6 +90,7 @@ export default function SearchPage() {
     setLoading(true);
 
     const params: FilterServiceParams = {
+      userId: userId,
       title: serviceTitle || undefined,
       tags: tags.length ? tags : undefined,
       minBudget,
@@ -115,16 +119,21 @@ export default function SearchPage() {
   return (
     <>
       <Header />
-      <main className="flex flex-col items-center min-h-screen px-12 py-8 gap-6 bg-gray-50">
-        {/* Title */}
-        <div className="w-full max-w-6xl text-left mb-2">
-          <h1 className="text-4xl text-black font-bold">
-            Here&apos;s what we found...
-          </h1>
-        </div>
+      <div className="px-16 py-10 w-full min-h-screen flex flex-col gap-8 bg-white">
+        {/* Back Button */}
+        <button
+          onClick={() => window.history.back()}
+          className="flex items-center gap-2 text-button-action cursor-pointer font-bold text-lg"
+        >
+          <ChevronLeft size={24} />
+          <p className="hover:underline">Back</p>
+        </button>
+
+        {/* Header */}
+        <p className="text-3xl font-bold">Services by {providerUser.name}</p>
 
         {/* Result Counter */}
-        <div className="flex justify-between items-center w-full max-w-6xl">
+        <div className="flex justify-between items-center w-full">
           <p className="text-lg font-medium">
             Services Found: {filteredServices.length}
           </p>
@@ -139,7 +148,7 @@ export default function SearchPage() {
 
         {/* Filter Panel */}
         {showFilter && (
-          <div className="w-full max-w-6xl bg-white p-4 rounded-md shadow-md">
+          <div className="w-full bg-white p-4 rounded-md shadow-md">
             <h3 className="text-lg font-semibold mb-2">Filter Services</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -161,7 +170,7 @@ export default function SearchPage() {
                   Tags
                 </label>
                 <div className="grid grid-cols-2 gap-2 mb-2">
-                  {TAG_OPTIONS.map((tag) => (
+                  {TAG_OPTIONS.map((tag: TagsOption) => (
                     <label key={tag.value} className="flex items-center gap-2">
                       <input
                         type="checkbox"
@@ -256,8 +265,8 @@ export default function SearchPage() {
           </div>
         )}
 
-        {/* Filtered Service cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl px-4 md:px-0">
+        {/* Services */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full px-4 md:px-0">
           {filteredServices.length > 0 ? (
             filteredServices.map((service: Service) => (
               <ServiceCard key={service._id} service={service} size="L" />
@@ -268,7 +277,7 @@ export default function SearchPage() {
             </p>
           )}
         </div>
-      </main>
+      </div>
       <Footer />
     </>
   );

@@ -14,7 +14,7 @@ import ServiceDetailPage from './pages/ServiceDetail';
 import ServiceEditPage from './pages/ServiceEdit';
 import ServiceCreatePage from './pages/ServiceCreate';
 import ProviderProfilePage from './pages/ProviderProfile';
-import ServiceListAllPage from './pages/ServiceListAll';
+import ProviderProfileServicePage from './pages/ProviderProfileService';
 import SearchPage from './pages/Search';
 import ServiceRequestPage from './pages/ServiceRequest';
 import ServiceRequestEditPage from './pages/ServiceRequestEdit';
@@ -69,8 +69,8 @@ export const router = createBrowserRouter([
         element: <ProviderProfilePage />,
       },
       {
-        path: 'servicelistall',
-        element: <ServiceListAllPage />,
+        path: 'user/:userId/service',
+        element: <ProviderProfileServicePage />,
       },
       {
         path: 'search',
