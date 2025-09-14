@@ -1,31 +1,21 @@
-import React, {
-  useEffect,
-  useState,
-  type ChangeEvent,
-  type FormEvent,
-} from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, type ChangeEvent, type FormEvent } from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import ActionButton from '@/components/our-components/actionButton';
 import {
   TAG_OPTIONS,
-  type Service,
   type ServiceTag,
   type TagsOption,
 } from '@/interfaces/Service';
-import { serviceValidator } from '@/utils/serviceValidator';
-import { Loader, AlertCircle } from 'lucide-react';
 import { formatDateToDisplay, getCompressedImageUrl } from '@/utils/function';
-import Loading from '@/components/our-components/loading';
-import {
-  getServiceById,
-  updateService,
-  type FormInterface,
-} from '@/api/service';
+import { serviceValidator } from '@/utils/serviceValidator';
+import { createService, type FormInterface } from '@/api/service';
+import { AlertCircle, Loader } from 'lucide-react';
 import MyDatePicker from '@/components/ui/calendar';
+import { useUser } from '@/context/UserContext';
 
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
@@ -45,24 +35,7 @@ const Textarea = React.forwardRef<
   );
 });
 
-function isFormDataSameAsOldService(formData: FormInterface, service: Service) {
-  return (
-    formData.title === service.title &&
-    formData.description === service.description &&
-    JSON.stringify(formData.tags.sort()) ===
-      JSON.stringify((service.tags || []).sort()) &&
-    formData.budget === service.budget &&
-    formData.location === service.location &&
-    formData.coverPhotoUrl === service.coverPhotoUrl &&
-    formData.date === service.date
-  );
-}
-
-export default function ServiceEditPage() {
-  const { serviceId } = useParams<{ serviceId: string }>();
-  const [service, setService] = useState<Service | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [updating, setUpdating] = useState(false);
+export const ServiceCreatePage: React.FC = () => {
   const [formData, setFormData] = useState<FormInterface>({
     title: '',
     description: '',
@@ -72,71 +45,14 @@ export default function ServiceEditPage() {
     coverPhotoUrl: '',
     date: null,
   });
+  const { user } = useUser();
+  if (!user) return;
 
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
 
-  useEffect(() => {
-    const fetchService = async () => {
-      if (!serviceId) return;
-
-      setLoading(true);
-      const currentService = await getServiceById(serviceId);
-      console.log(currentService);
-      setService(currentService);
-      setFormData({
-        title: currentService?.title || '',
-        description: currentService?.description || '',
-        tags: Array.isArray(currentService?.tags) ? currentService.tags : [],
-        budget: currentService?.budget || 0,
-        location: currentService?.location || '',
-        coverPhotoUrl: currentService?.coverPhotoUrl || '',
-        date: currentService?.date || null,
-      });
-
-      setLoading(false);
-    };
-
-    fetchService();
-  }, [serviceId]);
-
-  if (loading) {
-    return (
-      <div>
-        <Header />
-        <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
-          <Loading />
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (!service) {
-    return (
-      <div>
-        <Header />
-        <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
-          <div className="flex flex-col gap-4 justify-center items-center">
-            <p className="text-2xl font-semibold">
-              Sorry, We couldn&apos;t find the service you&apos;re looking
-              for...
-            </p>
-            <ActionButton
-              onClick={() => {
-                window.history.back();
-              }}
-              buttonType="outline"
-            >
-              Back
-            </ActionButton>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  const [adding, setAdding] = useState(false);
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -223,18 +139,12 @@ export default function ServiceEditPage() {
     }
   };
 
-  const canSubmit =
-    Object.keys(validationErrors).length === 0 &&
-    !isFormDataSameAsOldService(formData, service) &&
-    !updating;
-
   const handleSubmit = async (e?: FormEvent<HTMLFormElement>) => {
-    if (!serviceId) return;
     if (e) e.preventDefault();
 
     if (canSubmit) {
-      setUpdating(true);
-      const success = await updateService(serviceId, formData);
+      setAdding(true);
+      const success = await createService(user._id, formData);
       if (success) {
         setFormData({
           title: '',
@@ -247,18 +157,20 @@ export default function ServiceEditPage() {
         });
         window.location.href = `/account/service`;
       } else {
-        alert('Failed to update service. Please try again.');
+        alert('Failed to create service. Please try again.');
       }
-      setUpdating(false);
+      setAdding(false);
     }
   };
+
+  const canSubmit = Object.keys(validationErrors).length === 0 && !adding;
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <Header />
       <main className="flex-grow flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-2xl space-y-8">
-          <h1 className="text-3xl font-bold text-gray-900">Update a Service</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Create a Service</h1>
           <form onSubmit={handleSubmit} className="w-full space-y-6">
             {/* Service Title */}
             <div>
@@ -275,17 +187,17 @@ export default function ServiceEditPage() {
                 placeholder="Service Title"
                 value={formData.title}
                 onChange={handleInputChange}
-                disabled={updating}
+                disabled={adding}
                 className={`border-gray-300 ${
-                  validationErrors.serviceTitle
+                  validationErrors.title
                     ? 'border-red-500 focus:ring-red-200'
                     : 'focus:ring-blue-200'
                 }`}
               />
-              {validationErrors.serviceTitle && (
+              {validationErrors.title && (
                 <div className="flex items-center gap-1 text-red-500 text-sm mt-1">
                   <AlertCircle className="w-4 h-4" />
-                  <span>{validationErrors.serviceTitle}</span>
+                  <span>{validationErrors.title}</span>
                 </div>
               )}
             </div>
@@ -305,7 +217,7 @@ export default function ServiceEditPage() {
                 placeholder="Description"
                 value={formData.description}
                 onChange={handleInputChange}
-                disabled={updating}
+                disabled={adding}
                 className={`${
                   validationErrors.description
                     ? 'border-red-500 focus:ring-red-200'
@@ -339,7 +251,7 @@ export default function ServiceEditPage() {
                       onChange={(e) =>
                         handleTagChange(tagOption.value, e.target.checked)
                       }
-                      disabled={updating}
+                      disabled={adding}
                       className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                     <span className="text-sm text-gray-700">
@@ -368,11 +280,11 @@ export default function ServiceEditPage() {
                 <Input
                   id="budget"
                   name="budget"
-                  type="text"
+                  type="number"
                   placeholder="Budget"
                   value={formData.budget}
                   onChange={handleInputChange}
-                  disabled={updating}
+                  disabled={adding}
                   className={`border-gray-300 ${
                     validationErrors.budget
                       ? 'border-red-500 focus:ring-red-200'
@@ -401,7 +313,7 @@ export default function ServiceEditPage() {
                   placeholder="Location"
                   value={formData.location}
                   onChange={handleInputChange}
-                  disabled={updating}
+                  disabled={adding}
                   className={`border-gray-300 ${
                     validationErrors.location
                       ? 'border-red-500 focus:ring-red-200'
@@ -438,14 +350,14 @@ export default function ServiceEditPage() {
                 <ActionButton
                   type="button"
                   onClick={() => {
-                    if (!updating) {
+                    if (!adding) {
                       document.getElementById('cover-photo-upload')?.click();
                     }
                   }}
                   buttonType="outline"
                   buttonColor="green"
-                  disabled={updating}
-                  className={`${updating ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                  disabled={adding}
+                  className={`${adding ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                 >
                   Upload
                 </ActionButton>
@@ -456,7 +368,7 @@ export default function ServiceEditPage() {
                   className="sr-only"
                   onChange={handleImageUpload}
                   accept="image/*"
-                  disabled={updating}
+                  disabled={adding}
                 />
               </div>
             </div>
@@ -469,10 +381,7 @@ export default function ServiceEditPage() {
               >
                 Date to Perform
               </label>
-              <MyDatePicker
-                onSendData={handleDatePicking}
-                disabled={updating}
-              />
+              <MyDatePicker onSendData={handleDatePicking} disabled={adding} />
               {formData.date && (
                 <div className="text-sm text-gray-600 mt-2">
                   Selected Date: {formatDateToDisplay(formData.date)}
@@ -486,13 +395,13 @@ export default function ServiceEditPage() {
                 type="submit"
                 buttonColor="blue"
                 buttonType="filled"
-                disabled={!canSubmit || updating}
-                className={`${canSubmit && !updating ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
+                disabled={!canSubmit || adding}
+                className={`${canSubmit && !adding ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
               >
-                {updating ? (
+                {adding ? (
                   <div className="flex justify-center items-center gap-2">
                     <Loader className="animate-spin" size={16} />
-                    <span>Updating...</span>
+                    <span>Creating...</span>
                   </div>
                 ) : (
                   'Submit'
@@ -502,10 +411,10 @@ export default function ServiceEditPage() {
                 type="button"
                 buttonColor="red"
                 buttonType="outline"
-                disabled={updating}
-                className={`${!updating ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
+                disabled={adding}
+                className={`${!adding ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
                 onClick={() => {
-                  if (!updating) {
+                  if (!adding) {
                     window.location.href = `/account/service`;
                   }
                 }}
@@ -519,4 +428,6 @@ export default function ServiceEditPage() {
       <Footer />
     </div>
   );
-}
+};
+
+export default ServiceCreatePage;

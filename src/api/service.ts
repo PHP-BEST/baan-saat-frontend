@@ -1,6 +1,6 @@
 import { API_ROOT, type ResponseInterface } from '@/config/api';
-import type { Service, TagsOption } from '@/interfaces/Service';
-import { servicesCache } from '@/utils/cache';
+import type { Service, ServiceTag, TagsOption } from '@/interfaces/Service';
+import { serviceCache, servicesCache } from '@/utils/cache';
 import axios from 'axios';
 
 const API_BASE = `${API_ROOT}/api/services`;
@@ -51,6 +51,38 @@ export const getUserServices = async (userId: string): Promise<Service[]> => {
   } catch (err) {
     console.log('Error fetching user services in getUserServices:', err);
     return [];
+  }
+};
+
+export const getServiceById = async (
+  serviceId: string,
+): Promise<Service | null> => {
+  if (!serviceId) return null;
+
+  const cacheKey = `service-${serviceId}`;
+
+  if (serviceCache.has(cacheKey)) {
+    return serviceCache.get(cacheKey)!;
+  }
+
+  try {
+    const response = await axios.get<ResponseInterface<Service>>(
+      `${API_BASE}/${serviceId}`,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+
+    if (response.data.success) {
+      const currentService = response.data.data;
+      serviceCache.set(cacheKey, currentService);
+      return currentService;
+    } else {
+      throw new Error('Service not found');
+    }
+  } catch (err) {
+    console.error('Error fetching service data:', err);
+    return null;
   }
 };
 
@@ -110,5 +142,68 @@ export const filterServices = async (
   } catch (err) {
     console.log('Error filtering services in filterServices:', err);
     return [];
+  }
+};
+
+export interface FormInterface {
+  title: string;
+  description: string;
+  tags: ServiceTag[];
+  budget: number;
+  location: string;
+  coverPhotoUrl?: string;
+  date: Date | null;
+}
+
+export const createService = async (
+  userId: string,
+  formData: FormInterface,
+): Promise<boolean> => {
+  try {
+    const response = await axios.post<ResponseInterface<Service>>(
+      `${API_BASE}`,
+      { ...formData, customerId: userId },
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+
+    if (response.data.success) {
+      const service = response.data.data;
+      const serviceId = response.data.data._id;
+      serviceCache.set(`service-${serviceId}`, service);
+      return true;
+    } else {
+      throw new Error('Failed to create service');
+    }
+  } catch (err) {
+    console.error('Error creating service:', err);
+    return false;
+  }
+};
+
+export const updateService = async (
+  serviceId: string,
+  formData: FormInterface,
+): Promise<boolean> => {
+  try {
+    const response = await axios.put<ResponseInterface<Service>>(
+      `${API_BASE}/${serviceId}`,
+      formData,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+
+    if (response.data.success) {
+      const updatedService = response.data.data;
+      serviceCache.set(`service-${serviceId}`, updatedService);
+      return true;
+    } else {
+      throw new Error('Failed to update service');
+    }
+  } catch (err) {
+    console.error('Error updating service:', err);
+    return false;
   }
 };

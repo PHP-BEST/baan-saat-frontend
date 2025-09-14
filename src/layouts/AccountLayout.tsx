@@ -7,15 +7,16 @@ import axios from 'axios';
 interface SidebarItem {
   name: string;
   path: string;
+  isDisabled?: boolean;
 }
 
 const SidebarMenu: SidebarItem[] = [
-  { name: 'Profile', path: '/' },
-  { name: 'Account Setting', path: '/setting' },
-  { name: 'Privacy', path: '/privacy' },
-  { name: 'Your Request', path: '/your-request' },
-  { name: 'Requests', path: '/requests' },
-  { name: 'Your Service', path: '/service' },
+  { name: 'Profile', path: '/', isDisabled: false },
+  { name: 'Account Setting', path: '/setting', isDisabled: true },
+  { name: 'Privacy', path: '/privacy', isDisabled: true },
+  { name: 'Your Request', path: '/your-request', isDisabled: true },
+  { name: 'Requests', path: '/requests', isDisabled: false },
+  { name: 'Your Service', path: '/service', isDisabled: false },
 ];
 
 const logout = async () => {
@@ -29,9 +30,9 @@ const logout = async () => {
 
 export default function AccountLayout() {
   return (
-    <>
+    <div className="h-fit w-full">
       <Header />
-      <div className="w-full min-h-screen h-fit px-12 py-8 flex gap-6 bg-gray-50 justify-center">
+      <div className="w-full min-h-screen px-12 py-8 flex gap-6 bg-gray-50 justify-center">
         {/* Sidebar */}
         <div className="flex flex-col w-1/4 min-w-[160px] max-w-[240px]">
           <h1 className="text-2xl font-bold mb-2">Your Account</h1>
@@ -41,7 +42,10 @@ export default function AccountLayout() {
                 <NavLink
                   key={item.path}
                   to={'/account' + item.path}
-                  className="font-medium hover:text-button-action"
+                  className={`font-medium ${item.isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:text-button-action'}`}
+                  onClick={
+                    item.isDisabled ? (e) => e.preventDefault() : undefined
+                  }
                 >
                   {item.name}
                 </NavLink>
@@ -68,6 +72,6 @@ export default function AccountLayout() {
         </div>
       </div>
       <Footer />
-    </>
+    </div>
   );
 }

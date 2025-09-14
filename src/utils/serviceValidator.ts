@@ -137,7 +137,6 @@ export const serviceValidator = (
   value: ServiceFieldValue,
 ): ValidationResult => {
   switch (field) {
-    case 'serviceTitle':
     case 'title':
       return validateTitle(value as string);
     case 'description':

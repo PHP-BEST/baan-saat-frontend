@@ -1,16 +1,14 @@
 import type { Service } from '@/interfaces/Service';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
-import { API_ROOT, type ResponseInterface } from '@/config/api';
 import ActionButton from '@/components/our-components/actionButton';
-import { convertTagsToLabels } from '@/utils/function';
-import { Phone } from 'lucide-react';
-import { serviceCache } from '@/utils/cache';
+import { convertTagsToLabels, formatDateToDisplay } from '@/utils/function';
+import { Calendar, Phone } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import Loading from '@/components/our-components/loading';
+import { getServiceById } from '@/api/service';
 
 export default function ServiceDetailPage() {
   const navigate = useNavigate();
@@ -21,38 +19,11 @@ export default function ServiceDetailPage() {
 
   useEffect(() => {
     const fetchService = async () => {
+      setLoading(true);
       if (!serviceId) return;
-
-      const cacheKey = `service-${serviceId}`;
-
-      if (serviceCache.has(cacheKey)) {
-        setService(serviceCache.get(cacheKey)!);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        const response = await axios.get<ResponseInterface<Service>>(
-          `${API_ROOT}/services/${serviceId}`,
-          {
-            headers: { 'Content-Type': 'application/json' },
-          },
-        );
-
-        if (response.data.success) {
-          const currentService = response.data.data;
-          serviceCache.set(cacheKey, currentService);
-          setService(currentService);
-        } else {
-          throw new Error('Service not found');
-        }
-      } catch (err) {
-        console.error('Error fetching service data:', err);
-        setService(null);
-      } finally {
-        setLoading(false);
-      }
+      const service = await getServiceById(serviceId);
+      setService(service);
+      setLoading(false);
     };
 
     fetchService();
@@ -99,7 +70,7 @@ export default function ServiceDetailPage() {
     <div className="flex flex-col min-h-screen bg-white">
       <Header />
       <main className="flex-grow flex justify-center py-12 px-4">
-        <div className="w-full max-w-2xl space-y-4">
+        <div className="w-full max-w-2xl space-y-6">
           {/* Service Name */}
           <h1
             title={service.title}
@@ -120,29 +91,29 @@ export default function ServiceDetailPage() {
           )}
 
           {/* Service Description */}
-          <div className="w-full">
-            <h2 className="text-2xl font-semibold mb-2">Description</h2>
+          <div className="w-full flex flex-col gap-2">
+            <h2 className="text-2xl font-semibold">Description</h2>
             <p className="text-lg text-gray-700">
               {service.description || 'No description provided.'}
             </p>
           </div>
 
           {/* Service Location */}
-          <div className="w-full">
-            <h2 className="text-2xl font-semibold mb-2">Location</h2>
+          <div className="w-full flex flex-col gap-2">
+            <h2 className="text-2xl font-semibold">Location</h2>
             <p className="text-lg text-gray-700">{service.location}</p>
           </div>
 
           {/* Service Budget */}
-          <div className="w-full">
-            <h2 className="text-2xl font-semibold mb-2">Budget</h2>
+          <div className="w-full flex flex-col gap-2">
+            <h2 className="text-2xl font-semibold">Budget</h2>
             <p className="text-lg text-gray-700">฿ {service.budget}</p>
           </div>
 
           {/* Service Contact */}
-          <div className="w-full">
-            <h2 className="text-2xl font-semibold mb-2">Contact</h2>
-            <div className="flex gap-2">
+          <div className="w-full flex flex-col gap-2">
+            <h2 className="text-2xl font-semibold">Contact</h2>
+            <div className="flex gap-2 items-center">
               <Phone width={16} />
               <p className="text-lg text-gray-700">{service.telNumber}</p>
             </div>
@@ -150,8 +121,8 @@ export default function ServiceDetailPage() {
 
           {/* Service Tags */}
           {service.tags && service.tags.length > 0 && (
-            <div className="w-full">
-              <h2 className="text-2xl font-semibold mb-2">Tags</h2>
+            <div className="w-full flex flex-col gap-2">
+              <h2 className="text-2xl font-semibold">Tags</h2>
               <div className="flex flex-wrap gap-2">
                 {convertTagsToLabels(service.tags).map((tag) => (
                   <span
@@ -164,6 +135,17 @@ export default function ServiceDetailPage() {
               </div>
             </div>
           )}
+
+          {/* Service Date */}
+          <div className="w-full flex flex-col gap-2">
+            <h2 className="text-2xl font-semibold">Date to Perform</h2>
+            <div className="flex gap-2 items-center">
+              <Calendar width={16} />
+              <p className="text-lg text-gray-700">
+                {formatDateToDisplay(service.date)}
+              </p>
+            </div>
+          </div>
 
           <div className="flex justify-end gap-4 my-8">
             {/* Edit Button */}

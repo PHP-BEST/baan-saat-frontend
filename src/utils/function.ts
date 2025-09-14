@@ -41,3 +41,27 @@ export const getCompressedImageUrl = (
     img.src = URL.createObjectURL(file);
   });
 };
+
+export function formatDateToDisplay(date: Date): string {
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return '';
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = d.getMonth() + 1;
+  const monthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  const monthName = monthNames[month - 1];
+  const year = d.getFullYear() + 543;
+  return `${day} ${monthName} ${year}`;
+}

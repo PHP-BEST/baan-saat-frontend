@@ -60,7 +60,7 @@ export default function LandingPage() {
 
         {/* Search Box */}
         <div className="flex justify-center mt-4 w-full">
-          <div className="bg-white min-w-[100px] w-full max-w-[600px] h-[50px] flex gap-1 items-center mx-auto">
+          <div className="bg-white min-w-[100px] w-full max-w-[600px] h-[50px] flex gap-1 items-center mx-auto px-1">
             <Search
               width={28}
               height={28}

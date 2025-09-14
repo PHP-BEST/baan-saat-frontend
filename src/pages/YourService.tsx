@@ -1,16 +1,12 @@
+import { getUserServices } from '@/api/service';
 import ActionButton from '@/components/our-components/actionButton';
 import ServiceCard from '@/components/our-components/serviceCard';
-import { API_ROOT, type ResponseInterface } from '@/config/api';
 import { useUser } from '@/context/UserContext';
 import type { Service } from '@/interfaces/Service';
-import { servicesCache } from '@/utils/cache';
-import axios from 'axios';
 import { Loader } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 export default function YourServicePage() {
-  const navigate = useNavigate();
   const [services, setServices] = useState<Service[]>([]);
 
   const { user } = useUser();
@@ -20,38 +16,10 @@ export default function YourServicePage() {
 
   useEffect(() => {
     const fetchUserServices = async () => {
-      const cacheKey = `user-${user?._id}-services`;
-      if (servicesCache.has(cacheKey)) {
-        setServices(servicesCache.get(cacheKey)!);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        const response = await axios.get<ResponseInterface<Service[]>>(
-          `${API_ROOT}/api/services`,
-          {
-            headers: { 'Content-Type': 'application/json' },
-          },
-        );
-
-        if (response.data.success) {
-          const currentServices: Service[] = response.data.data;
-          const filteredServices = currentServices.filter(
-            (svc: Service) => svc.customerId === user._id,
-          );
-          servicesCache.set(cacheKey, filteredServices);
-          setServices(filteredServices);
-        } else {
-          throw new Error('Service not found');
-        }
-      } catch (err) {
-        console.error('Error fetching service data:', err);
-        setServices([]);
-      } finally {
-        setLoading(false);
-      }
+      setLoading(true);
+      const userServices = await getUserServices(user._id);
+      setServices(userServices);
+      setLoading(false);
     };
 
     fetchUserServices();
@@ -66,7 +34,7 @@ export default function YourServicePage() {
           <ActionButton
             className="cursor-pointer"
             onClick={() => {
-              navigate('/create-service');
+              window.location.href = '/service/create';
             }}
           >
             Create
@@ -90,7 +58,7 @@ export default function YourServicePage() {
         <ActionButton
           className="cursor-pointer"
           onClick={() => {
-            navigate('/create-service');
+            window.location.href = '/service/create';
           }}
         >
           Create
