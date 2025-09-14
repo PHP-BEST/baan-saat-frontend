@@ -9,10 +9,12 @@ import ActionButton from '@/components/our-components/actionButton';
 import { convertTagsToLabels } from '@/utils/function';
 import { Loader, Phone } from 'lucide-react';
 import { serviceCache } from '@/utils/cache';
+import { useUser } from '@/context/UserContext';
 
 export default function ServiceDetailPage() {
   const navigate = useNavigate();
   const { serviceId } = useParams<{ serviceId: string }>();
+  const { user } = useUser();
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -168,25 +170,27 @@ export default function ServiceDetailPage() {
 
           <div className="flex justify-end gap-4 my-8">
             {/* Edit Button */}
-            <ActionButton
-              buttonType="outline"
-              className="cursor-pointer"
-              onClick={() => {
-                navigate(`/service/${service._id}/edit`);
-              }}
-            >
-              Edit
-            </ActionButton>
+            {user?._id === service.customerId && (
+              <ActionButton
+                buttonType="outline"
+                className="cursor-pointer"
+                onClick={() => {
+                  navigate(`/service/${service._id}/edit`);
+                }}
+              >
+                Edit
+              </ActionButton>
+            )}
             {/* Back Button */}
             <ActionButton
               buttonType="outline"
               buttonColor="red"
               className="cursor-pointer"
               onClick={() => {
-                navigate('/account/service');
+                navigate('/');
               }}
             >
-              Back
+              Back to Home
             </ActionButton>
           </div>
         </div>
