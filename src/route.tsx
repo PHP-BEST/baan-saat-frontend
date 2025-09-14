@@ -12,7 +12,6 @@ import BookingPage from './pages/Booking';
 import CustomerRequestPage from './pages/CustomerRequest';
 import ServiceDetailPage from './pages/ServiceDetail';
 import ServiceEditPage from './pages/ServiceEdit';
-import ProfileCreationPage from './pages/ProfileCreation';
 import ServiceCreatePage from './pages/ServiceCreate';
 import ServiceListProfilePage from './pages/ServiceListProfile';
 import ServiceListAllPage from './pages/ServiceListAll';
@@ -60,10 +59,6 @@ export const router = createBrowserRouter([
       {
         path: 'service/:serviceId/edit',
         element: <ServiceEditPage />,
-      },
-      {
-        path: 'register',
-        element: <ProfileCreationPage />,
       },
       {
         path: 'service/create',
