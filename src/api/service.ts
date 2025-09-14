@@ -1,5 +1,5 @@
 import { API_ROOT, type ResponseInterface } from '@/config/api';
-import type { Service } from '@/interfaces/Service';
+import type { Service, TagsOption } from '@/interfaces/Service';
 import { servicesCache } from '@/utils/cache';
 import axios from 'axios';
 
@@ -71,6 +71,44 @@ export const searchServices = async (query: string): Promise<Service[]> => {
     }
   } catch (err) {
     console.log('Error searching services in searchServices:', err);
+    return [];
+  }
+};
+
+export interface FilterServiceParams {
+  title?: string;
+  tags?: TagsOption[];
+  minBudget?: number;
+  maxBudget?: number;
+  startDate?: string;
+  endDate?: string;
+}
+
+export const filterServices = async (
+  params: FilterServiceParams,
+): Promise<Service[]> => {
+  try {
+    const response = await axios.get<ResponseInterface<Service[]>>(
+      `${API_BASE}/filter`,
+      {
+        headers: { 'Content-Type': 'application/json' },
+        params: {
+          ...params,
+          ...(params.tags
+            ? { tags: params.tags.map((tag) => tag.value).join(',') }
+            : {}),
+        },
+      },
+    );
+
+    if (response.data.success) {
+      console.log('Filtered services:', response.data.data);
+      return response.data.data;
+    } else {
+      return [];
+    }
+  } catch (err) {
+    console.log('Error filtering services in filterServices:', err);
     return [];
   }
 };

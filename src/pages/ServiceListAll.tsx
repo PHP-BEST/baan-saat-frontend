@@ -89,7 +89,7 @@ export default function ServiceListAllPage() {
           <FilterBar
             showFilter={showFilter}
             setShowFilter={setShowFilter}
-            allJobs={allJobs}
+            services={allJobs}
             setFilteredJobs={setFilteredServices}
             searchName={false}
           />

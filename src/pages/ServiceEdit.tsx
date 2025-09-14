@@ -10,13 +10,19 @@ import { cn } from '@/lib/utils';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import ActionButton from '@/components/our-components/actionButton';
-import type { Service, ServiceTag } from '@/interfaces/Service';
+import {
+  TAG_OPTIONS,
+  type Service,
+  type ServiceTag,
+  type TagsOption,
+} from '@/interfaces/Service';
 import { serviceCache } from '@/utils/cache';
 import { API_ROOT, type ResponseInterface } from '@/config/api';
 import { serviceValidator } from '@/utils/serviceValidator';
 import axios from 'axios';
 import { Loader, AlertCircle } from 'lucide-react';
 import { getCompressedImageUrl } from '@/utils/function';
+import Loading from '@/components/our-components/loading';
 
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
@@ -35,23 +41,6 @@ const Textarea = React.forwardRef<
     />
   );
 });
-
-interface TagsOption {
-  label: string;
-  value: string;
-  order: number;
-}
-
-const tagsOptions: TagsOption[] = [
-  { label: 'การทำความสะอาด', value: 'houseCleaning', order: 1 },
-  { label: 'การซ่อมแซม', value: 'houseRepair', order: 2 },
-  { label: 'ประปา', value: 'plumbing', order: 3 },
-  { label: 'ไฟฟ้า', value: 'electrical', order: 4 },
-  { label: 'เครื่องปรับอากาศ', value: 'hvac', order: 5 },
-  { label: 'การทาสี', value: 'painting', order: 6 },
-  { label: 'การจัดสวน', value: 'landscaping', order: 7 },
-  { label: 'อื่นๆ', value: 'others', order: 8 },
-];
 
 interface FormInterface {
   serviceTitle: string;
@@ -152,11 +141,7 @@ export default function ServiceEditPage() {
       <div>
         <Header />
         <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
-          {/* Loading Text */}
-          <div className="flex justify-center gap-2 items-center">
-            <p className="text-2xl font-semibold">Loading</p>
-            <Loader className="animate-spin" size={24} />
-          </div>
+          <Loading />
         </div>
         <Footer />
       </div>
@@ -288,7 +273,7 @@ export default function ServiceEditPage() {
             location: '',
             coverPhotoUrl: '',
           });
-          window.location.href = `/service/${serviceId}`;
+          window.location.href = `/account/service`;
         } else {
           alert('Failed to update service. Please try again.');
         }
@@ -374,7 +359,7 @@ export default function ServiceEditPage() {
                 Tags
               </label>
               <div className="grid grid-cols-2 gap-3">
-                {tagsOptions.map((tagOption) => (
+                {TAG_OPTIONS.map((tagOption: TagsOption) => (
                   <label
                     key={tagOption.value}
                     className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
@@ -534,7 +519,7 @@ export default function ServiceEditPage() {
                 className={`${!updating ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
                 onClick={() => {
                   if (!updating) {
-                    window.location.href = `/service/${serviceId}`;
+                    window.location.href = `/account/service`;
                   }
                 }}
               >

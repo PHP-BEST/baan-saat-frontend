@@ -1,11 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import Footer from '@/components/our-components/footer';
-import { Loader, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import type { Service } from '@/interfaces/Service';
 import { getAllServices } from '@/api/service';
 import Header from '@/components/our-components/header';
 import ServiceCard from '@/components/our-components/serviceCard';
 import { useNavigate } from 'react-router-dom';
+import Loading from '@/components/our-components/loading';
 
 export default function LandingPage() {
   const [query, setQuery] = useState('');
@@ -87,10 +88,7 @@ export default function LandingPage() {
       <div className="bg-white min-h-[50vh] w-full flex flex-col px-10 py-10 gap-10">
         <h2 className="text-2xl font-bold">กระทู้คำขอล่าสุด</h2>
         {loading ? (
-          <div className="flex justify-center gap-2 items-center">
-            <p className="text-2xl font-semibold">Loading</p>
-            <Loader className="animate-spin" size={24} />
-          </div>
+          <Loading />
         ) : services.length === 0 ? (
           <div>No services found</div>
         ) : (
