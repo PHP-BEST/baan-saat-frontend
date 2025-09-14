@@ -9,8 +9,9 @@ const AvatarImage = ({ width = 52 }: AccountImageProps) => {
   const navigate = useNavigate();
   const { user } = useUser();
 
+  if (!user) return;
+
   const handleClick = () => {
-    alert('Go to Account Page to see Your Account');
     navigate('/account');
   };
 

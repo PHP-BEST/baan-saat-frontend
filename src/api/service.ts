@@ -3,7 +3,7 @@ import type { Service, TagsOption } from '@/interfaces/Service';
 import { servicesCache } from '@/utils/cache';
 import axios from 'axios';
 
-const API_BASE = `${API_ROOT}/services`;
+const API_BASE = `${API_ROOT}/api/services`;
 
 export const getAllServices = async (): Promise<Service[]> => {
   const cacheKey = 'all-services';

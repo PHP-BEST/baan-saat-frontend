@@ -29,6 +29,8 @@ const skillOptions: SkillOption[] = [
 
 export default function ProfilePage() {
   const { user, updateUser } = useUser();
+  if (!user) return;
+
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValues, setTempValues] = useState<Record<string, string>>({});
   const [hasChanges, setHasChanges] = useState(false);

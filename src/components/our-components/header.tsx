@@ -2,6 +2,8 @@ import { MessageCircle, Search } from 'lucide-react';
 import { useState } from 'react';
 import AvatarImage from './accountImage';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@/context/UserContext';
+import ActionButton from './actionButton';
 
 interface HeaderProps {
   isHideSearchBar?: boolean;
@@ -9,7 +11,8 @@ interface HeaderProps {
 
 const Header = ({ isHideSearchBar = false }: HeaderProps) => {
   const navigate = useNavigate();
-  const [query, setQuery] = useState<string>('');
+  const [query, setQuery] = useState('');
+  const { user } = useUser();
 
   const handleSearch = () => {
     if (query) {
@@ -72,22 +75,32 @@ const Header = ({ isHideSearchBar = false }: HeaderProps) => {
 
       {/* Right Side */}
       <div className="w-fit max-w-[50%] flex gap-3 items-center">
-        {/* Create a request */}
-        <p
-          className="text-[20px] underline cursor-pointer"
-          onClick={handleClickRequest}
-        >
-          Create a request
-        </p>
-        {/* Chat */}
-        <MessageCircle
-          width={48}
-          height={48}
-          className="cursor-pointer"
-          onClick={handleClickChat}
-        />
-        {/* Avatar Image */}
-        <AvatarImage />
+        {user ? (
+          <>
+            {/* Create a request */}
+            <p
+              className="text-[20px] underline cursor-pointer"
+              onClick={handleClickRequest}
+            >
+              Create a request
+            </p>
+            {/* Chat */}
+            <MessageCircle
+              width={48}
+              height={48}
+              className="cursor-pointer"
+              onClick={handleClickChat}
+            />
+            {/* Avatar Image */}
+            <AvatarImage />
+          </>
+        ) : (
+          <>
+            <ActionButton onClick={() => navigate('/login')}>
+              Sign in
+            </ActionButton>
+          </>
+        )}
       </div>
     </header>
   );

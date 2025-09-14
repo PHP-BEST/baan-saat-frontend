@@ -6,7 +6,7 @@ import LandingPage from './pages/Landing';
 import YourServicePage from './pages/YourService';
 import LoginPage from './pages/Login';
 import ProfilePage from './pages/Profile';
-import ProtectedRoute from './components/our-components/protectedRoute';
+import ProtectedRoute from './middleware/protectedRoute';
 
 import BookingPage from './pages/Booking';
 import CustomerRequestPage from './pages/CustomerRequest';

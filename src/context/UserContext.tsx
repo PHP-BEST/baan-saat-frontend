@@ -5,14 +5,13 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { User } from '@/interfaces/User';
+import { type User } from '@/interfaces/User';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
-import Axios from '@/api/Axios';
+import Axios from '@/config/Axios';
 
 interface UserContextType {
-  user: User;
-  isLoading: boolean;
+  user: User | null;
   updateUser: (user: User) => void;
   updateAvatarUrl: (avatarUrl: string) => void;
 }
@@ -46,24 +45,7 @@ interface UserProviderProps {
 
 export const UserProvider = ({ children }: UserProviderProps) => {
   const location = useLocation();
-
-  const [user, setUser] = useState<User>({
-    _id: '', // Just an example of user ID that I get from MongoDB
-    name: '',
-    role: 'customer',
-    telNumber: '',
-    avatarUrl: '',
-    email: '',
-    address: '',
-    providerProfile: {
-      title: '',
-      description: '',
-      skills: [],
-    },
-    lastLoginAt: new Date(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
+  const [user, setUser] = useState<User | null>(null);
 
   const { isLoading, refetch } = useQuery({
     queryKey: ['session'],
@@ -74,18 +56,18 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     gcTime: 0, // No caching - always fetch fresh data
   });
 
-  const getSession = async (): Promise<User | undefined> => {
-    const result = await refetch();
-    if (result.data) {
-      setUser(result.data);
-      return result.data;
-    }
-    return undefined;
-  };
-
   useEffect(() => {
-    console.log('UserProvider useEffect runs');
-    getSession();
+    async function handleSession() {
+      try {
+        const result = await refetch();
+        if (result.data) {
+          setUser(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching session:', error);
+      }
+    }
+    handleSession();
   }, [location.pathname]);
 
   const updateUser = (newUser: User) => {
@@ -93,7 +75,10 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   };
 
   const updateAvatarUrl = (avatarUrl: string) => {
-    setUser((prev) => ({ ...prev, avatarUrl }));
+    if (user) {
+      const updatedUser = { ...user, avatarUrl };
+      setUser(updatedUser);
+    }
   };
 
   if (isLoading) {
@@ -101,9 +86,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   }
 
   return (
-    <UserContext.Provider
-      value={{ user, isLoading, updateUser, updateAvatarUrl }}
-    >
+    <UserContext.Provider value={{ user, updateUser, updateAvatarUrl }}>
       {children}
     </UserContext.Provider>
   );

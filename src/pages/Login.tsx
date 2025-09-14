@@ -1,18 +1,6 @@
 import { API_ROOT } from '@/config/api';
-import { useUser } from '../context/UserContext';
-import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
 
 export default function LoginPage() {
-  const { user } = useUser();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (user._id !== '') {
-      navigate(-1); // stay at the same page
-    }
-  }, []);
-
   const handleGoogleSignIn = () => {
     window.location.href = `${API_ROOT}/auth/google`;
   };
@@ -33,19 +21,19 @@ export default function LoginPage() {
         <div className="flex flex-col gap-4">
           <button
             onClick={handleGoogleSignIn}
-            className="bg-gray-200 py-3 rounded-lg text-base font-medium hover:bg-gray-300 transition-colors"
+            className="bg-gray-200 cursor-pointer py-3 rounded-lg text-base font-medium hover:bg-gray-300 transition-colors"
           >
             Google
           </button>
           <button
             onClick={handleFacebookSignIn}
-            className="bg-gray-200 py-3 rounded-lg text-base font-medium hover:bg-gray-300 transition-colors"
+            className="bg-gray-200 cursor-pointer py-3 rounded-lg text-base font-medium hover:bg-gray-300 transition-colors"
           >
             Facebook
           </button>
           <button
             onClick={handleLineSignIn}
-            className="bg-gray-200 py-3 rounded-lg text-base font-medium hover:bg-gray-300 transition-colors"
+            className="bg-gray-200 cursor-pointer py-3 rounded-lg text-base font-medium hover:bg-gray-300 transition-colors"
           >
             Line
           </button>

@@ -2,7 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import Footer from '@/components/our-components/footer';
 import Header from '@/components/our-components/header';
 import ActionButton from '@/components/our-components/actionButton';
-import Axios from '@/api/Axios';
+import axios from 'axios';
 
 interface SidebarItem {
   name: string;
@@ -17,6 +17,15 @@ const SidebarMenu: SidebarItem[] = [
   { name: 'Requests', path: '/requests' },
   { name: 'Your Service', path: '/service' },
 ];
+
+const logout = async () => {
+  try {
+    await axios.delete('/logout');
+    window.location.href = '/';
+  } catch (error) {
+    console.error('Error logging out:', error);
+  }
+};
 
 export default function AccountLayout() {
   return (
@@ -45,16 +54,14 @@ export default function AccountLayout() {
               <ActionButton
                 buttonColor="red"
                 buttonType="outline"
-                onClick={() => {
-                  Axios.delete('/logout');
-                  window.location.href = '/login';
-                }}
+                onClick={logout}
               >
                 Sign out
               </ActionButton>
             </div>
           </div>
         </div>
+
         {/* Main Content */}
         <div className="w-full flex flex-col flex-1 max-w-[900px]">
           <Outlet />

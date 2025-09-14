@@ -12,7 +12,10 @@ import { useNavigate } from 'react-router-dom';
 export default function YourServicePage() {
   const navigate = useNavigate();
   const [services, setServices] = useState<Service[]>([]);
+
   const { user } = useUser();
+  if (!user) return;
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
