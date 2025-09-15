@@ -51,11 +51,19 @@ export const router = createBrowserRouter([
       },
       {
         path: 'service/:serviceId/edit',
-        element: <ServiceEditPage />,
+        element: (
+          <ProtectedRoute>
+            <ServiceEditPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'service/create',
-        element: <ServiceCreatePage />,
+        element: (
+          <ProtectedRoute>
+            <ServiceCreatePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'user/:userId',
@@ -71,11 +79,19 @@ export const router = createBrowserRouter([
       },
       {
         path: 'booking/:serviceId/create',
-        element: <BookingCreatePage />,
+        element: (
+          <ProtectedRoute>
+            <BookingCreatePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'booking/:requestId/edit',
-        element: <BookingEditPage />,
+        element: (
+          <ProtectedRoute>
+            <BookingEditPage />
+          </ProtectedRoute>
+        ),
       },
     ],
   },
