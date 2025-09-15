@@ -17,7 +17,6 @@ export const createOffer = async (
   serviceId: string,
 ): Promise<boolean> => {
   try {
-    console.log(formData);
     const response = await axios.post<ResponseInterface<Offer>>(
       `${API_BASE}`,
       { ...formData, serviceId, customerId, providerId },
@@ -29,5 +28,22 @@ export const createOffer = async (
   } catch (error) {
     console.error('Error creating offer:', error);
     return false;
+  }
+};
+
+export const checkOffer = async (
+  serviceId: string,
+  providerId: string,
+): Promise<Offer | null> => {
+  try {
+    console.log('Service ID:', serviceId, 'Provider ID:', providerId);
+    const response = await axios.get<ResponseInterface<Offer>>(
+      `${API_BASE}/check/${providerId}/${serviceId}`,
+    );
+    console.log('Check Offer Response:', response.data);
+    return response.data.data;
+  } catch (error) {
+    console.error('Error checking offer existence:', error);
+    return null;
   }
 };

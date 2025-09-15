@@ -12,6 +12,8 @@ import { getServiceById } from '@/api/service';
 import type { User } from '@/interfaces/User';
 import { getUserById } from '@/api/user';
 import ServiceNotFound from '@/error/ServiceNotFound';
+import { checkOffer } from '@/api/offer';
+import type { Offer } from '@/interfaces/Offer';
 
 export default function ServiceDetailPage() {
   const navigate = useNavigate();
@@ -19,7 +21,8 @@ export default function ServiceDetailPage() {
   const { user } = useUser();
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(false);
-  const [providerUser, setProviderUser] = useState<User | null>(null);
+  const [customerUser, setCustomerUser] = useState<User | null>(null);
+  const [offer, setOffer] = useState<Offer | null>(null);
 
   useEffect(() => {
     const fetchService = async () => {
@@ -28,8 +31,14 @@ export default function ServiceDetailPage() {
       const service = await getServiceById(serviceId);
       setService(service);
       if (service) {
-        const user = await getUserById(service.customerId);
-        setProviderUser(user);
+        const currentCustomerUser = await getUserById(service.customerId);
+        setCustomerUser(currentCustomerUser);
+        if (!user) {
+          setOffer(null);
+        } else {
+          const offer = await checkOffer(service._id, user._id);
+          setOffer(offer);
+        }
       }
       setLoading(false);
     };
@@ -99,10 +108,10 @@ export default function ServiceDetailPage() {
             <p
               className="text-lg font-semibold text-button-action hover:underline cursor-pointer"
               onClick={() => {
-                navigate(`/user/${providerUser?._id}`);
+                navigate(`/user/${customerUser?._id}`);
               }}
             >
-              {providerUser ? providerUser.name : 'Unknown'}
+              {customerUser ? customerUser.name : 'Unknown'}
             </p>
           </div>
 
@@ -170,7 +179,8 @@ export default function ServiceDetailPage() {
                 Edit
               </ActionButton>
             ) : (
-              user && (
+              user &&
+              (!offer ? (
                 <ActionButton
                   buttonType="outline"
                   className="cursor-pointer"
@@ -178,9 +188,19 @@ export default function ServiceDetailPage() {
                     navigate(`/offer/${service._id}/create`);
                   }}
                 >
-                  Offer
+                  Create Offer
                 </ActionButton>
-              )
+              ) : (
+                <ActionButton
+                  buttonType="outline"
+                  className="cursor-pointer"
+                  onClick={() => {
+                    navigate(`/offer/${offer._id}/edit`);
+                  }}
+                >
+                  Edit Offer
+                </ActionButton>
+              ))
             )}
             {/* Back Button */}
             <ActionButton
