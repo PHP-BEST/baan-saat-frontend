@@ -47,3 +47,34 @@ export const checkOffer = async (
     return null;
   }
 };
+
+export const getOfferById = async (offerId: string): Promise<Offer> => {
+  try {
+    const response = await axios.get<ResponseInterface<Offer>>(
+      `${API_BASE}/${offerId}`,
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching offer by ID:', error);
+    throw error;
+  }
+};
+
+export const updateOffer = async (
+  offerId: string,
+  formData: OfferFormInterface,
+): Promise<boolean> => {
+  try {
+    const response = await axios.put<ResponseInterface<Offer>>(
+      `${API_BASE}/${offerId}`,
+      formData,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+    return response.data.success;
+  } catch (error) {
+    console.error('Error updating offer:', error);
+    return false;
+  }
+};

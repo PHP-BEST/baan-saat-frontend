@@ -75,7 +75,7 @@ export default function OfferCreatePage() {
     if (
       Object.keys(validationErrors).length === 0 &&
       !adding &&
-      !isInvalidOfferForm(formData)
+      !isInvalidOfferForm(formData, service?.budget)
     ) {
       setCanSubmit(true);
     } else {
