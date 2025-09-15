@@ -180,12 +180,15 @@ export default function SearchPage() {
                 <div className="flex gap-2 mb-2">
                   <input
                     type="number"
-                    value={minBudget ?? ''}
-                    onChange={(e) =>
-                      setMinBudget(
-                        e.target.value ? Number(e.target.value) : undefined,
-                      )
-                    }
+                    value={minBudget}
+                    onChange={(e) => {
+                      e.preventDefault();
+                      if (e.target.value) {
+                        if (/^\d+$/.test(e.target.value)) {
+                          setMinBudget(Number(e.target.value));
+                        }
+                      }
+                    }}
                     className={`w-1/2 border rounded-md p-2 ${
                       filterError &&
                       filterError.toLowerCase().includes('budget')
@@ -197,12 +200,15 @@ export default function SearchPage() {
                   />
                   <input
                     type="number"
-                    value={maxBudget ?? ''}
-                    onChange={(e) =>
-                      setMaxBudget(
-                        e.target.value ? Number(e.target.value) : undefined,
-                      )
-                    }
+                    value={maxBudget}
+                    onChange={(e) => {
+                      e.preventDefault();
+                      if (e.target.value) {
+                        if (/^\d*$/.test(e.target.value)) {
+                          setMaxBudget(Number(e.target.value));
+                        }
+                      }
+                    }}
                     className={`w-1/2 border rounded-md p-2 ${
                       filterError &&
                       filterError.toLowerCase().includes('budget')

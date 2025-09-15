@@ -25,7 +25,7 @@ const Header = ({ isHideSearchBar = false }: HeaderProps) => {
   };
 
   const handleClickRequest = () => {
-    navigate('/account/request');
+    alert('Request feature is coming soon!');
   };
 
   return (

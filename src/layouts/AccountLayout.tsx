@@ -14,9 +14,9 @@ const SidebarMenu: SidebarItem[] = [
   { name: 'Profile', path: '/', isDisabled: false },
   { name: 'Account Setting', path: '/setting', isDisabled: true },
   { name: 'Privacy', path: '/privacy', isDisabled: true },
-  { name: 'Your Request', path: '/your-request', isDisabled: false },
-  { name: 'Requests', path: '/requests', isDisabled: false },
-  { name: 'Your Service', path: '/service', isDisabled: false },
+  { name: 'Your Requests', path: '/your-request', isDisabled: true },
+  { name: 'Requests', path: '/requests', isDisabled: true },
+  { name: 'Your Services', path: '/service', isDisabled: false },
 ];
 
 const logout = async () => {

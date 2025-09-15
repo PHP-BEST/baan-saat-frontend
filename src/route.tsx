@@ -8,7 +8,7 @@ import LoginPage from './pages/Login';
 import ProfilePage from './pages/Profile';
 import ProtectedRoute from './middleware/protectedRoute';
 
-import BookingPage from './pages/Booking';
+import BookingCreatePage from './pages/BookingCreate';
 import CustomerRequestPage from './pages/CustomerRequest';
 import ServiceDetailPage from './pages/ServiceDetail';
 import ServiceEditPage from './pages/ServiceEdit';
@@ -16,9 +16,8 @@ import ServiceCreatePage from './pages/ServiceCreate';
 import ProviderProfilePage from './pages/ProviderProfile';
 import ProviderProfileServicePage from './pages/ProviderProfileService';
 import SearchPage from './pages/Search';
-import ServiceRequestPage from './pages/ServiceRequest';
-import ServiceRequestEditPage from './pages/ServiceRequestEdit';
 import YourRequestPage from './pages/YourRequest';
+import BookingEditPage from './pages/BookingEdit';
 
 export const router = createBrowserRouter([
   {
@@ -50,7 +49,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'booking/:serviceId',
-        element: <BookingPage />,
+        element: <BookingCreatePage />,
       },
       {
         path: 'service/:serviceId',
@@ -77,12 +76,12 @@ export const router = createBrowserRouter([
         element: <SearchPage />,
       },
       {
-        path: 'ServiceRequest',
-        element: <ServiceRequestPage />,
+        path: 'request/:serviceId/create',
+        element: <BookingCreatePage />,
       },
       {
-        path: 'ServiceRequestEdit',
-        element: <ServiceRequestEditPage />,
+        path: 'request/:requestId/edit',
+        element: <BookingEditPage />,
       },
     ],
   },

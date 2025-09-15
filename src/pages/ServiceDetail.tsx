@@ -169,7 +169,7 @@ export default function ServiceDetailPage() {
 
           <div className="flex justify-end gap-4 my-8">
             {/* Edit Button */}
-            {user?._id === service.customerId && (
+            {user?._id === service.customerId ? (
               <ActionButton
                 buttonType="outline"
                 className="cursor-pointer"
@@ -179,6 +179,18 @@ export default function ServiceDetailPage() {
               >
                 Edit
               </ActionButton>
+            ) : (
+              user && (
+                <ActionButton
+                  buttonType="outline"
+                  className="cursor-pointer"
+                  onClick={() => {
+                    navigate(`/request/${service._id}/create`);
+                  }}
+                >
+                  Booking
+                </ActionButton>
+              )
             )}
             {/* Back Button */}
             <ActionButton

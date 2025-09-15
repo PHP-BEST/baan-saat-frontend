@@ -8,7 +8,7 @@ import ActionButton from '@/components/our-components/actionButton';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-export default function BookingPage() {
+export default function BookingCreatePage() {
   const { serviceId } = useParams();
   const [service, setService] = useState<Service | null>(null);
   const [customer, setCustomer] = useState<User | null>(null);
@@ -51,7 +51,7 @@ export default function BookingPage() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <div className="flex-grow min-h-full p-4 bg-white flex justify-center ">
-        <div className="w-[65%] min-h-full ">
+        <div className="w-[65%] min-h-full">
           <div className="w-full min-h-full bg-gray-100 rounded-2xl border border-gray-300 p-6 shadow-sm">
             <h1 className="text-2xl font-bold mb-2 text-center">Offering</h1>
             {/* Service Details Section */}
