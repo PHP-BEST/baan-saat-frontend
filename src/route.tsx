@@ -8,15 +8,15 @@ import LoginPage from './pages/Login';
 import ProfilePage from './pages/Profile';
 import ProtectedRoute from './middleware/protectedRoute';
 
-import BookingCreatePage from './pages/BookingCreate';
+import OfferCreatePage from './pages/OfferCreate';
 import ServiceDetailPage from './pages/ServiceDetail';
 import ServiceEditPage from './pages/ServiceEdit';
 import ServiceCreatePage from './pages/ServiceCreate';
 import ProviderProfilePage from './pages/ProviderProfile';
 import ProviderProfileServicePage from './pages/ProviderProfileService';
 import SearchPage from './pages/Search';
-import MyRequestPage from './pages/MyRequest';
-import BookingEditPage from './pages/BookingEdit';
+import MyOfferPage from './pages/MyOffer';
+import OfferEditPage from './pages/OfferEdit';
 
 export const router = createBrowserRouter([
   {
@@ -38,7 +38,7 @@ export const router = createBrowserRouter([
         children: [
           { path: '', element: <ProfilePage /> },
           { path: 'service', element: <MyServicePage /> },
-          { path: 'request', element: <MyRequestPage /> },
+          { path: 'offer', element: <MyOfferPage /> },
         ],
       },
       {
@@ -78,18 +78,18 @@ export const router = createBrowserRouter([
         element: <SearchPage />,
       },
       {
-        path: 'booking/:serviceId/create',
+        path: 'offer/:serviceId/create',
         element: (
           <ProtectedRoute>
-            <BookingCreatePage />
+            <OfferCreatePage />
           </ProtectedRoute>
         ),
       },
       {
-        path: 'booking/:requestId/edit',
+        path: 'offer/:offerId/edit',
         element: (
           <ProtectedRoute>
-            <BookingEditPage />
+            <OfferEditPage />
           </ProtectedRoute>
         ),
       },

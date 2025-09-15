@@ -14,7 +14,7 @@ const SidebarMenu: SidebarItem[] = [
   { name: 'Profile', path: '/', isDisabled: false },
   { name: 'Account Setting', path: '/setting', isDisabled: true },
   { name: 'Privacy', path: '/privacy', isDisabled: true },
-  { name: 'My Requests', path: '/request', isDisabled: false },
+  { name: 'My Offers', path: '/offer', isDisabled: false },
   { name: 'My Services', path: '/service', isDisabled: false },
 ];
 
@@ -48,9 +48,7 @@ export default function AccountLayout() {
                 >
                   {item.name}
                 </NavLink>
-                {(item.name === 'Privacy' || item.name === 'My Requests') && (
-                  <hr className="my-2" />
-                )}
+                {item.name === 'Privacy' && <hr className="my-2" />}
               </div>
             ))}
             <div className="mt-auto">

@@ -175,10 +175,10 @@ export default function ServiceDetailPage() {
                   buttonType="outline"
                   className="cursor-pointer"
                   onClick={() => {
-                    navigate(`/booking/${service._id}/create`);
+                    navigate(`/offer/${service._id}/create`);
                   }}
                 >
-                  Booking
+                  Offer
                 </ActionButton>
               )
             )}

@@ -77,7 +77,7 @@ export const validateDate = (date: Date | string): ValidationResult => {
   return { isValid: true };
 };
 
-export const bookingValidator = (
+export const offerValidator = (
   field: string,
   value: ServiceFieldValue,
   budget?: number | string,
@@ -94,8 +94,8 @@ export const bookingValidator = (
   }
 };
 
-export const validateBooking = (
-  booking: {
+export const validateOffer = (
+  offer: {
     description: string;
     offeredPrice: number;
     date: Date | string;
@@ -104,19 +104,19 @@ export const validateBooking = (
 ): { isValid: boolean; errors: Record<string, string> } => {
   const errors: Record<string, string> = {};
 
-  const descriptionValidation = validateDescription(booking.description);
+  const descriptionValidation = validateDescription(offer.description);
   if (!descriptionValidation.isValid) {
     errors.description = descriptionValidation.error!;
   }
 
-  const dateValidation = validateDate(booking.date);
+  const dateValidation = validateDate(offer.date);
   if (!dateValidation.isValid) {
     errors.date = dateValidation.error!;
   }
 
-  if (booking.offeredPrice) {
+  if (offer.offeredPrice) {
     const offeredPriceValidation = validateOfferedPrice(
-      booking.offeredPrice,
+      offer.offeredPrice,
       budget ?? 0,
     );
     if (!offeredPriceValidation.isValid) {

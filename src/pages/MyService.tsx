@@ -54,7 +54,7 @@ export default function MyServicePage() {
     <>
       {/* Header */}
       <div className="flex justify-between items-center mb-2">
-        <h1 className="text-2xl font-bold">Your Service</h1>
+        <h1 className="text-2xl font-bold">My Services</h1>
         <ActionButton
           className="cursor-pointer"
           onClick={() => {

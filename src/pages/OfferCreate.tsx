@@ -12,21 +12,21 @@ import type { User } from '@/interfaces/User';
 import ActionButton from '@/components/our-components/actionButton';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import type { BookingFormInterface } from '@/api/booking';
+import type { OfferFormInterface } from '@/api/offer';
 import { getServiceById } from '@/api/service';
 import Loading from '@/components/our-components/loading';
 import ServiceNotFound from '@/error/ServiceNotFound';
 import {
   convertTagsToLabels,
   formatDateToDisplay,
-  isInvalidBookingForm,
+  isInvalidOfferForm,
 } from '@/utils/function';
 import { AlertCircle, Calendar, Phone } from 'lucide-react';
 import { getUserById } from '@/api/user';
 import MyDatePicker from '@/components/ui/calendar';
 import { useUser } from '@/context/UserContext';
 import { Input } from '@/components/ui/input';
-import { bookingValidator } from '@/utils/bookingValidator';
+import { offerValidator } from '@/utils/offerValidator';
 
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
@@ -46,7 +46,7 @@ const Textarea = React.forwardRef<
   );
 });
 
-export default function BookingCreatePage() {
+export default function OfferCreatePage() {
   const navigate = useNavigate();
   const { user } = useUser();
   if (!user) return;
@@ -55,7 +55,7 @@ export default function BookingCreatePage() {
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(false);
   const [providerUser, setProviderUser] = useState<User | null>(null);
-  const [formData, setFormData] = useState<BookingFormInterface>({
+  const [formData, setFormData] = useState<OfferFormInterface>({
     date: null,
     offeredPrice: 0,
     description: '',
@@ -75,7 +75,7 @@ export default function BookingCreatePage() {
     if (
       Object.keys(validationErrors).length === 0 &&
       !adding &&
-      !isInvalidBookingForm(formData)
+      !isInvalidOfferForm(formData)
     ) {
       setCanSubmit(true);
     } else {
@@ -112,7 +112,7 @@ export default function BookingCreatePage() {
     }
 
     // Real-time validation
-    const validation = bookingValidator(
+    const validation = offerValidator(
       name,
       name === 'offeredPrice' ? Number(value) : value,
     );
@@ -173,7 +173,7 @@ export default function BookingCreatePage() {
       }));
 
       // Validate date
-      const validation = bookingValidator('date', dateStr);
+      const validation = offerValidator('date', dateStr);
       if (!validation.isValid) {
         setValidationErrors((prev) => ({
           ...prev,
@@ -194,7 +194,7 @@ export default function BookingCreatePage() {
 
     if (canSubmit) {
       setAdding(true);
-      alert('Your booking request has been submitted.');
+      alert('Your offer has been submitted.');
 
       // ===== API CALL PLACEHOLDER ====
 
@@ -207,7 +207,7 @@ export default function BookingCreatePage() {
           offeredPrice: 0,
           description: '',
         });
-        window.location.href = `/account/request`;
+        window.location.href = `/account/offer`;
       } else {
         alert('Failed to create service. Please try again.');
       }
@@ -311,12 +311,12 @@ export default function BookingCreatePage() {
 
           <hr className="my-6" />
 
-          {/* Booking Section */}
+          {/* Offer Section */}
           <div className="flex flex-col gap-4">
-            {/* Booking Title */}
+            {/* Offer Title */}
             <h1 className="text-3xl font-bold text-gray-900">Your Offer</h1>
 
-            {/* Booking Date */}
+            {/* Offer Date */}
             <div>
               <label
                 htmlFor="date"
@@ -332,7 +332,7 @@ export default function BookingCreatePage() {
               )}
             </div>
 
-            {/* Booking Offered Price */}
+            {/* Offer Offered Price */}
             <div>
               <label
                 htmlFor="offeredPrice"
@@ -362,7 +362,7 @@ export default function BookingCreatePage() {
               )}
             </div>
 
-            {/* Booking Description */}
+            {/* Offer Description */}
             <div>
               <label
                 htmlFor="description"

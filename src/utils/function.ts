@@ -1,4 +1,4 @@
-import type { BookingFormInterface } from '@/api/booking';
+import type { OfferFormInterface } from '@/api/offer';
 import type { ServiceFormInterface } from '@/api/service';
 import type { ServiceTag } from '@/interfaces/Service';
 
@@ -77,8 +77,8 @@ export function isInvalidServiceForm(formData: ServiceFormInterface): boolean {
   );
 }
 
-export function isInvalidBookingForm(
-  formData: BookingFormInterface,
+export function isInvalidOfferForm(
+  formData: OfferFormInterface,
   budget?: number,
 ): boolean {
   if (!budget) budget = 0;
