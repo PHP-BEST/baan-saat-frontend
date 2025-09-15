@@ -1,5 +1,4 @@
 import { API_ROOT_DEV, API_ROOT_LOCAL, API_ROOT_PROD, NODE_ENV } from './env';
-import axios from 'axios';
 export let API_ROOT: string;
 
 if (NODE_ENV === 'development') {
@@ -16,60 +15,4 @@ if (NODE_ENV === 'development') {
 export interface ResponseInterface<T> {
   success: boolean;
   data: T;
-}
-
-interface GetProfileData {
-  data: {
-    name: string;
-    _id: string;
-    email: string;
-    telNumber: string;
-    avatarUrl: string;
-    role: 'customer' | 'provider';
-    providerProfile?: {
-      title: string;
-      description: string;
-      skills: string[]; // Array of strings for skills
-    };
-    lastLoginAt: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-}
-
-// Fetch data by ID
-export async function fetchData(id: string): Promise<GetProfileData['data']> {
-  try {
-    const response = await axios.get(`${API_ROOT}/api/users/${id}`, {
-      withCredentials: false,
-    });
-    return response.data.data;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      console.error('Axios error fetching data:', error.message);
-    } else {
-      console.error('Unknown error fetching data:', error);
-    }
-    throw error;
-  }
-}
-
-// Update data by ID
-export async function updateData(
-  id: string,
-  newData: GetProfileData['data'],
-): Promise<GetProfileData['data']> {
-  try {
-    const response = await axios.put(`${API_ROOT}/users/${id}`, newData, {
-      withCredentials: false,
-    });
-    return response.data.data;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      console.error('Axios error updating data:', error.message);
-    } else {
-      console.error('Unknown error updating data:', error);
-    }
-    throw error;
-  }
 }

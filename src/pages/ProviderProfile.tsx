@@ -21,7 +21,7 @@ import { getServicesByUserId } from '@/api/service';
 import ServiceCard from '@/components/our-components/serviceCard';
 import ActionButton from '@/components/our-components/actionButton';
 import { useUser } from '@/context/UserContext';
-import { ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function ProviderProfilePage() {
   const navigate = useNavigate();
@@ -92,11 +92,18 @@ export default function ProviderProfilePage() {
                   <div className="w-full h-full" />
                 )}
               </div>
-              <h1 className="text-4xl font-bold">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">
                 {providerUser.name}’s Profile
               </h1>
             </>
           )}
+          <button
+            className="flex gap-2 items-center text-button-action font-bold text-lg cursor-pointer ml-auto"
+            onClick={() => navigate(-1)}
+          >
+            <ChevronLeft size={32} />
+            <p className="hover:underline">Back</p>
+          </button>
         </div>
 
         {/* Content */}

@@ -4,24 +4,9 @@ import { useUser } from '@/context/UserContext';
 import ActionButton from '@/components/our-components/actionButton';
 import ProfileField from '@/components/our-components/profileField';
 import { profileValidator } from '@/utils/profileValidator';
-import type { SkillsType } from '@/interfaces/User';
+import { SKILL_OPTIONS, type SkillsType } from '@/interfaces/User';
 import { updateUser } from '@/api/user';
-
-interface SkillOption {
-  label: string;
-  value: string;
-  order: number;
-}
-const skillOptions: SkillOption[] = [
-  { label: 'การทำความสะอาด', value: 'houseCleaning', order: 1 },
-  { label: 'การซ่อมแซม', value: 'houseRepair', order: 2 },
-  { label: 'ประปา', value: 'plumbing', order: 3 },
-  { label: 'ไฟฟ้า', value: 'electrical', order: 4 },
-  { label: 'เครื่องปรับอากาศ', value: 'hvac', order: 5 },
-  { label: 'การทาสี', value: 'painting', order: 6 },
-  { label: 'การจัดสวน', value: 'landscaping', order: 7 },
-  { label: 'อื่นๆ', value: 'others', order: 8 },
-];
+import { getCompressedImageUrl } from '@/utils/function';
 
 export default function ProfilePage() {
   const { user } = useUser();
@@ -166,10 +151,12 @@ export default function ProfilePage() {
     }
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
+      const imageUrl = await getCompressedImageUrl(file);
       setTempAvatarUrl(imageUrl);
     }
   };
@@ -321,7 +308,7 @@ export default function ProfilePage() {
             <ProfileField
               label="Skill & Experiences"
               field="skills"
-              skillOptions={skillOptions}
+              skillOptions={SKILL_OPTIONS}
               {...commonFieldProperties}
               cursorPositions={cursorPositions}
               setCursorPositions={setCursorPositions}
