@@ -1,3 +1,4 @@
+import type { BookingFormInterface } from '@/api/booking';
 import type { ServiceFormInterface } from '@/api/service';
 import type { ServiceTag } from '@/interfaces/Service';
 
@@ -74,4 +75,12 @@ export function isInvalidServiceForm(formData: ServiceFormInterface): boolean {
     formData.telNumber.trim() === '' ||
     formData.date === null
   );
+}
+
+export function isInvalidBookingForm(
+  formData: BookingFormInterface,
+  budget?: number,
+): boolean {
+  if (!budget) budget = 0;
+  return formData.offeredPrice > budget || formData.date === null;
 }

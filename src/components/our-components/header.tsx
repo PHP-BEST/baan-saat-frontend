@@ -24,10 +24,6 @@ const Header = ({ isHideSearchBar = false }: HeaderProps) => {
     alert('Chat feature is coming soon!');
   };
 
-  const handleClickRequest = () => {
-    alert('Request feature is coming soon!');
-  };
-
   return (
     <header className="w-full px-3 py-1 bg-background-header-footer flex justify-between items-center">
       {/* Left Side */}
@@ -77,13 +73,6 @@ const Header = ({ isHideSearchBar = false }: HeaderProps) => {
       <div className="w-fit max-w-[50%] flex gap-3 items-center">
         {user ? (
           <>
-            {/* Create a request */}
-            <p
-              className="text-[20px] underline cursor-pointer"
-              onClick={handleClickRequest}
-            >
-              Create a request
-            </p>
             {/* Chat */}
             <MessageCircle
               width={48}

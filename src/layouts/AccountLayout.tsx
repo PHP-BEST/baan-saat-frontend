@@ -14,9 +14,8 @@ const SidebarMenu: SidebarItem[] = [
   { name: 'Profile', path: '/', isDisabled: false },
   { name: 'Account Setting', path: '/setting', isDisabled: true },
   { name: 'Privacy', path: '/privacy', isDisabled: true },
-  { name: 'Your Requests', path: '/your-request', isDisabled: true },
-  { name: 'Requests', path: '/requests', isDisabled: true },
-  { name: 'Your Services', path: '/service', isDisabled: false },
+  { name: 'My Requests', path: '/request', isDisabled: false },
+  { name: 'My Services', path: '/service', isDisabled: false },
 ];
 
 const logout = async () => {
@@ -49,7 +48,7 @@ export default function AccountLayout() {
                 >
                   {item.name}
                 </NavLink>
-                {(item.name === 'Privacy' || item.name === 'Requests') && (
+                {(item.name === 'Privacy' || item.name === 'My Requests') && (
                   <hr className="my-2" />
                 )}
               </div>

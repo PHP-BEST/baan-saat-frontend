@@ -184,7 +184,7 @@ export default function SearchPage() {
                     onChange={(e) => {
                       e.preventDefault();
                       if (e.target.value) {
-                        if (/^\d+$/.test(e.target.value)) {
+                        if (Number(e.target.value) >= 0) {
                           setMinBudget(Number(e.target.value));
                         }
                       }
@@ -204,7 +204,7 @@ export default function SearchPage() {
                     onChange={(e) => {
                       e.preventDefault();
                       if (e.target.value) {
-                        if (/^\d*$/.test(e.target.value)) {
+                        if (Number(e.target.value) >= 0) {
                           setMaxBudget(Number(e.target.value));
                         }
                       }

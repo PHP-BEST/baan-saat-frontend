@@ -9,8 +9,8 @@ import Loading from '@/components/our-components/loading';
 import type { Service } from '@/interfaces/Service';
 import { getServicesByUserId } from '@/api/service';
 import ServiceCard from '@/components/our-components/serviceCard';
-import ActionButton from '@/components/our-components/actionButton';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import UserNotFound from '@/error/UserNotFound';
 
 export default function ProviderProfilePage() {
   const navigate = useNavigate();
@@ -51,18 +51,7 @@ export default function ProviderProfilePage() {
       <div>
         <Header />
         <div className="px-16 py-10 w-full min-h-screen flex flex-col gap-10 bg-white">
-          <div className="max-w-6xl mx-auto flex flex-col gap-6 items-center">
-            <p className="text-center text-2xl font-semibold">
-              We couldn&apos;t find the user you were looking for...
-            </p>
-            <ActionButton
-              onClick={() => navigate(-1)}
-              buttonType="outline"
-              className="cursor-pointer"
-            >
-              Back
-            </ActionButton>
-          </div>
+          <UserNotFound />
         </div>
         <Footer />
       </div>

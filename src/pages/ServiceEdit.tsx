@@ -30,6 +30,7 @@ import {
   type ServiceFormInterface,
 } from '@/api/service';
 import MyDatePicker from '@/components/ui/calendar';
+import ServiceNotFound from '@/error/ServiceNotFound';
 
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
@@ -132,7 +133,7 @@ export default function ServiceEditPage() {
     } else {
       setCanSubmit(false);
     }
-  }, [formData, validationErrors]);
+  }, [formData, validationErrors, updating, service]);
 
   if (loading) {
     return (
@@ -151,20 +152,7 @@ export default function ServiceEditPage() {
       <div>
         <Header />
         <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
-          <div className="flex flex-col gap-4 justify-center items-center">
-            <p className="text-2xl font-semibold">
-              Sorry, We couldn&apos;t find the service you&apos;re looking
-              for...
-            </p>
-            <ActionButton
-              onClick={() => {
-                window.history.back();
-              }}
-              buttonType="outline"
-            >
-              Back
-            </ActionButton>
-          </div>
+          <ServiceNotFound />
         </div>
         <Footer />
       </div>
@@ -175,9 +163,19 @@ export default function ServiceEditPage() {
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
+    if (name === 'budget') {
+      if (Number(value) >= 0) {
+        setFormData((prev) => ({
+          ...prev,
+          [name]: Number(value),
+        }));
+      }
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'budget' ? Number(value) : value,
+      [name]: value,
     }));
 
     // Clear validation error when user starts typing
@@ -418,7 +416,7 @@ export default function ServiceEditPage() {
                 <Input
                   id="budget"
                   name="budget"
-                  type="text"
+                  type="number"
                   placeholder="Budget"
                   value={formData.budget}
                   onChange={handleInputChange}

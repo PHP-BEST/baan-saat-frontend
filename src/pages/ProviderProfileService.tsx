@@ -1,7 +1,7 @@
 import ServiceCard from '@/components/our-components/serviceCard';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { ChevronLeft, Filter } from 'lucide-react';
 import type { User } from '@/interfaces/User';
@@ -19,9 +19,9 @@ import {
 } from '@/api/service';
 import { filterValidator } from '@/utils/filterValidator';
 import ActionButton from '@/components/our-components/actionButton';
+import UserNotFound from '@/error/UserNotFound';
 
 export default function ProviderProfileServicePage() {
-  const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
   const [providerUser, setProviderUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
@@ -69,18 +69,7 @@ export default function ProviderProfileServicePage() {
       <div>
         <Header />
         <div className="px-16 py-10 w-full min-h-screen flex flex-col gap-10 bg-white">
-          <div className="max-w-6xl mx-auto flex flex-col gap-6 items-center">
-            <p className="text-center text-2xl font-semibold">
-              We couldn&apos;t find the user you were looking for...
-            </p>
-            <ActionButton
-              onClick={() => navigate(-1)}
-              buttonType="outline"
-              className="cursor-pointer"
-            >
-              Back
-            </ActionButton>
-          </div>
+          <UserNotFound />
         </div>
         <Footer />
       </div>

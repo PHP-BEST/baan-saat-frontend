@@ -11,6 +11,7 @@ import Loading from '@/components/our-components/loading';
 import { getServiceById } from '@/api/service';
 import type { User } from '@/interfaces/User';
 import { getUserById } from '@/api/user';
+import ServiceNotFound from '@/error/ServiceNotFound';
 
 export default function ServiceDetailPage() {
   const navigate = useNavigate();
@@ -53,20 +54,7 @@ export default function ServiceDetailPage() {
       <div>
         <Header />
         <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
-          <div className="flex flex-col gap-4 justify-center items-center">
-            <p className="text-2xl font-semibold">
-              Sorry, We couldn&apos;t find the service you&apos;re looking
-              for...
-            </p>
-            <ActionButton
-              onClick={() => {
-                window.history.back();
-              }}
-              buttonType="outline"
-            >
-              Back
-            </ActionButton>
-          </div>
+          <ServiceNotFound />
         </div>
         <Footer />
       </div>
@@ -121,7 +109,9 @@ export default function ServiceDetailPage() {
           {/* Service Location */}
           <div className="w-full flex flex-col gap-2">
             <h2 className="text-2xl font-semibold">Location</h2>
-            <p className="text-lg text-gray-700">{service.location}</p>
+            <p className="text-lg text-gray-700">
+              {service.location ? service.location : 'Unknown'}
+            </p>
           </div>
 
           {/* Service Budget */}
@@ -185,7 +175,7 @@ export default function ServiceDetailPage() {
                   buttonType="outline"
                   className="cursor-pointer"
                   onClick={() => {
-                    navigate(`/request/${service._id}/create`);
+                    navigate(`/booking/${service._id}/create`);
                   }}
                 >
                   Booking

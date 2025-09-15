@@ -70,9 +70,19 @@ export const ServiceCreatePage: React.FC = () => {
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
+    if (name === 'budget') {
+      if (Number(value) >= 0) {
+        setFormData((prev) => ({
+          ...prev,
+          [name]: Number(value),
+        }));
+      }
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'budget' ? Number(value) : value,
+      [name]: value,
     }));
 
     // Clear validation error when user starts typing
@@ -161,7 +171,7 @@ export const ServiceCreatePage: React.FC = () => {
     } else {
       setCanSubmit(false);
     }
-  }, [formData, validationErrors]);
+  }, [formData, validationErrors, adding]);
 
   const handleSubmit = async (e?: FormEvent<HTMLFormElement>) => {
     if (e) e.preventDefault();

@@ -8,7 +8,7 @@ interface RequestProps {
   location: string;
   status: string;
 }
-export default function YourRequestPage() {
+export default function MyRequestPage() {
   const [requests] = useState<RequestProps[]>([
     {
       serviceName: 'ล้างจาน',
@@ -37,7 +37,7 @@ export default function YourRequestPage() {
   ]);
   return (
     <>
-      <h1 className="text-2xl font-bold mb-2">Your Request</h1>
+      <h1 className="text-2xl font-bold mb-2">My Requests</h1>
       <div className="w-full h-full bg-white border border-border-sidebar p-8 rounded-2xl shadow-sm m-0">
         <div className="grid grid-cols-[2fr_1.5fr_1.2fr_0.7fr_1.5fr_1fr] px-3 my-1">
           <span className="font-bold text-center">Service Name</span>
