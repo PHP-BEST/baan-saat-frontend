@@ -12,7 +12,7 @@ import type { User } from '@/interfaces/User';
 import ActionButton from '@/components/our-components/actionButton';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import type { OfferFormInterface } from '@/api/offer';
+import { createOffer, type OfferFormInterface } from '@/api/offer';
 import { getServiceById } from '@/api/service';
 import Loading from '@/components/our-components/loading';
 import ServiceNotFound from '@/error/ServiceNotFound';
@@ -54,7 +54,7 @@ export default function OfferCreatePage() {
   const { serviceId } = useParams();
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(false);
-  const [providerUser, setProviderUser] = useState<User | null>(null);
+  const [customerUser, setCustomerUser] = useState<User | null>(null);
   const [formData, setFormData] = useState<OfferFormInterface>({
     date: null,
     offeredPrice: 0,
@@ -131,8 +131,8 @@ export default function OfferCreatePage() {
       const service = await getServiceById(serviceId);
       setService(service);
       if (service) {
-        const currentUser = await getUserById(service.customerId);
-        setProviderUser(currentUser);
+        const currentCustomer = await getUserById(service.customerId);
+        setCustomerUser(currentCustomer);
       }
 
       setLoading(false);
@@ -194,13 +194,12 @@ export default function OfferCreatePage() {
 
     if (canSubmit) {
       setAdding(true);
-      alert('Your offer has been submitted.');
-
-      // ===== API CALL PLACEHOLDER ====
-
-      // ===============================
-
-      const success = true;
+      const success = await createOffer(
+        formData,
+        service.customerId,
+        user._id,
+        service._id,
+      );
       if (success) {
         setFormData({
           date: null,
@@ -253,7 +252,7 @@ export default function OfferCreatePage() {
             <div className="w-full flex flex-col gap-2">
               <h2 className="text-2xl font-semibold">Posted By</h2>
               <p className="text-lg text-gray-700">
-                {providerUser ? providerUser.name : 'Unknown'}
+                {customerUser ? customerUser.name : 'Unknown'}
               </p>
             </div>
 
@@ -353,6 +352,8 @@ export default function OfferCreatePage() {
                     ? 'border-red-500 focus:ring-red-200'
                     : 'focus:ring-blue-200'
                 }`}
+                min={0}
+                max={service.budget}
               />
               {validationErrors.offeredPrice && (
                 <div className="flex items-center gap-1 text-red-500 text-sm mt-1">
