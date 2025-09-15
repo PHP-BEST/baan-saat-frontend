@@ -1,5 +1,5 @@
 import { API_ROOT, type ResponseInterface } from '@/config/api';
-import type { Offer } from '@/interfaces/Offer';
+import type { Offer, OfferDetail } from '@/interfaces/Offer';
 import axios from 'axios';
 
 const API_BASE = `${API_ROOT}/api/offers`;
@@ -76,5 +76,19 @@ export const updateOffer = async (
   } catch (error) {
     console.error('Error updating offer:', error);
     return false;
+  }
+};
+
+export const getDetailedOffersByProviderId = async (
+  providerId: string,
+): Promise<OfferDetail[]> => {
+  try {
+    const response = await axios.get<ResponseInterface<OfferDetail[]>>(
+      `${API_BASE}/provider/${providerId}/detail`,
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching offers by provider ID:', error);
+    throw error;
   }
 };
