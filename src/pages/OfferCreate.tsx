@@ -408,7 +408,6 @@ export default function OfferCreatePage() {
                 buttonColor="red"
                 buttonType="outline"
                 onClick={() => setShowConfirm('cancel')}
-                fontSize={16}
                 disabled={adding}
                 className="cursor-pointer"
               >

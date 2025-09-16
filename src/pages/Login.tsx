@@ -1,6 +1,8 @@
 import ActionButton from '@/components/our-components/actionButton';
 import { API_ROOT } from '@/config/api';
+import { useUser } from '@/context/UserContext';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface TermsModalProps {
   title: string;
@@ -45,6 +47,12 @@ const TermsModal = ({
 };
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const { user } = useUser();
+  if (user) {
+    navigate(-1);
+  }
+
   const [isAgree, setAgree] = useState(false);
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
 

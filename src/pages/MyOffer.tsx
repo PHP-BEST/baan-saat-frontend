@@ -62,7 +62,7 @@ export default function MyOfferPage() {
                   Offered Date
                 </th>
                 <th className="border border-gray-200 p-2 w-1/5">
-                  Price (THB)
+                  Offered Price
                 </th>
                 <th className="border border-gray-200 p-2 w-1/5">Status</th>
               </tr>

@@ -23,7 +23,7 @@ export default function LandingPage() {
           (a, b) =>
             new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
         )
-        .slice(0, 10);
+        .slice(0, 9);
       setServices(sortedServices);
       setServices(allServices);
       setLoading(false);
