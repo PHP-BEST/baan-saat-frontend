@@ -10,6 +10,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
 import { getUserSession } from '@/api/user';
 
+import Loading from '@/components/our-components/loading';
+
 interface UserContextType {
   user: User | null;
 }
@@ -56,7 +58,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   }, [location.pathname, user]);
 
   if (isLoading) {
-    return <h1>Loading...</h1>;
+    return <Loading />
   }
 
   return (
