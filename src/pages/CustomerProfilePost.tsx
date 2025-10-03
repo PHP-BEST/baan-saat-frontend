@@ -1,35 +1,31 @@
-import ServiceCard from '@/components/our-components/serviceCard';
+import PostCard from '@/components/our-components/postCard';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { ChevronLeft, Filter } from 'lucide-react';
 import type { User } from '@/interfaces/User';
-import {
-  TAG_OPTIONS,
-  type Service,
-  type TagsOption,
-} from '@/interfaces/Service';
+import { TAG_OPTIONS, type Post, type TagsOption } from '@/interfaces/Post';
 import Loading from '@/components/our-components/loading';
 import { getUserById } from '@/api/user';
 import {
-  filterServices,
-  getServicesByUserId,
-  type FilterServiceParams,
-} from '@/api/service';
+  filterPosts,
+  getPostsByUserId,
+  type FilterPostParams,
+} from '@/api/post';
 import { filterValidator } from '@/utils/filterValidator';
 import ActionButton from '@/components/our-components/actionButton';
 import UserNotFound from '@/error/UserNotFound';
 
-export default function ProviderProfileServicePage() {
+export default function CustomerProfilePostPage() {
   const { userId } = useParams<{ userId: string }>();
-  const [providerUser, setProviderUser] = useState<User | null>(null);
+  const [customerUser, setCustomerUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
-  const [filteredServices, setFilteredServices] = useState<Service[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
 
   // Filter states
-  const [serviceTitle, setServiceTitle] = useState<string | undefined>();
+  const [postTitle, setPostTitle] = useState<string | undefined>();
   const [tags, setTags] = useState<TagsOption[]>([]);
   const [minBudget, setMinBudget] = useState<number | undefined>();
   const [maxBudget, setMaxBudget] = useState<number | undefined>();
@@ -38,18 +34,18 @@ export default function ProviderProfileServicePage() {
   const [filterError, setFilterError] = useState<string | undefined>();
 
   useEffect(() => {
-    const getProviderUser = async () => {
+    const getCustomerUser = async () => {
       setLoading(true);
       if (!userId) return;
       const user = await getUserById(userId);
-      setProviderUser(user);
+      setCustomerUser(user);
       if (user) {
-        const services = await getServicesByUserId(userId);
-        setFilteredServices(services);
+        const posts = await getPostsByUserId(userId);
+        setFilteredPosts(posts);
       }
       setLoading(false);
     };
-    getProviderUser();
+    getCustomerUser();
   }, [userId]);
 
   if (loading) {
@@ -64,7 +60,7 @@ export default function ProviderProfileServicePage() {
     );
   }
 
-  if (!providerUser) {
+  if (!customerUser) {
     return (
       <div>
         <Header />
@@ -90,23 +86,24 @@ export default function ProviderProfileServicePage() {
     setFilterError(undefined);
     setLoading(true);
 
-    const params: FilterServiceParams = {
+    const params: FilterPostParams = {
       userId: userId,
-      title: serviceTitle || undefined,
-      tags: tags.length ? tags : undefined,
+      title: postTitle || undefined,
+      tags: tags,
+      other: '',
       minBudget,
       maxBudget,
       startDate: startDate || undefined,
       endDate: endDate || undefined,
     };
 
-    let services = await filterServices(params);
-    services = services.sort(
+    let posts = await filterPosts(params);
+    posts = posts.sort(
       (a, b) =>
         new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
     );
 
-    setFilteredServices(services);
+    setFilteredPosts(posts);
     setShowFilter(false);
     setLoading(false);
   };
@@ -131,12 +128,12 @@ export default function ProviderProfileServicePage() {
         </button>
 
         {/* Header */}
-        <p className="text-3xl font-bold">Services by {providerUser.name}</p>
+        <p className="text-3xl font-bold">Posts by {customerUser.name}</p>
 
         {/* Result Counter */}
         <div className="flex justify-between items-center w-full">
           <p className="text-lg font-medium">
-            Services Found: {filteredServices.length}
+            Posts Found: {filteredPosts.length}
           </p>
           <button
             className="flex items-center gap-1 text-button-action cursor-pointer"
@@ -150,35 +147,35 @@ export default function ProviderProfileServicePage() {
         {/* Filter Panel */}
         {showFilter && (
           <div className="w-full bg-white p-4 rounded-md shadow-md">
-            <h3 className="text-lg font-semibold mb-2">Filter Services</h3>
+            <h3 className="text-lg font-semibold mb-2">Filter Posts</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="font-medium text-black block mb-1">
-                  Service Title
+                  Post Title
                 </label>
                 <input
                   type="text"
-                  value={serviceTitle ?? ''}
-                  onChange={(e) => setServiceTitle(e.target.value)}
+                  value={postTitle ?? ''}
+                  onChange={(e) => setPostTitle(e.target.value)}
                   className={`w-full border rounded-md p-2 mb-2 ${
                     filterError && filterError.toLowerCase().includes('title')
                       ? 'border-red-500'
                       : 'border-gray-300'
                   }`}
-                  placeholder="Service Title"
+                  placeholder="Post Title"
                 />
                 <label className="font-medium text-black block mb-1">
                   Tags
                 </label>
                 <div className="grid grid-cols-2 gap-2 mb-2">
-                  {TAG_OPTIONS.map((tag: TagsOption) => (
-                    <label key={tag.value} className="flex items-center gap-2">
+                  {TAG_OPTIONS.map((t: TagsOption) => (
+                    <label key={t.value} className="flex items-center gap-2">
                       <input
                         type="checkbox"
-                        checked={tags.includes(tag)}
-                        onChange={() => handleTagChange(tag)}
+                        checked={tags.includes(t)}
+                        onChange={() => handleTagChange(t)}
                       />
-                      <span>{tag.label}</span>
+                      <span>{t.label}</span>
                     </label>
                   ))}
                 </div>
@@ -272,11 +269,11 @@ export default function ProviderProfileServicePage() {
           </div>
         )}
 
-        {/* Services */}
+        {/* Posts */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full px-4 md:px-0">
-          {filteredServices.length > 0 ? (
-            filteredServices.map((service: Service) => (
-              <ServiceCard key={service._id} service={service} size="L" />
+          {filteredPosts.length > 0 ? (
+            filteredPosts.map((post: Post) => (
+              <PostCard key={post._id} post={post} size="L" />
             ))
           ) : (
             <p className="col-span-full text-center text-gray-500 text-lg">

@@ -1,32 +1,32 @@
-import { getDetailedOffersByProviderId } from '@/api/offer';
+import { getDetailedApplysByProviderId } from '@/api/apply';
 import Loading from '@/components/our-components/loading';
 import { useUser } from '@/context/UserContext';
-import type { OfferDetail } from '@/interfaces/Offer';
+import type { ApplyDetail } from '@/interfaces/Apply';
 import { formatDateToDisplay } from '@/utils/function';
 import { useEffect, useState } from 'react';
 
-export default function MyOfferPage() {
+export default function MyApplyPage() {
   const { user } = useUser();
 
   if (!user) return;
 
-  const [offersDetail, setOffersDetail] = useState<OfferDetail[]>([]);
+  const [applysDetail, setApplysDetail] = useState<ApplyDetail[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const getOffers = async () => {
+    const getApplys = async () => {
       setLoading(true);
-      const currentOffers = await getDetailedOffersByProviderId(user._id);
-      setOffersDetail(currentOffers);
+      const currentApplys = await getDetailedApplysByProviderId(user._id);
+      setApplysDetail(currentApplys);
       setLoading(false);
     };
-    getOffers();
+    getApplys();
   }, []);
 
   if (loading) {
     return (
       <>
-        <h1 className="text-2xl font-bold mb-2">My Offers</h1>
+        <h1 className="text-2xl font-bold mb-2">My Applys</h1>
         <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
           <Loading />
         </div>
@@ -34,12 +34,12 @@ export default function MyOfferPage() {
     );
   }
 
-  if (offersDetail.length === 0) {
+  if (applysDetail.length === 0) {
     return (
       <>
-        <h1 className="text-2xl font-bold mb-2">My Offers</h1>
+        <h1 className="text-2xl font-bold mb-2">My Applys</h1>
         <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
-          <p className="text-gray-700 text-2xl">You have no offers yet.</p>
+          <p className="text-gray-700 text-2xl">You have no applys yet.</p>
         </div>
       </>
     );
@@ -47,46 +47,44 @@ export default function MyOfferPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold mb-2">My Offers</h1>
+      <h1 className="text-2xl font-bold mb-2">My Applys</h1>
       <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
         {/* Table */}
         <div className="w-full max-h-[100vh] overflow-auto">
           <table className="table-fixed w-full border-collapse border border-gray-200">
             <thead className="sticky top-0 bg-table-row-header">
               <tr>
-                <th className="border border-gray-200 p-2 w-2/5">
-                  Service Title
-                </th>
+                <th className="border border-gray-200 p-2 w-2/5">Post Title</th>
                 <th className="border border-gray-200 p-2 w-1/5">Customer</th>
                 <th className="border border-gray-200 p-2 w-1/5">
-                  Offered Date
+                  Applied Date
                 </th>
                 <th className="border border-gray-200 p-2 w-1/5">
-                  Price (THB)
+                  Applied Price
                 </th>
                 <th className="border border-gray-200 p-2 w-1/5">Status</th>
               </tr>
             </thead>
             <tbody>
-              {offersDetail.map((offer, idx) => (
+              {applysDetail.map((apply, idx) => (
                 <tr
                   key={`customer-request-${idx}`}
                   className="bg-table-row-content text-center cursor-pointer hover:bg-gray-100"
                 >
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {offer.service.title}
+                    {apply.post.title}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {offer.customer.name}
+                    {apply.customer.name}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {formatDateToDisplay(offer.date)}
+                    {formatDateToDisplay(apply.date)}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {offer.offeredPrice} THB
+                    {apply.appliedPrice} THB
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {offer.status}
+                    {apply.status}
                   </td>
                 </tr>
               ))}

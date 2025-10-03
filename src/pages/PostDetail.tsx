@@ -1,4 +1,4 @@
-import type { Service } from '@/interfaces/Service';
+import type { Post } from '@/interfaces/Post';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Header from '@/components/our-components/header';
@@ -8,43 +8,43 @@ import { convertTagsToLabels, formatDateToDisplay } from '@/utils/function';
 import { Calendar, Phone } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import Loading from '@/components/our-components/loading';
-import { getServiceById } from '@/api/service';
+import { getPostById } from '@/api/post';
 import type { User } from '@/interfaces/User';
 import { getUserById } from '@/api/user';
-import ServiceNotFound from '@/error/ServiceNotFound';
-import { checkOffer } from '@/api/offer';
-import type { Offer } from '@/interfaces/Offer';
+import PostNotFound from '@/error/PostNotFound';
+import { checkApply } from '@/api/apply';
+import type { Apply } from '@/interfaces/Apply';
 
-export default function ServiceDetailPage() {
+export default function PostDetailPage() {
   const navigate = useNavigate();
-  const { serviceId } = useParams<{ serviceId: string }>();
+  const { postId } = useParams<{ postId: string }>();
   const { user } = useUser();
-  const [service, setService] = useState<Service | null>(null);
+  const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(false);
   const [customerUser, setCustomerUser] = useState<User | null>(null);
-  const [offer, setOffer] = useState<Offer | null>(null);
+  const [offer, setApply] = useState<Apply | null>(null);
 
   useEffect(() => {
-    const fetchService = async () => {
+    const fetchPost = async () => {
       setLoading(true);
-      if (!serviceId) return;
-      const service = await getServiceById(serviceId);
-      setService(service);
-      if (service) {
-        const currentCustomerUser = await getUserById(service.customerId);
+      if (!postId) return;
+      const post = await getPostById(postId);
+      setPost(post);
+      if (post) {
+        const currentCustomerUser = await getUserById(post.customerId);
         setCustomerUser(currentCustomerUser);
         if (!user) {
-          setOffer(null);
+          setApply(null);
         } else {
-          const offer = await checkOffer(service._id, user._id);
-          setOffer(offer);
+          const offer = await checkApply(post._id, user._id);
+          setApply(offer);
         }
       }
       setLoading(false);
     };
 
-    fetchService();
-  }, [serviceId]);
+    fetchPost();
+  }, [postId]);
 
   if (loading) {
     return (
@@ -58,12 +58,12 @@ export default function ServiceDetailPage() {
     );
   }
 
-  if (!service) {
+  if (!post) {
     return (
       <div>
         <Header />
         <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
-          <ServiceNotFound />
+          <PostNotFound />
         </div>
         <Footer />
       </div>
@@ -75,34 +75,31 @@ export default function ServiceDetailPage() {
       <Header />
       <main className="flex-grow flex justify-center py-12 px-4">
         <div className="w-full max-w-2xl space-y-6">
-          {/* Service Name */}
-          <h1
-            title={service.title}
-            className="text-3xl font-bold text-gray-900"
-          >
-            {service.title}
+          {/* Post Name */}
+          <h1 title={post.title} className="text-3xl font-bold text-gray-900">
+            {post.title}
           </h1>
 
-          {/* Service Cover Image */}
-          {service.coverPhotoUrl ? (
+          {/* Post Cover Image */}
+          {post.coverPhotoUrl ? (
             <img
-              src={service.coverPhotoUrl}
-              alt={service.title}
+              src={post.coverPhotoUrl}
+              alt={post.title}
               className="w-full h-64 object-cover"
             />
           ) : (
             <div className="w-full h-64 bg-gray-200 flex items-center justify-center"></div>
           )}
 
-          {/* Service Description */}
+          {/* Post Description */}
           <div className="w-full flex flex-col gap-2">
             <h2 className="text-2xl font-semibold">Description</h2>
             <p className="text-lg text-gray-700">
-              {service.description || 'No description provided.'}
+              {post.description || 'No description provided.'}
             </p>
           </div>
 
-          {/* Service Provider Name */}
+          {/* Post Provider Name */}
           <div className="w-full flex flex-col gap-2">
             <h2 className="text-2xl font-semibold">Posted By</h2>
             <p
@@ -115,35 +112,35 @@ export default function ServiceDetailPage() {
             </p>
           </div>
 
-          {/* Service Location */}
+          {/* Post Location */}
           <div className="w-full flex flex-col gap-2">
             <h2 className="text-2xl font-semibold">Location</h2>
             <p className="text-lg text-gray-700">
-              {service.location ? service.location : 'Unknown'}
+              {post.location ? post.location : 'Unknown'}
             </p>
           </div>
 
-          {/* Service Budget */}
+          {/* Post Budget */}
           <div className="w-full flex flex-col gap-2">
             <h2 className="text-2xl font-semibold">Budget</h2>
-            <p className="text-lg text-gray-700">฿ {service.budget}</p>
+            <p className="text-lg text-gray-700">฿ {post.budget}</p>
           </div>
 
-          {/* Service Contact */}
+          {/* Post Contact */}
           <div className="w-full flex flex-col gap-2">
             <h2 className="text-2xl font-semibold">Contact</h2>
             <div className="flex gap-2 items-center">
               <Phone width={16} />
-              <p className="text-lg text-gray-700">{service.telNumber}</p>
+              <p className="text-lg text-gray-700">{post.telNumber}</p>
             </div>
           </div>
 
-          {/* Service Tags */}
-          {service.tags && service.tags.length > 0 && (
+          {/* Post Tag */}
+          {post.tag && (
             <div className="w-full flex flex-col gap-2">
               <h2 className="text-2xl font-semibold">Tags</h2>
               <div className="flex flex-wrap gap-2">
-                {convertTagsToLabels(service.tags).map((tag) => (
+                {convertTagsToLabels([post.tag]).map((tag) => (
                   <span
                     key={tag}
                     className="bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded"
@@ -155,25 +152,24 @@ export default function ServiceDetailPage() {
             </div>
           )}
 
-          {/* Service Date */}
+          {/* Post Date */}
           <div className="w-full flex flex-col gap-2">
             <h2 className="text-2xl font-semibold">Date to Perform</h2>
             <div className="flex gap-2 items-center">
               <Calendar width={16} />
               <p className="text-lg text-gray-700">
-                {formatDateToDisplay(service.date)}
+                {formatDateToDisplay(post.date)}
               </p>
             </div>
           </div>
 
           <div className="flex justify-end gap-4 my-8">
             {/* Edit Button */}
-            {user?._id === service.customerId ? (
+            {user?._id === post.customerId ? (
               <ActionButton
-                buttonType="outline"
                 className="cursor-pointer"
                 onClick={() => {
-                  navigate(`/service/${service._id}/edit`);
+                  navigate(`/post/${post._id}/edit`);
                 }}
               >
                 Edit
@@ -182,29 +178,26 @@ export default function ServiceDetailPage() {
               user &&
               (!offer ? (
                 <ActionButton
-                  buttonType="outline"
                   className="cursor-pointer"
                   onClick={() => {
-                    navigate(`/offer/${service._id}/create`);
+                    navigate(`/offer/${post._id}/create`);
                   }}
                 >
-                  Create Offer
+                  Create
                 </ActionButton>
               ) : (
                 <ActionButton
-                  buttonType="outline"
                   className="cursor-pointer"
                   onClick={() => {
                     navigate(`/offer/${offer._id}/edit`);
                   }}
                 >
-                  Edit Offer
+                  Edit Apply
                 </ActionButton>
               ))
             )}
             {/* Back Button */}
             <ActionButton
-              buttonType="outline"
               buttonColor="red"
               className="cursor-pointer"
               onClick={() => {

@@ -1,8 +1,8 @@
-import type { OfferFormInterface } from '@/api/offer';
-import type { ServiceFormInterface } from '@/api/service';
-import type { ServiceTag } from '@/interfaces/Service';
+import type { ApplyFormInterface } from '@/api/apply';
+import type { PostFormInterface } from '@/api/post';
+import type { PostTag } from '@/interfaces/Post';
 
-export function convertTagsToLabels(tags: ServiceTag[]): string[] {
+export function convertTagsToLabels(tags: PostTag[]): string[] {
   const tagLabelMap: Record<string, string> = {
     houseCleaning: 'การทำความสะอาด',
     houseRepair: 'การซ่อมแซม',
@@ -68,7 +68,7 @@ export function formatDateToDisplay(date: Date): string {
   return `${day} ${monthName} ${year}`;
 }
 
-export function isInvalidServiceForm(formData: ServiceFormInterface): boolean {
+export function isInvalidPostForm(formData: PostFormInterface): boolean {
   return (
     formData.title.trim() === '' ||
     formData.budget === 0 ||
@@ -77,10 +77,10 @@ export function isInvalidServiceForm(formData: ServiceFormInterface): boolean {
   );
 }
 
-export function isInvalidOfferForm(
-  formData: OfferFormInterface,
+export function isInvalidApplyForm(
+  formData: ApplyFormInterface,
   budget?: number,
 ): boolean {
   if (!budget) budget = 0;
-  return formData.offeredPrice > budget || formData.date === null;
+  return formData.appliedPrice > budget || formData.date === null;
 }

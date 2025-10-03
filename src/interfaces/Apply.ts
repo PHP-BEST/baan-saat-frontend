@@ -1,29 +1,29 @@
-import type { Service } from './Service';
+import type { Post } from './Post';
 import type { User } from './User';
 
-export interface Offer {
+export interface Apply {
   _id: string;
-  serviceId: string;
+  postId: string;
   customerId: string;
   providerId: string;
   date: Date;
-  offeredPrice: number;
+  appliedPrice: number;
   status: OfferStatus;
   description?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface OfferDetail {
+export interface ApplyDetail {
   _id: string;
-  service: Service;
-  serviceId: string;
+  post: Post;
+  postId: string;
   customer: User;
   customerId: string;
   provider: User;
   providerId: string;
   date: Date;
-  offeredPrice: number;
+  appliedPrice: number;
   status: OfferStatus;
   description?: string;
   createdAt: Date;

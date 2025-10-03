@@ -8,11 +8,7 @@ export default function UserNotFound() {
       <p className="text-center text-2xl font-semibold">
         We couldn&apos;t find the user you were looking for...
       </p>
-      <ActionButton
-        onClick={() => navigate(-1)}
-        buttonType="outline"
-        className="cursor-pointer"
-      >
+      <ActionButton onClick={() => navigate(-1)} className="cursor-pointer">
         Back
       </ActionButton>
     </div>

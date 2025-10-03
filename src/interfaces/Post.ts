@@ -1,4 +1,4 @@
-export interface Service {
+export interface Post {
   _id: string;
   customerId: string;
   title: string;
@@ -6,14 +6,15 @@ export interface Service {
   budget: number;
   telNumber: string;
   location: string;
-  tags?: ServiceTag[];
+  tag: PostTag;
+  other: string;
   date: Date;
   coverPhotoUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type ServiceTag =
+export type PostTag =
   | 'houseCleaning'
   | 'houseRepair'
   | 'plumbing'
@@ -37,5 +38,4 @@ export const TAG_OPTIONS: TagsOption[] = [
   { label: 'เครื่องปรับอากาศ', value: 'hvac', order: 5 },
   { label: 'การทาสี', value: 'painting', order: 6 },
   { label: 'การจัดสวน', value: 'landscaping', order: 7 },
-  { label: 'อื่นๆ', value: 'others', order: 8 },
 ];

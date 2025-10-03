@@ -10,18 +10,14 @@ import { cn } from '@/lib/utils';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import ActionButton from '@/components/our-components/actionButton';
-import {
-  TAG_OPTIONS,
-  type ServiceTag,
-  type TagsOption,
-} from '@/interfaces/Service';
+import { TAG_OPTIONS, type PostTag, type TagsOption } from '@/interfaces/Post';
 import {
   formatDateToDisplay,
   getCompressedImageUrl,
-  isInvalidServiceForm,
+  isInvalidPostForm,
 } from '@/utils/function';
-import { serviceValidator } from '@/utils/serviceValidator';
-import { createService, type ServiceFormInterface } from '@/api/service';
+import { postValidator } from '@/utils/postValidator';
+import { createPost, type PostFormInterface } from '@/api/post';
 import { AlertCircle, Loader } from 'lucide-react';
 import MyDatePicker from '@/components/ui/calendar';
 import { useUser } from '@/context/UserContext';
@@ -44,19 +40,20 @@ const Textarea = React.forwardRef<
   );
 });
 
-export const ServiceCreatePage: React.FC = () => {
+export const PostCreatePage: React.FC = () => {
   const { user } = useUser();
   if (!user) return;
 
-  const [formData, setFormData] = useState<ServiceFormInterface>({
+  const [formData, setFormData] = useState<PostFormInterface>({
     title: '',
     description: '',
-    tags: [],
+    tag: null,
+    other: '',
     budget: 0,
     telNumber: user?.telNumber || '',
     location: '',
     coverPhotoUrl: '',
-    date: null,
+    date: undefined,
   });
 
   const [validationErrors, setValidationErrors] = useState<
@@ -95,25 +92,13 @@ export const ServiceCreatePage: React.FC = () => {
     }
 
     // Real-time validation
-    const validation = serviceValidator(
-      name,
-      name === 'budget' ? Number(value) : value,
-    );
+    const validation = postValidator(formData, name);
     if (!validation.isValid) {
       setValidationErrors((prev) => ({
         ...prev,
         [name]: validation.error || '',
       }));
     }
-  };
-
-  const handleTagChange = (tagValue: string, checked: boolean) => {
-    setFormData((prev) => ({
-      ...prev,
-      tags: checked
-        ? [...prev.tags, tagValue as ServiceTag]
-        : prev.tags.filter((t) => t !== tagValue),
-    }));
   };
 
   const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -138,14 +123,8 @@ export const ServiceCreatePage: React.FC = () => {
 
   const handleDatePicking = (date: Date | undefined) => {
     if (date) {
-      const dateStr = date ? date.toLocaleDateString() : '';
-      setFormData((prev) => ({
-        ...prev,
-        date: date,
-      }));
-
       // Validate date
-      const validation = serviceValidator('date', dateStr);
+      const validation = postValidator(formData, 'date');
       if (!validation.isValid) {
         setValidationErrors((prev) => ({
           ...prev,
@@ -165,7 +144,7 @@ export const ServiceCreatePage: React.FC = () => {
     if (
       Object.keys(validationErrors).length === 0 &&
       !adding &&
-      !isInvalidServiceForm(formData)
+      !isInvalidPostForm(formData)
     ) {
       setCanSubmit(true);
     } else {
@@ -178,21 +157,22 @@ export const ServiceCreatePage: React.FC = () => {
 
     if (canSubmit) {
       setAdding(true);
-      const success = await createService(user._id, formData);
+      const success = await createPost(user._id, formData);
       if (success) {
         setFormData({
           title: '',
           description: '',
-          tags: [],
+          tag: null,
+          other: '',
           budget: 0,
           telNumber: user.telNumber || '',
           location: '',
           coverPhotoUrl: '',
-          date: null,
+          date: undefined,
         });
-        window.location.href = `/account/service`;
+        window.location.href = `/account/post`;
       } else {
-        alert('Failed to create service. Please try again.');
+        alert('Failed to create post. Please try again.');
       }
       setAdding(false);
     }
@@ -203,21 +183,21 @@ export const ServiceCreatePage: React.FC = () => {
       <Header />
       <main className="flex-grow flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-2xl space-y-8">
-          <h1 className="text-3xl font-bold text-gray-900">Create a Service</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Create a Post</h1>
           <form onSubmit={handleSubmit} className="w-full space-y-6">
-            {/* Service Title */}
+            {/* Post Title */}
             <div>
               <label
                 htmlFor="title"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Service Title
+                Post Title
               </label>
               <Input
                 id="title"
                 name="title"
                 type="text"
-                placeholder="Service Title"
+                placeholder="Post Title"
                 value={formData.title}
                 onChange={handleInputChange}
                 disabled={adding}
@@ -265,38 +245,90 @@ export const ServiceCreatePage: React.FC = () => {
               )}
             </div>
 
-            {/* Tags */}
+            {/* Tag */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Tags
+                Tag
               </label>
-              <div className="grid grid-cols-2 gap-3">
+
+              <div className="space-y-2">
                 {TAG_OPTIONS.map((tagOption: TagsOption) => (
                   <label
                     key={tagOption.value}
                     className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
                   >
                     <input
-                      type="checkbox"
-                      checked={formData.tags.includes(
-                        tagOption.value as ServiceTag,
-                      )}
-                      onChange={(e) =>
-                        handleTagChange(tagOption.value, e.target.checked)
+                      type="radio"
+                      name="tag"
+                      value={tagOption.value}
+                      checked={formData.tag === tagOption.value}
+                      onChange={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          tag: tagOption.value as PostTag,
+                          other: '',
+                        }))
                       }
                       disabled={adding}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                     />
                     <span className="text-sm text-gray-700">
                       {tagOption.label}
                     </span>
                   </label>
                 ))}
+
+                {/* Others */}
+                <div>
+                  <label className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                    <input
+                      type="radio"
+                      name="tag"
+                      value="others"
+                      checked={formData.tag === 'others'}
+                      onChange={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          tag: 'others' as PostTag,
+                        }))
+                      }
+                      disabled={adding}
+                      className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">อื่นๆ</span>
+                  </label>
+
+                  {formData.tag === 'others' && (
+                    <div className="mt-2 ml-6">
+                      <input
+                        id="other"
+                        name="other"
+                        type="text"
+                        placeholder="Please specify..."
+                        value={formData.other}
+                        onChange={handleInputChange}
+                        disabled={adding}
+                        className={`w-full border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 transition ${
+                          validationErrors.other
+                            ? 'border-red-500 focus:border-red-500'
+                            : ''
+                        }`}
+                      />
+                      {validationErrors.other && (
+                        <div className="flex items-center gap-1 text-red-500 text-sm mt-1">
+                          <AlertCircle className="w-4 h-4" />
+                          <span>{validationErrors.other}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-              {validationErrors.tags && (
+
+              {validationErrors.tag && (
                 <div className="flex items-center gap-1 text-red-500 text-sm mt-1">
                   <AlertCircle className="w-4 h-4" />
-                  <span>{validationErrors.tags}</span>
+                  <span>{validationErrors.tag}</span>
                 </div>
               )}
             </div>
@@ -417,7 +449,6 @@ export const ServiceCreatePage: React.FC = () => {
                       document.getElementById('cover-photo-upload')?.click();
                     }
                   }}
-                  buttonType="outline"
                   buttonColor="green"
                   disabled={adding}
                   className={`${adding ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
@@ -436,7 +467,7 @@ export const ServiceCreatePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Service Date */}
+            {/* Post Date */}
             <div>
               <label
                 htmlFor="date"
@@ -473,12 +504,11 @@ export const ServiceCreatePage: React.FC = () => {
               <ActionButton
                 type="button"
                 buttonColor="red"
-                buttonType="outline"
                 disabled={adding}
                 className={`${!adding ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
                 onClick={() => {
                   if (!adding) {
-                    window.location.href = `/account/service`;
+                    window.location.href = `/account/post`;
                   }
                 }}
               >
@@ -493,4 +523,4 @@ export const ServiceCreatePage: React.FC = () => {
   );
 };
 
-export default ServiceCreatePage;
+export default PostCreatePage;

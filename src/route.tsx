@@ -1,22 +1,22 @@
 import { createBrowserRouter } from 'react-router-dom';
-import ErrorPage from './pages/Error';
+import ErrorPage from './error/Error';
 import AccountLayout from './layouts/AccountLayout';
 import MainLayout from './layouts/MainLayout';
 import LandingPage from './pages/Landing';
-import MyServicePage from './pages/MyService';
+import MyPostPage from './pages/MyPost';
 import LoginPage from './pages/Login';
 import ProfilePage from './pages/Profile';
 import ProtectedRoute from './middleware/protectedRoute';
 
-import OfferCreatePage from './pages/OfferCreate';
-import ServiceDetailPage from './pages/ServiceDetail';
-import ServiceEditPage from './pages/ServiceEdit';
-import ServiceCreatePage from './pages/ServiceCreate';
-import ProviderProfilePage from './pages/ProviderProfile';
-import ProviderProfileServicePage from './pages/ProviderProfileService';
+import ApplyCreatePage from './pages/ApplyCreate';
+import PostDetailPage from './pages/PostDetail';
+import PostEditPage from './pages/PostEdit';
+import PostCreatePage from './pages/PostCreate';
+import CustomerProfilePage from './pages/CustomerProfile';
 import SearchPage from './pages/Search';
-import MyOfferPage from './pages/MyOffer';
-import OfferEditPage from './pages/OfferEdit';
+import MyApplyPage from './pages/MyApply';
+import CustomerProfilePostPage from './pages/CustomerProfilePost';
+import ApplyEditPage from './pages/ApplyEdit';
 
 export const router = createBrowserRouter([
   {
@@ -37,8 +37,8 @@ export const router = createBrowserRouter([
         ),
         children: [
           { path: '', element: <ProfilePage /> },
-          { path: 'service', element: <MyServicePage /> },
-          { path: 'offer', element: <MyOfferPage /> },
+          { path: 'post', element: <MyPostPage /> },
+          { path: 'apply', element: <MyApplyPage /> },
         ],
       },
       {
@@ -46,50 +46,50 @@ export const router = createBrowserRouter([
         element: <LoginPage />,
       },
       {
-        path: 'service/:serviceId',
-        element: <ServiceDetailPage />,
+        path: 'post/:postId',
+        element: <PostDetailPage />,
       },
       {
-        path: 'service/:serviceId/edit',
+        path: 'post/:postId/edit',
         element: (
           <ProtectedRoute>
-            <ServiceEditPage />
+            <PostEditPage />
           </ProtectedRoute>
         ),
       },
       {
-        path: 'service/create',
+        path: 'post/create',
         element: (
           <ProtectedRoute>
-            <ServiceCreatePage />
+            <PostCreatePage />
           </ProtectedRoute>
         ),
       },
       {
         path: 'user/:userId',
-        element: <ProviderProfilePage />,
+        element: <CustomerProfilePage />,
       },
       {
-        path: 'user/:userId/service',
-        element: <ProviderProfileServicePage />,
+        path: 'user/:userId/post',
+        element: <CustomerProfilePostPage />,
       },
       {
         path: 'search',
         element: <SearchPage />,
       },
       {
-        path: 'offer/:serviceId/create',
+        path: 'apply/:postId/create',
         element: (
           <ProtectedRoute>
-            <OfferCreatePage />
+            <ApplyCreatePage />
           </ProtectedRoute>
         ),
       },
       {
-        path: 'offer/:offerId/edit',
+        path: 'apply/:applyId/edit',
         element: (
           <ProtectedRoute>
-            <OfferEditPage />
+            <ApplyEditPage />
           </ProtectedRoute>
         ),
       },

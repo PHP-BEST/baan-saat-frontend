@@ -14,8 +14,8 @@ const SidebarMenu: SidebarItem[] = [
   { name: 'Profile', path: '/', isDisabled: false },
   { name: 'Account Setting', path: '/setting', isDisabled: true },
   { name: 'Privacy', path: '/privacy', isDisabled: true },
-  { name: 'My Offers', path: '/offer', isDisabled: false },
-  { name: 'My Services', path: '/service', isDisabled: false },
+  { name: 'My Applys', path: '/apply', isDisabled: false },
+  { name: 'My Posts', path: '/post', isDisabled: false },
 ];
 
 const logout = async () => {
@@ -52,11 +52,7 @@ export default function AccountLayout() {
               </div>
             ))}
             <div className="mt-auto">
-              <ActionButton
-                buttonColor="red"
-                buttonType="outline"
-                onClick={logout}
-              >
+              <ActionButton buttonColor="red" onClick={logout}>
                 Sign out
               </ActionButton>
             </div>

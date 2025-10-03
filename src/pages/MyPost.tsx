@@ -1,13 +1,13 @@
-import { getUserServices } from '@/api/service';
+import { getUserPosts } from '@/api/post';
 import ActionButton from '@/components/our-components/actionButton';
 import Loading from '@/components/our-components/loading';
-import ServiceCard from '@/components/our-components/serviceCard';
+import PostCard from '@/components/our-components/postCard';
 import { useUser } from '@/context/UserContext';
-import type { Service } from '@/interfaces/Service';
+import type { Post } from '@/interfaces/Post';
 import { useEffect, useState } from 'react';
 
-export default function MyServicePage() {
-  const [services, setServices] = useState<Service[]>([]);
+export default function MyPostPage() {
+  const [posts, setPosts] = useState<Post[]>([]);
 
   const { user } = useUser();
   if (!user) return;
@@ -15,14 +15,14 @@ export default function MyServicePage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchUserServices = async () => {
+    const fetchUserPosts = async () => {
       setLoading(true);
-      const userServices = await getUserServices(user._id);
-      setServices(userServices);
+      const userPosts = await getUserPosts(user._id);
+      setPosts(userPosts);
       setLoading(false);
     };
 
-    fetchUserServices();
+    fetchUserPosts();
   }, []);
 
   if (loading) {
@@ -30,11 +30,11 @@ export default function MyServicePage() {
       <>
         {/* Header */}
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold mb-2">My Services</h1>
+          <h1 className="text-2xl font-bold mb-2">My Posts</h1>
           <ActionButton
             className="cursor-pointer -translate-y-2"
             onClick={() => {
-              window.location.href = '/service/create';
+              window.location.href = '/post/create';
             }}
           >
             Create
@@ -53,11 +53,11 @@ export default function MyServicePage() {
     <>
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold mb-2">My Services</h1>
+        <h1 className="text-2xl font-bold mb-2">My Posts</h1>
         <ActionButton
           className="cursor-pointer -translate-y-2"
           onClick={() => {
-            window.location.href = '/service/create';
+            window.location.href = '/post/create';
           }}
         >
           Create
@@ -66,16 +66,16 @@ export default function MyServicePage() {
 
       {/* Content */}
       <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
-        {services.length > 0 ? (
+        {posts.length > 0 ? (
           <div className="w-full h-full max-h-screen overflow-auto grid grid-cols-3 gap-4">
-            {services.map((service: Service) => (
-              <ServiceCard key={service._id} service={service} />
+            {posts.map((post: Post) => (
+              <PostCard key={post._id} post={post} />
             ))}
           </div>
         ) : (
           <div className="w-full h-full max-h-screen">
             <p className="text-xl text-center font-semibold">
-              You haven&apos;t created any services yet...
+              You haven&apos;t created any posts yet...
             </p>
           </div>
         )}
