@@ -1,5 +1,5 @@
 import { API_ROOT, type ResponseInterface } from '@/config/api';
-import type { Post, PostTag, TagsOption } from '@/interfaces/Post';
+import type { Post, PostTag } from '@/interfaces/Post';
 import axios from 'axios';
 
 const API_BASE = `${API_ROOT}/api/posts`;
@@ -105,7 +105,7 @@ export const searchPosts = async (query: string): Promise<Post[]> => {
 export interface FilterPostParams {
   userId?: string;
   title?: string;
-  tags: TagsOption[];
+  tags: PostTag[];
   other: string;
   minBudget?: number;
   maxBudget?: number;
@@ -121,12 +121,7 @@ export const filterPosts = async (
       `${API_BASE}/filter`,
       {
         headers: { 'Content-Type': 'application/json' },
-        params: {
-          ...params,
-          ...(params.tags.length
-            ? { tags: params.tags.map((tag) => tag.value) }
-            : {}),
-        },
+        params: params,
       },
     );
 

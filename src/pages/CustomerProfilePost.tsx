@@ -5,7 +5,12 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { ChevronLeft, Filter } from 'lucide-react';
 import type { User } from '@/interfaces/User';
-import { TAG_OPTIONS, type Post, type TagsOption } from '@/interfaces/Post';
+import {
+  TAG_OPTIONS,
+  type Post,
+  type PostTag,
+  type TagsOption,
+} from '@/interfaces/Post';
 import Loading from '@/components/our-components/loading';
 import { getUserById } from '@/api/user';
 import {
@@ -27,6 +32,8 @@ export default function CustomerProfilePostPage() {
   // Filter states
   const [postTitle, setPostTitle] = useState<string | undefined>();
   const [tags, setTags] = useState<TagsOption[]>([]);
+  const [other, setOther] = useState<string>('');
+  const [otherSelected, setOtherSelected] = useState(false);
   const [minBudget, setMinBudget] = useState<number | undefined>();
   const [maxBudget, setMaxBudget] = useState<number | undefined>();
   const [startDate, setStartDate] = useState('');
@@ -86,16 +93,23 @@ export default function CustomerProfilePostPage() {
     setFilterError(undefined);
     setLoading(true);
 
+    const postTags = tags.map((tag) => tag.value as PostTag);
+
     const params: FilterPostParams = {
       userId: userId,
       title: postTitle || undefined,
-      tags: tags,
-      other: '',
+      tags:
+        otherSelected && other.trim() !== ''
+          ? [...postTags, 'others' as PostTag]
+          : postTags,
+      other: otherSelected ? other : '',
       minBudget,
       maxBudget,
       startDate: startDate || undefined,
       endDate: endDate || undefined,
     };
+
+    console.log('Filter params:', params);
 
     let posts = await filterPosts(params);
     posts = posts.sort(
@@ -168,16 +182,45 @@ export default function CustomerProfilePostPage() {
                   Tags
                 </label>
                 <div className="grid grid-cols-2 gap-2 mb-2">
-                  {TAG_OPTIONS.map((t: TagsOption) => (
-                    <label key={t.value} className="flex items-center gap-2">
+                  {TAG_OPTIONS.filter((t) => t.value !== 'others').map(
+                    (t: TagsOption) => (
+                      <label key={t.value} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={tags.includes(t)}
+                          onChange={() => handleTagChange(t)}
+                        />
+                        <span>{t.label}</span>
+                      </label>
+                    ),
+                  )}
+
+                  {/* Others option */}
+                  <div className="col-span-2">
+                    <label className="flex items-center gap-2">
                       <input
                         type="checkbox"
-                        checked={tags.includes(t)}
-                        onChange={() => handleTagChange(t)}
+                        checked={otherSelected}
+                        onChange={() => {
+                          setOtherSelected((prev) => !prev);
+                          if (otherSelected) {
+                            setOther('');
+                          }
+                        }}
                       />
-                      <span>{t.label}</span>
+                      <span>อื่นๆ</span>
                     </label>
-                  ))}
+
+                    {otherSelected && (
+                      <input
+                        type="text"
+                        value={other}
+                        onChange={(e) => setOther(e.target.value)}
+                        placeholder="Please specify..."
+                        className="w-full mt-1 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 transition"
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
               <div>
