@@ -1,35 +1,35 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import Footer from '@/components/our-components/footer';
 import { Search } from 'lucide-react';
-import type { Service } from '@/interfaces/Service';
-import { getAllServices } from '@/api/service';
+import type { Post } from '@/interfaces/Post';
+import { getAllPosts } from '@/api/post';
 import Header from '@/components/our-components/header';
-import ServiceCard from '@/components/our-components/serviceCard';
+import PostCard from '@/components/our-components/postCard';
 import { useNavigate } from 'react-router-dom';
 import Loading from '@/components/our-components/loading';
 
 export default function LandingPage() {
   const [query, setQuery] = useState('');
-  const [services, setServices] = useState<Service[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchServices = async () => {
+    const fetchPosts = async () => {
       setLoading(true);
-      const allServices = await getAllServices();
-      const sortedServices = allServices
+      const allPosts = await getAllPosts();
+      const sortedPosts = allPosts
         .sort(
           (a, b) =>
             new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
         )
         .slice(0, 9);
-      setServices(sortedServices);
-      setServices(allServices);
+      setPosts(sortedPosts);
+      setPosts(allPosts);
       setLoading(false);
     };
 
-    fetchServices();
+    fetchPosts();
   }, []);
 
   const handleSearch = (e: FormEvent) => {
@@ -89,12 +89,12 @@ export default function LandingPage() {
         <h2 className="text-2xl font-bold">กระทู้คำขอล่าสุด</h2>
         {loading ? (
           <Loading />
-        ) : services.length === 0 ? (
-          <div>No services found</div>
+        ) : posts.length === 0 ? (
+          <div>No posts found</div>
         ) : (
           <div className="w-full max-w-screen-xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-center items-center mx-auto">
-            {services.map((service) => (
-              <ServiceCard service={service} size="L" key={service._id} />
+            {posts.map((post) => (
+              <PostCard post={post} size="L" key={post._id} />
             ))}
           </div>
         )}

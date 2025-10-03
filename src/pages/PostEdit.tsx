@@ -12,25 +12,21 @@ import Footer from '@/components/our-components/footer';
 import ActionButton from '@/components/our-components/actionButton';
 import {
   TAG_OPTIONS,
-  type Service,
-  type ServiceTag,
+  type Post,
+  type PostTag,
   type TagsOption,
-} from '@/interfaces/Service';
-import { serviceValidator } from '@/utils/serviceValidator';
+} from '@/interfaces/Post';
+import { postValidator } from '@/utils/postValidator';
 import { Loader, AlertCircle } from 'lucide-react';
 import {
   formatDateToDisplay,
   getCompressedImageUrl,
-  isInvalidServiceForm,
+  isInvalidPostForm,
 } from '@/utils/function';
 import Loading from '@/components/our-components/loading';
-import {
-  getServiceById,
-  updateService,
-  type ServiceFormInterface,
-} from '@/api/service';
+import { getPostById, updatePost, type PostFormInterface } from '@/api/post';
 import MyDatePicker from '@/components/ui/calendar';
-import ServiceNotFound from '@/error/ServiceNotFound';
+import PostNotFound from '@/error/PostNotFound';
 
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
@@ -50,48 +46,48 @@ const Textarea = React.forwardRef<
   );
 });
 
-function isFormDataSameAsOldService(
-  formData: ServiceFormInterface,
-  service: Service | null,
+function isFormDataSameAsOldPost(
+  formData: PostFormInterface,
+  post: Post | null,
 ) {
-  if (!service) return false;
+  if (!post) return false;
 
   // Handle date comparison separately
   const formDateStr = formData.date
     ? new Date(formData.date).toISOString().split('T')[0]
     : null;
-  const serviceDateStr = service.date
-    ? new Date(service.date).toISOString().split('T')[0]
+  const postDateStr = post.date
+    ? new Date(post.date).toISOString().split('T')[0]
     : null;
 
   return (
-    formData.title === service.title &&
-    formData.description === service.description &&
-    JSON.stringify(formData.tags.sort()) ===
-      JSON.stringify((service.tags || []).sort()) &&
-    formData.budget === service.budget &&
-    formData.location === service.location &&
-    formData.coverPhotoUrl === service.coverPhotoUrl &&
-    formDateStr === serviceDateStr &&
-    formData.telNumber === service.telNumber
+    formData.title === post.title &&
+    formData.description === post.description &&
+    formData.tag === post.tag &&
+    formData.budget === post.budget &&
+    formData.location === post.location &&
+    formData.coverPhotoUrl === post.coverPhotoUrl &&
+    formDateStr === postDateStr &&
+    formData.telNumber === post.telNumber
   );
 }
 
-export default function ServiceEditPage() {
-  const { serviceId } = useParams<{ serviceId: string }>();
-  const [service, setService] = useState<Service | null>(null);
+export default function PostEditPage() {
+  const { postId } = useParams<{ postId: string }>();
+  const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
-  const [formData, setFormData] = useState<ServiceFormInterface>({
+  const [formData, setFormData] = useState<PostFormInterface>({
     title: '',
     description: '',
-    tags: [],
+    tag: null,
+    other: '',
     budget: 0,
     location: '',
     coverPhotoUrl: '',
     telNumber: '',
-    date: null,
+    date: undefined,
   });
 
   const [validationErrors, setValidationErrors] = useState<
@@ -100,40 +96,41 @@ export default function ServiceEditPage() {
 
   useEffect(() => {
     const fetchService = async () => {
-      if (!serviceId) return;
+      if (!postId) return;
 
       setLoading(true);
-      const currentService = await getServiceById(serviceId);
-      setService(currentService);
+      const currentPost = await getPostById(postId);
+      setPost(currentPost);
       setFormData({
-        title: currentService?.title || '',
-        description: currentService?.description || '',
-        tags: Array.isArray(currentService?.tags) ? currentService.tags : [],
-        budget: currentService?.budget || 0,
-        location: currentService?.location || '',
-        coverPhotoUrl: currentService?.coverPhotoUrl || '',
-        telNumber: currentService?.telNumber || '',
-        date: currentService?.date || null,
+        title: currentPost?.title || '',
+        description: currentPost?.description || '',
+        tag: currentPost?.tag || null,
+        other: currentPost?.other || '',
+        budget: currentPost?.budget || 0,
+        location: currentPost?.location || '',
+        coverPhotoUrl: currentPost?.coverPhotoUrl || '',
+        telNumber: currentPost?.telNumber || '',
+        date: currentPost?.date || undefined,
       });
 
       setLoading(false);
     };
 
     fetchService();
-  }, [serviceId]);
+  }, [postId]);
 
   useEffect(() => {
     if (
       Object.keys(validationErrors).length === 0 &&
       !updating &&
-      !isInvalidServiceForm(formData) &&
-      !isFormDataSameAsOldService(formData, service)
+      !isInvalidPostForm(formData) &&
+      !isFormDataSameAsOldPost(formData, post)
     ) {
       setCanSubmit(true);
     } else {
       setCanSubmit(false);
     }
-  }, [formData, validationErrors, updating, service]);
+  }, [formData, validationErrors, updating, post]);
 
   if (loading) {
     return (
@@ -147,12 +144,12 @@ export default function ServiceEditPage() {
     );
   }
 
-  if (!service) {
+  if (!post) {
     return (
       <div>
         <Header />
         <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
-          <ServiceNotFound />
+          <PostNotFound />
         </div>
         <Footer />
       </div>
@@ -188,25 +185,13 @@ export default function ServiceEditPage() {
     }
 
     // Real-time validation
-    const validation = serviceValidator(
-      name,
-      name === 'budget' ? Number(value) : value,
-    );
+    const validation = postValidator(formData, name);
     if (!validation.isValid) {
       setValidationErrors((prev) => ({
         ...prev,
         [name]: validation.error || '',
       }));
     }
-  };
-
-  const handleTagChange = (tagValue: string, checked: boolean) => {
-    setFormData((prev) => ({
-      ...prev,
-      tags: checked
-        ? [...prev.tags, tagValue as ServiceTag]
-        : prev.tags.filter((t) => t !== tagValue),
-    }));
   };
 
   const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -231,14 +216,8 @@ export default function ServiceEditPage() {
 
   const handleDatePicking = (date: Date | undefined) => {
     if (date) {
-      const dateStr = date ? date.toLocaleDateString() : '';
-      setFormData((prev) => ({
-        ...prev,
-        date: date,
-      }));
-
       // Validate date
-      const validation = serviceValidator('date', dateStr);
+      const validation = postValidator(formData, 'date');
       if (!validation.isValid) {
         setValidationErrors((prev) => ({
           ...prev,
@@ -255,7 +234,7 @@ export default function ServiceEditPage() {
   };
 
   const handleSubmit = async (e?: FormEvent<HTMLFormElement>) => {
-    if (!serviceId) return;
+    if (!postId) return;
     if (e) e.preventDefault();
 
     // Validate all fields before submission
@@ -275,7 +254,7 @@ export default function ServiceEditPage() {
       if (value === null) {
         newErrors[field] = `${field} is required`;
       } else {
-        const validation = serviceValidator(field, value);
+        const validation = postValidator(formData, field);
         if (!validation.isValid) {
           newErrors[field] = validation.error || '';
         }
@@ -288,11 +267,11 @@ export default function ServiceEditPage() {
     // Only proceed if there are no validation errors
     if (Object.keys(newErrors).length === 0 && canSubmit) {
       setUpdating(true);
-      const success = await updateService(serviceId, formData);
+      const success = await updatePost(postId, formData);
       if (success) {
-        window.location.href = `/account/service`;
+        window.location.href = `/account/post`;
       } else {
-        alert('Failed to update service. Please try again.');
+        alert('Failed to update post. Please try again.');
       }
       setUpdating(false);
     } else {
@@ -306,21 +285,21 @@ export default function ServiceEditPage() {
       <Header />
       <main className="flex-grow flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-2xl space-y-8">
-          <h1 className="text-3xl font-bold text-gray-900">Update a Service</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Update a Post</h1>
           <form onSubmit={handleSubmit} className="w-full space-y-6">
-            {/* Service Title */}
+            {/* Post Title */}
             <div>
               <label
                 htmlFor="title"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Service Title
+                Post Title
               </label>
               <Input
                 id="title"
                 name="title"
                 type="text"
-                placeholder="Service Title"
+                placeholder="Post Title"
                 value={formData.title}
                 onChange={handleInputChange}
                 disabled={updating}
@@ -368,38 +347,90 @@ export default function ServiceEditPage() {
               )}
             </div>
 
-            {/* Tags */}
+            {/* Tag */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Tags
+                Tag
               </label>
-              <div className="grid grid-cols-2 gap-3">
+
+              <div className="space-y-2">
                 {TAG_OPTIONS.map((tagOption: TagsOption) => (
                   <label
                     key={tagOption.value}
                     className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
                   >
                     <input
-                      type="checkbox"
-                      checked={formData.tags.includes(
-                        tagOption.value as ServiceTag,
-                      )}
-                      onChange={(e) =>
-                        handleTagChange(tagOption.value, e.target.checked)
+                      type="radio"
+                      name="tag"
+                      value={tagOption.value}
+                      checked={formData.tag === tagOption.value}
+                      onChange={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          tag: tagOption.value as PostTag,
+                          other: '',
+                        }))
                       }
                       disabled={updating}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                     />
                     <span className="text-sm text-gray-700">
                       {tagOption.label}
                     </span>
                   </label>
                 ))}
+
+                {/* Others */}
+                <div>
+                  <label className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                    <input
+                      type="radio"
+                      name="tag"
+                      value="others"
+                      checked={formData.tag === 'others'}
+                      onChange={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          tag: 'others' as PostTag,
+                        }))
+                      }
+                      disabled={updating}
+                      className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">Others</span>
+                  </label>
+
+                  {formData.tag === 'others' && (
+                    <div className="mt-2 ml-6">
+                      <input
+                        id="other"
+                        name="other"
+                        type="text"
+                        placeholder="Please specify..."
+                        value={formData.other}
+                        onChange={handleInputChange}
+                        disabled={updating}
+                        className={`w-full border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 transition ${
+                          validationErrors.other
+                            ? 'border-red-500 focus:border-red-500'
+                            : ''
+                        }`}
+                      />
+                      {validationErrors.other && (
+                        <div className="flex items-center gap-1 text-red-500 text-sm mt-1">
+                          <AlertCircle className="w-4 h-4" />
+                          <span>{validationErrors.other}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-              {validationErrors.tags && (
+
+              {validationErrors.tag && (
                 <div className="flex items-center gap-1 text-red-500 text-sm mt-1">
                   <AlertCircle className="w-4 h-4" />
-                  <span>{validationErrors.tags}</span>
+                  <span>{validationErrors.tag}</span>
                 </div>
               )}
             </div>
@@ -520,7 +551,6 @@ export default function ServiceEditPage() {
                       document.getElementById('cover-photo-upload')?.click();
                     }
                   }}
-                  buttonType="outline"
                   buttonColor="green"
                   disabled={updating}
                   className={`${updating ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
@@ -539,7 +569,7 @@ export default function ServiceEditPage() {
               </div>
             </div>
 
-            {/* Service Date */}
+            {/* Post Date */}
             <div>
               <label
                 htmlFor="date"
@@ -579,12 +609,11 @@ export default function ServiceEditPage() {
               <ActionButton
                 type="button"
                 buttonColor="red"
-                buttonType="outline"
                 disabled={updating}
                 className={`${!updating ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
                 onClick={() => {
                   if (!updating) {
-                    window.location.href = `/account/service`;
+                    window.location.href = `/account/post`;
                   }
                 }}
               >

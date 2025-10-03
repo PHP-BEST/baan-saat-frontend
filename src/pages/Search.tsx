@@ -2,19 +2,15 @@ import { Filter } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
-import {
-  TAG_OPTIONS,
-  type Service,
-  type TagsOption,
-} from '@/interfaces/Service';
+import { TAG_OPTIONS, type Post, type TagsOption } from '@/interfaces/Post';
 import { useSearchParams } from 'react-router-dom';
 import {
-  filterServices,
-  getAllServices,
-  searchServices,
-  type FilterServiceParams,
-} from '@/api/service';
-import ServiceCard from '@/components/our-components/serviceCard';
+  filterPosts,
+  getAllPosts,
+  searchPosts,
+  type FilterPostParams,
+} from '@/api/post';
+import PostCard from '@/components/our-components/postCard';
 import Loading from '@/components/our-components/loading';
 import ActionButton from '@/components/our-components/actionButton';
 import { filterValidator } from '@/utils/filterValidator';
@@ -23,11 +19,13 @@ export default function SearchPage() {
   const [searchParams] = useSearchParams();
   const [showFilter, setShowFilter] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [filteredServices, setFilteredServices] = useState<Service[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
 
   // Filter states
-  const [serviceTitle, setServiceTitle] = useState<string | undefined>();
+  const [postTitle, setPostTitle] = useState<string | undefined>();
   const [tags, setTags] = useState<TagsOption[]>([]);
+  const [other, setOther] = useState<string>('');
+  const [otherSelected, setOtherSelected] = useState(false);
   const [minBudget, setMinBudget] = useState<number | undefined>();
   const [maxBudget, setMaxBudget] = useState<number | undefined>();
   const [startDate, setStartDate] = useState('');
@@ -35,29 +33,29 @@ export default function SearchPage() {
   const [filterError, setFilterError] = useState<string | undefined>();
 
   useEffect(() => {
-    const fetchInitialServices = async () => {
+    const fetchInitialPosts = async () => {
       setLoading(true);
       const query = searchParams.get('query') || '';
-      let services = await searchServices(query);
-      if (services.length === 0) {
-        services = await getAllServices();
-        services = services
+      let posts = await searchPosts(query);
+      if (posts.length === 0) {
+        posts = await getAllPosts();
+        posts = posts
           .sort(
             (a, b) =>
               new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
           )
           .slice(0, 10);
       } else {
-        services = services.sort(
+        posts = posts.sort(
           (a, b) =>
             new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
         );
       }
-      setFilteredServices(services);
+      setFilteredPosts(posts);
       setLoading(false);
     };
 
-    fetchInitialServices();
+    fetchInitialPosts();
   }, [searchParams]);
 
   if (loading) {
@@ -86,22 +84,23 @@ export default function SearchPage() {
     setFilterError(undefined);
     setLoading(true);
 
-    const params: FilterServiceParams = {
-      title: serviceTitle || undefined,
-      tags: tags.length ? tags : undefined,
+    const params: FilterPostParams = {
+      title: postTitle || undefined,
+      tags: tags,
+      other: other,
       minBudget,
       maxBudget,
       startDate: startDate || undefined,
       endDate: endDate || undefined,
     };
 
-    let services = await filterServices(params);
-    services = services.sort(
+    let posts = await filterPosts(params);
+    posts = posts.sort(
       (a, b) =>
         new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
     );
 
-    setFilteredServices(services);
+    setFilteredPosts(posts);
     setShowFilter(false);
     setLoading(false);
   };
@@ -126,7 +125,7 @@ export default function SearchPage() {
         {/* Result Counter */}
         <div className="flex justify-between items-center w-full max-w-6xl">
           <p className="text-lg font-medium">
-            Services Found: {filteredServices.length}
+            Posts Found: {filteredPosts.length}
           </p>
           <button
             className="flex items-center gap-1 text-button-action cursor-pointer"
@@ -140,22 +139,22 @@ export default function SearchPage() {
         {/* Filter Panel */}
         {showFilter && (
           <div className="w-full max-w-6xl bg-white p-4 rounded-md shadow-md">
-            <h3 className="text-lg font-semibold mb-2">Filter Services</h3>
+            <h3 className="text-lg font-semibold mb-2">Filter Posts</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="font-medium text-black block mb-1">
-                  Service Title
+                  Post Title
                 </label>
                 <input
                   type="text"
-                  value={serviceTitle ?? ''}
-                  onChange={(e) => setServiceTitle(e.target.value)}
+                  value={postTitle ?? ''}
+                  onChange={(e) => setPostTitle(e.target.value)}
                   className={`w-full border rounded-md p-2 mb-2 ${
                     filterError && filterError.toLowerCase().includes('title')
                       ? 'border-red-500'
                       : 'border-gray-300'
                   }`}
-                  placeholder="Service Title"
+                  placeholder="Post Title"
                 />
                 <label className="font-medium text-black block mb-1">
                   Tags
@@ -171,6 +170,33 @@ export default function SearchPage() {
                       <span>{tag.label}</span>
                     </label>
                   ))}
+
+                  {/* Others Option */}
+                  <div className="col-span-2">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={otherSelected}
+                        onChange={() => {
+                          setOtherSelected((prev) => !prev);
+                          if (otherSelected) {
+                            setOther('');
+                          }
+                        }}
+                      />
+                      <span>อื่นๆ</span>
+                    </label>
+
+                    {otherSelected && (
+                      <input
+                        type="text"
+                        value={other}
+                        onChange={(e) => setOther(e.target.value)}
+                        placeholder="Please specify..."
+                        className="w-full mt-1 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 transition"
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
               <div>
@@ -262,11 +288,11 @@ export default function SearchPage() {
           </div>
         )}
 
-        {/* Filtered Service cards */}
+        {/* Filtered Post cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl px-4 md:px-0">
-          {filteredServices.length > 0 ? (
-            filteredServices.map((service: Service) => (
-              <ServiceCard key={service._id} service={service} size="L" />
+          {filteredPosts.length > 0 ? (
+            filteredPosts.map((post: Post) => (
+              <PostCard key={post._id} post={post} size="L" />
             ))
           ) : (
             <p className="col-span-full text-center text-gray-500 text-lg">

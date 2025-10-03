@@ -7,26 +7,26 @@ import React, {
 import { useParams } from 'react-router-dom';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
-import type { Service } from '@/interfaces/Service';
+import type { Post } from '@/interfaces/Post';
 import type { User } from '@/interfaces/User';
 import ActionButton from '@/components/our-components/actionButton';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { createOffer, type OfferFormInterface } from '@/api/offer';
-import { getServiceById } from '@/api/service';
+import { createApply, type ApplyFormInterface } from '@/api/apply';
+import { getPostById } from '@/api/post';
 import Loading from '@/components/our-components/loading';
-import ServiceNotFound from '@/error/ServiceNotFound';
+import PostNotFound from '@/error/PostNotFound';
 import {
   convertTagsToLabels,
   formatDateToDisplay,
-  isInvalidOfferForm,
+  isInvalidApplyForm,
 } from '@/utils/function';
 import { AlertCircle, Calendar, Phone } from 'lucide-react';
 import { getUserById } from '@/api/user';
 import MyDatePicker from '@/components/ui/calendar';
 import { useUser } from '@/context/UserContext';
 import { Input } from '@/components/ui/input';
-import { offerValidator } from '@/utils/offerValidator';
+import { applyValidator } from '@/utils/applyValidator';
 
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
@@ -46,18 +46,19 @@ const Textarea = React.forwardRef<
   );
 });
 
-export default function OfferCreatePage() {
+export default function ApplyCreatePage() {
   const navigate = useNavigate();
   const { user } = useUser();
   if (!user) return;
 
-  const { serviceId } = useParams();
-  const [service, setService] = useState<Service | null>(null);
+  const { postId } = useParams();
+  const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(false);
   const [customerUser, setCustomerUser] = useState<User | null>(null);
-  const [formData, setFormData] = useState<OfferFormInterface>({
-    date: null,
-    offeredPrice: 0,
+  const [formData, setFormData] = useState<ApplyFormInterface>({
+    date: undefined,
+    appliedPrice: 0,
+    budget: 0,
     description: '',
   });
   const [showConfirm, setShowConfirm] = useState<'submit' | 'cancel' | null>(
@@ -75,7 +76,7 @@ export default function OfferCreatePage() {
     if (
       Object.keys(validationErrors).length === 0 &&
       !adding &&
-      !isInvalidOfferForm(formData, service?.budget)
+      !isInvalidApplyForm(formData, post?.budget)
     ) {
       setCanSubmit(true);
     } else {
@@ -87,7 +88,7 @@ export default function OfferCreatePage() {
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    if (name === 'offeredPrice') {
+    if (name === 'appliedPrice') {
       if (Number(value) >= 0) {
         setFormData((prev) => ({
           ...prev,
@@ -112,10 +113,7 @@ export default function OfferCreatePage() {
     }
 
     // Real-time validation
-    const validation = offerValidator(
-      name,
-      name === 'offeredPrice' ? Number(value) : value,
-    );
+    const validation = applyValidator(formData, name);
     if (!validation.isValid) {
       setValidationErrors((prev) => ({
         ...prev,
@@ -125,20 +123,21 @@ export default function OfferCreatePage() {
   };
 
   useEffect(() => {
-    const getCurrentService = async () => {
+    const getCurrentPost = async () => {
       setLoading(true);
-      if (!serviceId) return;
-      const service = await getServiceById(serviceId);
-      setService(service);
-      if (service) {
-        const currentCustomer = await getUserById(service.customerId);
+      if (!postId) return;
+      const post = await getPostById(postId);
+      setPost(post);
+      if (post) {
+        setFormData((prev) => ({ ...prev, budget: post.budget }));
+        const currentCustomer = await getUserById(post.customerId);
         setCustomerUser(currentCustomer);
       }
 
       setLoading(false);
     };
-    getCurrentService();
-  }, [serviceId]);
+    getCurrentPost();
+  }, [postId]);
 
   if (loading) {
     return (
@@ -152,12 +151,12 @@ export default function OfferCreatePage() {
     );
   }
 
-  if (!service) {
+  if (!post) {
     return (
       <div>
         <Header />
         <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
-          <ServiceNotFound />
+          <PostNotFound />
         </div>
         <Footer />
       </div>
@@ -166,14 +165,8 @@ export default function OfferCreatePage() {
 
   const handleDatePicking = (date: Date | undefined) => {
     if (date) {
-      const dateStr = date ? date.toLocaleDateString() : '';
-      setFormData((prev) => ({
-        ...prev,
-        date: date,
-      }));
-
       // Validate date
-      const validation = offerValidator('date', dateStr);
+      const validation = applyValidator(formData, 'date');
       if (!validation.isValid) {
         setValidationErrors((prev) => ({
           ...prev,
@@ -194,21 +187,22 @@ export default function OfferCreatePage() {
 
     if (canSubmit) {
       setAdding(true);
-      const success = await createOffer(
+      const success = await createApply(
         formData,
-        service.customerId,
+        post.customerId,
         user._id,
-        service._id,
+        post._id,
       );
       if (success) {
         setFormData({
-          date: null,
-          offeredPrice: 0,
+          date: undefined,
+          appliedPrice: 0,
+          budget: post.budget,
           description: '',
         });
-        window.location.href = `/account/offer`;
+        window.location.href = `/account/apply`;
       } else {
-        alert('Failed to create service. Please try again.');
+        alert('Failed to create post. Please try again.');
       }
       setAdding(false);
     }
@@ -219,36 +213,33 @@ export default function OfferCreatePage() {
       <Header />
       <main className="flex-grow flex justify-center py-12 px-4">
         <div className="w-[65%] min-h-full bg-gray-100 rounded-2xl border border-gray-300 p-6 shadow-sm">
-          {/* Service Information */}
+          {/* Post Information */}
           <div className="flex flex-col gap-4">
-            {/* Service Title */}
-            <h1
-              title={service.title}
-              className="text-3xl font-bold text-gray-900"
-            >
-              {service.title}
+            {/* Post Title */}
+            <h1 title={post.title} className="text-3xl font-bold text-gray-900">
+              {post.title}
             </h1>
 
-            {/* Service Cover Image */}
-            {service.coverPhotoUrl ? (
+            {/* Post Cover Image */}
+            {post.coverPhotoUrl ? (
               <img
-                src={service.coverPhotoUrl}
-                alt={service.title}
+                src={post.coverPhotoUrl}
+                alt={post.title}
                 className="w-full h-64 object-cover"
               />
             ) : (
               <div className="w-full h-64 bg-gray-200 flex items-center justify-center"></div>
             )}
 
-            {/* Service Description */}
+            {/* Post Description */}
             <div className="w-full flex flex-col gap-2">
               <h2 className="text-2xl font-semibold">Description</h2>
               <p className="text-lg text-gray-700">
-                {service.description || 'No description provided.'}
+                {post.description || 'No description provided.'}
               </p>
             </div>
 
-            {/* Service Provider Name */}
+            {/* Post Provider Name */}
             <div className="w-full flex flex-col gap-2">
               <h2 className="text-2xl font-semibold">Posted By</h2>
               <p className="text-lg text-gray-700">
@@ -256,35 +247,35 @@ export default function OfferCreatePage() {
               </p>
             </div>
 
-            {/* Service Location */}
+            {/* Post Location */}
             <div className="w-full flex flex-col gap-2">
               <h2 className="text-2xl font-semibold">Location</h2>
               <p className="text-lg text-gray-700">
-                {service.location ? service.location : 'Unknown'}
+                {post.location ? post.location : 'Unknown'}
               </p>
             </div>
 
-            {/* Service Budget */}
+            {/* Post Budget */}
             <div className="w-full flex flex-col gap-2">
               <h2 className="text-2xl font-semibold">Budget</h2>
-              <p className="text-lg text-gray-700">฿ {service.budget}</p>
+              <p className="text-lg text-gray-700">฿ {post.budget}</p>
             </div>
 
-            {/* Service Contact */}
+            {/* Post Contact */}
             <div className="w-full flex flex-col gap-2">
               <h2 className="text-2xl font-semibold">Contact</h2>
               <div className="flex gap-2 items-center">
                 <Phone width={16} />
-                <p className="text-lg text-gray-700">{service.telNumber}</p>
+                <p className="text-lg text-gray-700">{post.telNumber}</p>
               </div>
             </div>
 
-            {/* Service Tags */}
-            {service.tags && service.tags.length > 0 && (
+            {/* Post Tag */}
+            {post.tag && (
               <div className="w-full flex flex-col gap-2">
                 <h2 className="text-2xl font-semibold">Tags</h2>
                 <div className="flex flex-wrap gap-2">
-                  {convertTagsToLabels(service.tags).map((tag) => (
+                  {convertTagsToLabels([post.tag]).map((tag) => (
                     <span
                       key={tag}
                       className="bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded"
@@ -296,13 +287,13 @@ export default function OfferCreatePage() {
               </div>
             )}
 
-            {/* Service Date */}
+            {/* Post Date */}
             <div className="w-full flex flex-col gap-2">
               <h2 className="text-2xl font-semibold">Date to Perform</h2>
               <div className="flex gap-2 items-center">
                 <Calendar width={16} />
                 <p className="text-lg text-gray-700">
-                  {formatDateToDisplay(service.date)}
+                  {formatDateToDisplay(post.date)}
                 </p>
               </div>
             </div>
@@ -310,12 +301,12 @@ export default function OfferCreatePage() {
 
           <hr className="my-6" />
 
-          {/* Offer Section */}
+          {/* Apply Section */}
           <div className="flex flex-col gap-4">
-            {/* Offer Title */}
-            <h1 className="text-3xl font-bold text-gray-900">Your Offer</h1>
+            {/* Apply Title */}
+            <h1 className="text-3xl font-bold text-gray-900">Your Apply</h1>
 
-            {/* Offer Date */}
+            {/* Apply Date */}
             <div>
               <label
                 htmlFor="date"
@@ -331,39 +322,39 @@ export default function OfferCreatePage() {
               )}
             </div>
 
-            {/* Offer Offered Price */}
+            {/* Apply Applied Price */}
             <div>
               <label
-                htmlFor="offeredPrice"
+                htmlFor="appliedPrice"
                 className="block text-lg font-medium text-gray-700 mb-1"
               >
-                Offered Price
+                Applied Price
               </label>
               <Input
-                id="offeredPrice"
-                name="offeredPrice"
+                id="appliedPrice"
+                name="appliedPrice"
                 type="text"
-                placeholder="Offered Price"
-                value={formData.offeredPrice}
+                placeholder="Applied Price"
+                value={formData.appliedPrice}
                 onChange={handleInputChange}
                 disabled={adding}
                 className={`border-gray-300 ${
-                  validationErrors.offeredPrice
+                  validationErrors.appliedPrice
                     ? 'border-red-500 focus:ring-red-200'
                     : 'focus:ring-blue-200'
                 }`}
                 min={0}
-                max={service.budget}
+                max={post.budget}
               />
-              {validationErrors.offeredPrice && (
+              {validationErrors.appliedPrice && (
                 <div className="flex items-center gap-1 text-red-500 text-sm mt-1">
                   <AlertCircle className="w-4 h-4" />
-                  <span>{validationErrors.offeredPrice}</span>
+                  <span>{validationErrors.appliedPrice}</span>
                 </div>
               )}
             </div>
 
-            {/* Offer Description */}
+            {/* Apply Description */}
             <div>
               <label
                 htmlFor="description"
@@ -397,7 +388,6 @@ export default function OfferCreatePage() {
             <div className="flex justify-center mt-6 gap-4">
               <ActionButton
                 buttonColor="green"
-                buttonType="outline"
                 onClick={() => setShowConfirm('submit')}
                 className="cursor-pointer"
                 disabled={!canSubmit || adding}
@@ -406,7 +396,6 @@ export default function OfferCreatePage() {
               </ActionButton>
               <ActionButton
                 buttonColor="red"
-                buttonType="outline"
                 onClick={() => setShowConfirm('cancel')}
                 disabled={adding}
                 className="cursor-pointer"

@@ -321,11 +321,7 @@ export default function ProfilePage() {
         {/* Submit Button */}
         {canSave && (
           <div className="mt-auto flex gap-3">
-            <ActionButton
-              buttonColor="red"
-              buttonType="outline"
-              onClick={cancelAllChanges}
-            >
+            <ActionButton buttonColor="red" onClick={cancelAllChanges}>
               <X className="w-4 h-4" />
               Cancel
             </ActionButton>

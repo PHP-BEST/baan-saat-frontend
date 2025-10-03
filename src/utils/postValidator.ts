@@ -1,4 +1,4 @@
-import type { ServiceFieldValue } from './type';
+import type { PostFormInterface } from '@/api/post';
 
 export interface ValidationResult {
   isValid: boolean;
@@ -7,13 +7,13 @@ export interface ValidationResult {
 
 export const validateTitle = (title: string): ValidationResult => {
   if (title === '') {
-    return { isValid: false, error: 'Service title cannot be empty' };
+    return { isValid: false, error: 'Post title cannot be empty' };
   }
 
   if (title.length > 200) {
     return {
       isValid: false,
-      error: 'Service title must be 200 characters or less',
+      error: 'Post title must be 200 characters or less',
     };
   }
 
@@ -113,106 +113,68 @@ export const validateTags = (tags: string[]): ValidationResult => {
   return { isValid: true };
 };
 
-export const validateDate = (date: Date | string): ValidationResult => {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+export const validateOther = (tag: string, other: string): ValidationResult => {
+  if (tag !== 'others') {
+    return { isValid: true };
+  }
 
-  if (isNaN(dateObj.getTime())) {
+  if (other.trim() === '') {
+    return { isValid: false, error: 'Please specify this field' };
+  }
+
+  if (other.length > 20) {
+    return {
+      isValid: false,
+      error: 'This field must be 20 characters or less',
+    };
+  }
+
+  return { isValid: true };
+};
+
+export const validateDate = (date: Date | undefined): ValidationResult => {
+  if (!date) {
+    return { isValid: false, error: 'Date cannot be empty' };
+  }
+
+  if (isNaN(date.getTime())) {
     return { isValid: false, error: 'Invalid date format' };
   }
 
   // Check if date is in the past
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  dateObj.setHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0);
 
-  if (dateObj < today) {
-    return { isValid: false, error: 'Service date cannot be in the past' };
+  if (date < today) {
+    return { isValid: false, error: 'Post date cannot be in the past' };
   }
 
   return { isValid: true };
 };
 
-export const serviceValidator = (
+export const postValidator = (
+  formData: PostFormInterface,
   field: string,
-  value: ServiceFieldValue,
 ): ValidationResult => {
   switch (field) {
     case 'title':
-      return validateTitle(value as string);
+      return validateTitle(formData.title);
     case 'description':
-      return validateDescription(value as string);
+      return validateDescription(formData.description);
     case 'budget':
-      return validateBudget(value as number | string);
+      return validateBudget(formData.budget);
     case 'telNumber':
-      return validateTelNumber(value as string);
+      return validateTelNumber(formData.telNumber);
     case 'location':
-      return validateLocation(value as string);
-    case 'tags':
-      return validateTags(value as string[]);
+      return validateLocation(formData.location);
+    case 'tag':
+      return validateTags([formData.tag as string]);
+    case 'other':
+      return validateOther(formData.tag as string, formData.other);
     case 'date':
-      return validateDate(value as Date | string);
+      return validateDate(formData.date);
     default:
       return { isValid: true };
   }
-};
-
-export const validateService = (service: {
-  title: string;
-  description?: string;
-  budget?: number;
-  coverPhotoUrl?: string;
-  telNumber: string;
-  location?: string;
-  tags?: string[];
-  date: Date | string;
-}): { isValid: boolean; errors: Record<string, string> } => {
-  const errors: Record<string, string> = {};
-
-  const titleValidation = validateTitle(service.title);
-  if (!titleValidation.isValid) {
-    errors.title = titleValidation.error!;
-  }
-
-  const telValidation = validateTelNumber(service.telNumber);
-  if (!telValidation.isValid) {
-    errors.telNumber = telValidation.error!;
-  }
-
-  const dateValidation = validateDate(service.date);
-  if (!dateValidation.isValid) {
-    errors.date = dateValidation.error!;
-  }
-
-  if (service.description) {
-    const descValidation = validateDescription(service.description);
-    if (!descValidation.isValid) {
-      errors.description = descValidation.error!;
-    }
-  }
-
-  if (service.budget !== undefined) {
-    const budgetValidation = validateBudget(service.budget);
-    if (!budgetValidation.isValid) {
-      errors.budget = budgetValidation.error!;
-    }
-  }
-
-  if (service.location) {
-    const locationValidation = validateLocation(service.location);
-    if (!locationValidation.isValid) {
-      errors.location = locationValidation.error!;
-    }
-  }
-
-  if (service.tags) {
-    const tagsValidation = validateTags(service.tags);
-    if (!tagsValidation.isValid) {
-      errors.tags = tagsValidation.error!;
-    }
-  }
-
-  return {
-    isValid: Object.keys(errors).length === 0,
-    errors,
-  };
 };
