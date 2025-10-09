@@ -181,7 +181,7 @@ export default function SearchPage() {
 
   return (
     <>
-      <Header isHideSearchBar={true} />
+      <Header/>
       <main className="flex flex-col items-center min-h-screen px-6 py-8 gap-6 bg-gray-50">
         {/* Title */}
         <div className="w-full max-w-6xl text-center mb-4">
@@ -390,6 +390,7 @@ export default function SearchPage() {
                   key={provider._id}
                   onClick={() => navigate(`/user/${provider._id}`)}
                   className="bg-white rounded-xl shadow-md p-5 flex flex-col items-center text-center hover:shadow-lg transition"
+                  onClick={() => navigate(`/user/${provider._id}`)}
                 >
                   <img
                     src={provider.avatarUrl || '/default-avatar.png'}
