@@ -256,11 +256,9 @@ export default function ApplyDetailPage() {
             {/* Apply Description */}
             <div className="w-full flex flex-col gap-2">
               <h2 className="text-lg font-medium text-gray-700">Description</h2>
-              <div className="bg-white p-4 rounded-lg border border-gray-300">
-                <p className="text-gray-700 whitespace-pre-wrap">
-                  {apply.description || 'No description provided.'}
-                </p>
-              </div>
+              <p className="text-gray-700 whitespace-pre-wrap">
+                {apply.description || 'No description provided.'}
+              </p>
             </div>
 
             {/* Submitted Date */}
