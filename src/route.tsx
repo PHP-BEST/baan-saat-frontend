@@ -17,6 +17,7 @@ import SearchPage from './pages/Search';
 import MyApplyPage from './pages/MyApply';
 import CustomerProfilePostPage from './pages/CustomerProfilePost';
 import ApplyEditPage from './pages/ApplyEdit';
+import ApplyDetailPage from './pages/ApplyDetail';
 
 export const router = createBrowserRouter([
   {
@@ -90,6 +91,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ApplyEditPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'apply/:applyId',
+        element: (
+          <ProtectedRoute>
+            <ApplyDetailPage />
           </ProtectedRoute>
         ),
       },

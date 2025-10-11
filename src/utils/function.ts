@@ -82,5 +82,5 @@ export function isInvalidApplyForm(
   budget?: number,
 ): boolean {
   if (!budget) budget = 0;
-  return formData.appliedPrice > budget || formData.date === null;
+  return formData.appliedPrice > budget || formData.date === undefined;
 }

@@ -22,7 +22,7 @@ export default function PostDetailPage() {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(false);
   const [customerUser, setCustomerUser] = useState<User | null>(null);
-  const [offer, setApply] = useState<Apply | null>(null);
+  const [apply, setApply] = useState<Apply | null>(null);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -36,8 +36,8 @@ export default function PostDetailPage() {
         if (!user) {
           setApply(null);
         } else {
-          const offer = await checkApply(post._id, user._id);
-          setApply(offer);
+          const currentApply = await checkApply(post._id, user._id);
+          setApply(currentApply);
         }
       }
       setLoading(false);
@@ -176,11 +176,11 @@ export default function PostDetailPage() {
               </ActionButton>
             ) : (
               user &&
-              (!offer ? (
+              (!apply ? (
                 <ActionButton
                   className="cursor-pointer"
                   onClick={() => {
-                    navigate(`/offer/${post._id}/create`);
+                    navigate(`/apply/${post._id}/create`);
                   }}
                 >
                   Create
@@ -189,7 +189,7 @@ export default function PostDetailPage() {
                 <ActionButton
                   className="cursor-pointer"
                   onClick={() => {
-                    navigate(`/offer/${offer._id}/edit`);
+                    navigate(`/apply/${apply._id}/edit`);
                   }}
                 >
                   Edit Apply

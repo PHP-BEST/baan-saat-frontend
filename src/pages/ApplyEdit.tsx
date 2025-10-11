@@ -98,16 +98,16 @@ export default function ApplyEditPage() {
   const [canSubmit, setCanSubmit] = useState(false);
 
   useEffect(() => {
-    if (
-      Object.keys(validationErrors).length === 0 &&
+    const hasNoErrors = Object.keys(validationErrors).length === 0;
+    const isUnchanged = isFormDataSameAsOldApply(formData, oldFormData);
+
+    const isFormValid =
       !updating &&
-      !isInvalidApplyForm(formData, post?.budget) &&
-      !isFormDataSameAsOldApply(formData, oldFormData)
-    ) {
-      setCanSubmit(true);
-    } else {
-      setCanSubmit(false);
-    }
+      !isUnchanged &&
+      hasNoErrors &&
+      !isInvalidApplyForm(formData, post?.budget);
+
+    setCanSubmit(isFormValid);
   }, [formData, validationErrors, updating]);
 
   const handleInputChange = (
@@ -216,6 +216,7 @@ export default function ApplyEditPage() {
   }
 
   const handleDatePicking = (date: Date | undefined) => {
+    setFormData((prev) => ({ ...prev, date }));
     if (date) {
       // Validate date
       const validation = applyValidator(formData, 'date');
