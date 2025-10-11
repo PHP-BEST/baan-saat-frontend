@@ -14,7 +14,7 @@ const SidebarMenu: SidebarItem[] = [
   { name: 'Profile', path: '/', isDisabled: false },
   { name: 'Account Setting', path: '/setting', isDisabled: true },
   { name: 'Privacy', path: '/privacy', isDisabled: true },
-  { name: 'My Applys', path: '/apply', isDisabled: false },
+  { name: 'My Applies', path: '/apply', isDisabled: false },
   { name: 'My Posts', path: '/post', isDisabled: false },
 ];
 

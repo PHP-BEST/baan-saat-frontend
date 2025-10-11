@@ -2,7 +2,7 @@ import { API_ROOT, type ResponseInterface } from '@/config/api';
 import type { Apply, ApplyDetail } from '@/interfaces/Apply';
 import axios from 'axios';
 
-const API_BASE = `${API_ROOT}/api/applys`;
+const API_BASE = `${API_ROOT}/api/applies`;
 
 export interface ApplyFormInterface {
   date: Date | undefined;
@@ -80,7 +80,7 @@ export const updateApply = async (
   }
 };
 
-export const getDetailedApplysByProviderId = async (
+export const getDetailedAppliesByProviderId = async (
   providerId: string,
 ): Promise<ApplyDetail[]> => {
   try {

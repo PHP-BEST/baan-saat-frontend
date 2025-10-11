@@ -6,7 +6,7 @@ export default function ApplyNotFound() {
   return (
     <div className="max-w-6xl mx-auto flex flex-col gap-6 items-center justify-center">
       <p className="text-center text-2xl font-semibold">
-        We couldn&apos;t find the apply you were looking for...
+        We couldn&apos;t find the applies you were looking for...
       </p>
       <ActionButton onClick={() => navigate(-1)} className="cursor-pointer">
         Back
