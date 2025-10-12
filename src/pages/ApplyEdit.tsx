@@ -98,38 +98,45 @@ export default function ApplyEditPage() {
   const [canSubmit, setCanSubmit] = useState(false);
 
   useEffect(() => {
-    const hasNoErrors = Object.keys(validationErrors).length === 0;
     const isUnchanged = isFormDataSameAsOldApply(formData, oldFormData);
-
     const isFormValid =
-      !updating &&
-      !isUnchanged &&
-      hasNoErrors &&
-      !isInvalidApplyForm(formData, post?.budget);
-
+      !updating && !isUnchanged && !isInvalidApplyForm(formData);
     setCanSubmit(isFormValid);
-  }, [formData, validationErrors, updating]);
+  }, [formData, updating, post]);
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    if (name === 'appliedPrice') {
-      if (Number(value) >= 0) {
-        setFormData((prev) => ({
-          ...prev,
-          [name]: Number(value),
-        }));
+
+    // Handle budget separately
+    if (name === 'budget') {
+      const numericValue = Number(value);
+      if (numericValue >= 0) {
+        const updatedFormData = { ...formData, [name]: numericValue };
+        setFormData(updatedFormData);
+
+        const validation = applyValidator(updatedFormData, name);
+        if (!validation.isValid) {
+          setValidationErrors((prev) => ({
+            ...prev,
+            [name]: validation.error || '',
+          }));
+        } else {
+          setValidationErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors[name];
+            return newErrors;
+          });
+        }
       }
       return;
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    const updatedFormData = { ...formData, [name]: value };
+    setFormData(updatedFormData);
 
-    // Clear validation error when user starts typing
+    // Clear previous validation error
     if (validationErrors[name]) {
       setValidationErrors((prev) => {
         const newErrors = { ...prev };
@@ -138,13 +145,19 @@ export default function ApplyEditPage() {
       });
     }
 
-    // Real-time validation
-    const validation = applyValidator(formData, name);
+    // Real-time validation with *updated* data
+    const validation = applyValidator(updatedFormData, name);
     if (!validation.isValid) {
       setValidationErrors((prev) => ({
         ...prev,
         [name]: validation.error || '',
       }));
+    } else {
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
     }
   };
 
@@ -216,23 +229,23 @@ export default function ApplyEditPage() {
   }
 
   const handleDatePicking = (date: Date | undefined) => {
-    setFormData((prev) => ({ ...prev, date }));
-    if (date) {
-      // Validate date
-      const validation = applyValidator(formData, 'date');
-      if (!validation.isValid) {
-        setValidationErrors((prev) => ({
-          ...prev,
-          date: validation.error || '',
-        }));
-      } else {
-        setValidationErrors((prev) => {
-          const newErrors = { ...prev };
-          delete newErrors.date;
-          return newErrors;
-        });
-      }
-    }
+    if (!date) return;
+
+    setFormData((prev) => {
+      const updated = { ...prev, date };
+      const validation = applyValidator(updated, 'date');
+
+      setValidationErrors((prevErrors) => {
+        if (!validation.isValid) {
+          return { ...prevErrors, date: validation.error || '' };
+        }
+        const newErrors = { ...prevErrors };
+        delete newErrors.date;
+        return newErrors;
+      });
+
+      return updated;
+    });
   };
 
   const handleSubmit = async (e?: FormEvent<HTMLFormElement>) => {

@@ -1,5 +1,5 @@
 import { API_ROOT, type ResponseInterface } from '@/config/api';
-import type { Apply, ApplyDetail } from '@/interfaces/Apply';
+import type { Apply, ApplyDetail, ApplyStatus } from '@/interfaces/Apply';
 import axios from 'axios';
 
 const API_BASE = `${API_ROOT}/api/applies`;
@@ -67,6 +67,25 @@ export const updateApply = async (
     const response = await axios.put<ResponseInterface<Apply>>(
       `${API_BASE}/${applyId}`,
       formData,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+    return response.data.success;
+  } catch (error) {
+    console.error('Error updating apply:', error);
+    return false;
+  }
+};
+
+export const updateApplyStatus = async (
+  applyId: string,
+  applyStatus: ApplyStatus,
+): Promise<boolean> => {
+  try {
+    const response = await axios.put<ResponseInterface<Apply>>(
+      `${API_BASE}/${applyId}`,
+      { status: applyStatus },
       {
         headers: { 'Content-Type': 'application/json' },
       },

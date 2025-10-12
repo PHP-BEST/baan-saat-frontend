@@ -67,22 +67,35 @@ export const PostCreatePage: React.FC = () => {
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
+
+    // Handle budget separately
     if (name === 'budget') {
-      if (Number(value) >= 0) {
-        setFormData((prev) => ({
-          ...prev,
-          [name]: Number(value),
-        }));
+      const numericValue = Number(value);
+      if (numericValue >= 0) {
+        const updatedFormData = { ...formData, [name]: numericValue };
+        setFormData(updatedFormData);
+
+        const validation = postValidator(updatedFormData, name);
+        if (!validation.isValid) {
+          setValidationErrors((prev) => ({
+            ...prev,
+            [name]: validation.error || '',
+          }));
+        } else {
+          setValidationErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors[name];
+            return newErrors;
+          });
+        }
       }
       return;
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    const updatedFormData = { ...formData, [name]: value };
+    setFormData(updatedFormData);
 
-    // Clear validation error when user starts typing
+    // Clear previous validation error
     if (validationErrors[name]) {
       setValidationErrors((prev) => {
         const newErrors = { ...prev };
@@ -91,13 +104,19 @@ export const PostCreatePage: React.FC = () => {
       });
     }
 
-    // Real-time validation
-    const validation = postValidator(formData, name);
+    // Real-time validation with *updated* data
+    const validation = postValidator(updatedFormData, name);
     if (!validation.isValid) {
       setValidationErrors((prev) => ({
         ...prev,
         [name]: validation.error || '',
       }));
+    } else {
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
     }
   };
 
@@ -122,30 +141,29 @@ export const PostCreatePage: React.FC = () => {
   };
 
   const handleDatePicking = (date: Date | undefined) => {
-    setFormData((prev) => ({ ...prev, date }));
-    if (date) {
-      // Validate date
-      const validation = postValidator(formData, 'date');
-      if (!validation.isValid) {
-        setValidationErrors((prev) => ({
-          ...prev,
-          date: validation.error || '',
-        }));
-      } else {
-        setValidationErrors((prev) => {
-          const newErrors = { ...prev };
-          delete newErrors.date;
-          return newErrors;
-        });
-      }
-    }
+    if (!date) return;
+
+    setFormData((prev) => {
+      const updated = { ...prev, date };
+      const validation = postValidator(updated, 'date');
+
+      setValidationErrors((prevErrors) => {
+        if (!validation.isValid) {
+          return { ...prevErrors, date: validation.error || '' };
+        }
+        const newErrors = { ...prevErrors };
+        delete newErrors.date;
+        return newErrors;
+      });
+
+      return updated;
+    });
   };
 
   useEffect(() => {
-    const hasNoErrors = Object.keys(validationErrors).length === 0;
-    const isFormValid = !adding && hasNoErrors && !isInvalidPostForm(formData);
+    const isFormValid = !adding && !isInvalidPostForm(formData);
     setCanSubmit(isFormValid);
-  }, [formData, validationErrors, adding]);
+  }, [formData, adding]);
 
   const handleSubmit = async (e?: FormEvent<HTMLFormElement>) => {
     if (e) e.preventDefault();

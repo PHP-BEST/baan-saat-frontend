@@ -24,6 +24,8 @@ export default function PostDetailPage() {
   const [customerUser, setCustomerUser] = useState<User | null>(null);
   const [myApply, setMyApply] = useState<Apply | null>(null);
   const [providerApplies, setProviderApplies] = useState<ApplyDetail[]>([]);
+  const [acceptedApply, setAcceptedApply] = useState<ApplyDetail | null>();
+  const [hasAcceptedApply, setHasAcceptedApply] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -42,6 +44,15 @@ export default function PostDetailPage() {
         }
         const currentApplies = await getDetailedAppliesByPostId(post._id);
         setProviderApplies(currentApplies);
+        const acceptedApplies = currentApplies.filter(
+          (apply: ApplyDetail) => apply.status == 'Accepted',
+        );
+        setHasAcceptedApply(acceptedApplies.length != 0);
+        if (acceptedApplies.length != 0) {
+          setAcceptedApply(acceptedApplies[0]);
+        } else {
+          setAcceptedApply(null);
+        }
       }
       setLoading(false);
     };
@@ -102,7 +113,7 @@ export default function PostDetailPage() {
             </p>
           </div>
 
-          {/* Post Provider Name */}
+          {/* Post Customer Name */}
           <div className="w-full flex flex-col gap-2">
             <h2 className="text-2xl font-semibold">Posted By</h2>
             <p
@@ -167,11 +178,11 @@ export default function PostDetailPage() {
           </div>
 
           {/* Application from Providers */}
-          {user?._id === post.customerId && (
-            <div className="w-full max-h-[20vh] overflow-auto flex flex-col gap-2">
+          {user?._id === post.customerId ? (
+            <div className="w-full flex flex-col gap-2">
               <h2 className="text-2xl font-semibold">Applies</h2>
               {providerApplies && providerApplies.length > 0 ? (
-                <table className="table-fixed w-full border-collapse border border-gray-200">
+                <table className="table-fixed w-full border-collapse border border-gray-200 max-h-[20vh] overflow-auto">
                   <thead className="sticky top-0 bg-table-row-header">
                     <tr>
                       <th className="border border-gray-200 p-2 w-1/5">Name</th>
@@ -180,7 +191,7 @@ export default function PostDetailPage() {
                       </th>
                       <th className="border border-gray-200 p-2 w-1/5">Date</th>
                       <th className="border border-gray-200 p-2 w-2/5">
-                        Action
+                        Status
                       </th>
                     </tr>
                   </thead>
@@ -189,7 +200,10 @@ export default function PostDetailPage() {
                       return (
                         <tr
                           key={`provider-apply-${idx}`}
-                          className="bg-table-row-content"
+                          className={`bg-table-row-content cursor-pointer hover:bg-gray-100 text-center`}
+                          onClick={() => {
+                            navigate(`/apply/${apply._id}`);
+                          }}
                         >
                           <td className="border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap">
                             {apply.provider.name}
@@ -200,25 +214,17 @@ export default function PostDetailPage() {
                           <td className="border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap">
                             {formatDateToDisplay(apply.date)}
                           </td>
-                          <td className="flex gap-2 justify-center border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                            <ActionButton
-                              buttonType={'outline'}
-                              buttonColor="green"
-                              onClick={() => {
-                                alert('Accept this provider');
-                              }}
-                            >
-                              Accept
-                            </ActionButton>
-                            <ActionButton
-                              buttonType={'outline'}
-                              buttonColor="red"
-                              onClick={() => {
-                                alert('Reject this provider');
-                              }}
-                            >
-                              Reject
-                            </ActionButton>
+                          <td
+                            className={`border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap 
+                              ${
+                                apply.status == 'Accepted'
+                                  ? 'text-accept'
+                                  : apply.status == 'Rejected'
+                                    ? 'text-reject'
+                                    : 'text-black'
+                              }`}
+                          >
+                            {apply.status}
                           </td>
                         </tr>
                       );
@@ -231,42 +237,81 @@ export default function PostDetailPage() {
                 </p>
               )}
             </div>
+          ) : (
+            <div className="w-full flex flex-col gap-2">
+              <h2 className="text-2xl font-semibold">Provider</h2>
+              {hasAcceptedApply ? (
+                <p
+                  className="text-lg font-semibold text-button-action hover:underline cursor-pointer"
+                  onClick={() => {
+                    navigate(`/user/${acceptedApply?.providerId}`);
+                  }}
+                >
+                  {acceptedApply ? acceptedApply.provider.name : 'Unknown'}
+                </p>
+              ) : (
+                <p className="text-lg text-gray-700">
+                  No providers match this post...
+                </p>
+              )}
+            </div>
           )}
 
+          {/* Buttons */}
           <div className="flex justify-end gap-4 my-8">
-            {/* Edit Button */}
-            {user?._id === post.customerId ? (
-              <ActionButton
-                className="cursor-pointer"
-                onClick={() => {
-                  navigate(`/post/${post._id}/edit`);
-                }}
-              >
-                Edit
-              </ActionButton>
+            {user && user?._id === post.customerId ? (
+              <>
+                {/* Customer View */}
+                {!hasAcceptedApply && (
+                  <ActionButton
+                    className="cursor-pointer"
+                    onClick={() => {
+                      navigate(`/post/${post._id}/edit`);
+                    }}
+                  >
+                    Edit
+                  </ActionButton>
+                )}
+              </>
             ) : (
-              user &&
-              (!myApply ? (
-                <ActionButton
-                  className="cursor-pointer"
-                  onClick={() => {
-                    navigate(`/apply/${post._id}/create`);
-                  }}
-                >
-                  Create Apply
-                </ActionButton>
-              ) : (
-                <ActionButton
-                  className="cursor-pointer"
-                  onClick={() => {
-                    navigate(`/apply/${myApply._id}/edit`);
-                  }}
-                >
-                  Edit Apply
-                </ActionButton>
-              ))
+              user && (
+                <>
+                  {/* Provider View */}
+                  {!myApply ? (
+                    !hasAcceptedApply && (
+                      <ActionButton
+                        className="cursor-pointer"
+                        onClick={() => {
+                          navigate(`/apply/${post._id}/create`);
+                        }}
+                      >
+                        Create Apply
+                      </ActionButton>
+                    )
+                  ) : !hasAcceptedApply ? (
+                    <ActionButton
+                      className="cursor-pointer"
+                      onClick={() => {
+                        navigate(`/apply/${myApply._id}`);
+                      }}
+                    >
+                      View Apply
+                    </ActionButton>
+                  ) : (
+                    myApply._id == acceptedApply?._id && (
+                      <ActionButton
+                        className="cursor-pointer"
+                        onClick={() => {
+                          alert('Go to Chat Page!');
+                        }}
+                      >
+                        Chat??
+                      </ActionButton>
+                    )
+                  )}
+                </>
+              )
             )}
-            {/* Back Button */}
             <ActionButton
               buttonColor="red"
               className="cursor-pointer"

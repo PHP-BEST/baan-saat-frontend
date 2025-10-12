@@ -90,7 +90,9 @@ export default function MyApplyPage() {
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
                     {apply.appliedPrice} THB
                   </td>
-                  <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
+                  <td
+                    className={`border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap font-bold ${apply.status == 'Accepted' ? 'text-accept' : apply.status == 'Rejected' ? 'text-reject' : ''}`}
+                  >
                     {apply.status}
                   </td>
                 </tr>

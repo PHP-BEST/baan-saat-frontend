@@ -1,4 +1,4 @@
-import type { ApplyFormInterface } from '@/api/apply';
+import { updateApplyStatus, type ApplyFormInterface } from '@/api/apply';
 import type { PostFormInterface } from '@/api/post';
 import type { PostTag } from '@/interfaces/Post';
 
@@ -77,10 +77,14 @@ export function isInvalidPostForm(formData: PostFormInterface): boolean {
   );
 }
 
-export function isInvalidApplyForm(
-  formData: ApplyFormInterface,
-  budget?: number,
-): boolean {
-  if (!budget) budget = 0;
-  return formData.appliedPrice > budget || formData.date === undefined;
+export function isInvalidApplyForm(formData: ApplyFormInterface): boolean {
+  return formData.date === undefined;
 }
+
+export const acceptApply = async (applyId: string) => {
+  await updateApplyStatus(applyId, 'Accepted');
+};
+
+export const rejectApply = async (applyId: string) => {
+  await updateApplyStatus(applyId, 'Rejected');
+};

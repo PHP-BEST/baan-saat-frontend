@@ -4,12 +4,17 @@ import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import type { Post } from '@/interfaces/Post';
 import type { User } from '@/interfaces/User';
-import type { Apply } from '@/interfaces/Apply';
+import type { Apply, ApplyStatus } from '@/interfaces/Apply';
 import ActionButton from '@/components/our-components/actionButton';
 import Loading from '@/components/our-components/loading';
-import { convertTagsToLabels, formatDateToDisplay } from '@/utils/function';
-import { Calendar, Phone } from 'lucide-react';
-import { getApplyById } from '@/api/apply';
+import {
+  acceptApply,
+  convertTagsToLabels,
+  formatDateToDisplay,
+  rejectApply,
+} from '@/utils/function';
+import { Calendar, Loader, Phone } from 'lucide-react';
+import { getApplyById, getDetailedAppliesByPostId } from '@/api/apply';
 import { getPostById } from '@/api/post';
 import { getUserById } from '@/api/user';
 import { useUser } from '@/context/UserContext';
@@ -24,7 +29,10 @@ export default function ApplyDetailPage() {
   const [apply, setApply] = useState<Apply | null>(null);
   const [post, setPost] = useState<Post | null>(null);
   const [customerUser, setCustomerUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [providerUser, setProviderUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [isStatusApplyLoading, setStatusApplyLoading] = useState(false);
+  const [applyAction, setApplyAction] = useState<ApplyStatus>('Pending');
 
   useEffect(() => {
     const fetchApplyDetails = async () => {
@@ -32,13 +40,12 @@ export default function ApplyDetailPage() {
 
       try {
         setLoading(true);
-
-        // Fetch apply data
         const applyData = await getApplyById(applyId);
         if (!applyData) {
           return;
         }
         setApply(applyData);
+        setApplyAction(applyData.status);
 
         const postData = await getPostById(applyData.postId);
         if (!postData) {
@@ -48,6 +55,8 @@ export default function ApplyDetailPage() {
 
         const customer = await getUserById(applyData.customerId);
         setCustomerUser(customer);
+        const provider = await getUserById(applyData.providerId);
+        setProviderUser(provider);
       } catch (err) {
         console.error('Error fetching apply details:', err);
       } finally {
@@ -98,33 +107,6 @@ export default function ApplyDetailPage() {
     );
   }
 
-  const getStatusBadge = (status: string) => {
-    const statusStyles = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      accepted: 'bg-green-100 text-green-800',
-      rejected: 'bg-red-100 text-red-800',
-      completed: 'bg-blue-100 text-blue-800',
-    };
-
-    const statusLabels = {
-      pending: 'Pending',
-      accepted: 'Accepted',
-      rejected: 'Rejected',
-      completed: 'Completed',
-    };
-
-    return (
-      <span
-        className={`px-3 py-1 rounded-full text-sm font-semibold ${
-          statusStyles[status as keyof typeof statusStyles] ||
-          'bg-gray-100 text-gray-800'
-        }`}
-      >
-        {statusLabels[status as keyof typeof statusLabels] || status}
-      </span>
-    );
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <Header />
@@ -158,7 +140,7 @@ export default function ApplyDetailPage() {
               </p>
             </div>
 
-            {/* Post Provider Name */}
+            {/* Post Customer Name */}
             <div className="w-full flex flex-col gap-2">
               <h2 className="text-2xl font-semibold">Posted By</h2>
               <p className="text-lg text-gray-700">
@@ -226,15 +208,40 @@ export default function ApplyDetailPage() {
           <div className="flex flex-col gap-4">
             {/* Apply Title with Status */}
             <div className="flex justify-between items-center">
-              <h1 className="text-3xl font-bold text-gray-900">Your Apply</h1>
-              {getStatusBadge(apply.status)}
+              <h1 className="text-3xl font-bold text-gray-900">
+                {user._id == apply.customerId ? `Provider Apply` : 'My Apply'}
+              </h1>
+              <p
+                className={`${
+                  applyAction == 'Accepted'
+                    ? 'border rounded-full border-accept bg-accept'
+                    : applyAction == 'Rejected'
+                      ? 'border-reject bg-reject'
+                      : 'border-black bg-black'
+                } border rounded-full text-xl font-semibold text-white px-3 py-1`}
+              >
+                {applyAction}
+              </p>
             </div>
+
+            {/* Apply Provider Name */}
+            {user._id != providerUser?._id && (
+              <div className="w-full flex flex-col gap-2">
+                <h2 className="text-2xl font-semibold">Name</h2>
+                <p
+                  className="text-lg font-semibold text-button-action hover:underline cursor-pointer"
+                  onClick={() => {
+                    navigate(`/user/${providerUser?._id}`);
+                  }}
+                >
+                  {providerUser ? providerUser.name : 'Unknown'}
+                </p>
+              </div>
+            )}
 
             {/* Apply Date */}
             <div className="w-full flex flex-col gap-2">
-              <h2 className="text-lg font-medium text-gray-700">
-                Date to Perform
-              </h2>
+              <h2 className="text-2xl font-semibold">Date to Perform</h2>
               <div className="flex gap-2 items-center">
                 <Calendar width={16} />
                 <p className="text-lg text-gray-900">
@@ -245,9 +252,7 @@ export default function ApplyDetailPage() {
 
             {/* Apply Applied Price */}
             <div className="w-full flex flex-col gap-2">
-              <h2 className="text-lg font-medium text-gray-700">
-                Applied Price
-              </h2>
+              <h2 className="text-2xl font-semibold">Applied Price</h2>
               <p className="text-lg text-gray-900">
                 ฿ {apply.appliedPrice.toLocaleString()}
               </p>
@@ -255,17 +260,15 @@ export default function ApplyDetailPage() {
 
             {/* Apply Description */}
             <div className="w-full flex flex-col gap-2">
-              <h2 className="text-lg font-medium text-gray-700">Description</h2>
-              <p className="text-gray-700 whitespace-pre-wrap">
+              <h2 className="text-2xl font-semibold">Description</h2>
+              <p className="text-lg text-gray-900 whitespace-pre-wrap">
                 {apply.description || 'No description provided.'}
               </p>
             </div>
 
             {/* Submitted Date */}
             <div className="w-full flex flex-col gap-2">
-              <h2 className="text-lg font-medium text-gray-700">
-                Submitted On
-              </h2>
+              <h2 className="text-2xl font-semibold">Submitted On</h2>
               <p className="text-lg text-gray-900">
                 {formatDateToDisplay(apply.createdAt)}
               </p>
@@ -273,17 +276,76 @@ export default function ApplyDetailPage() {
 
             {/* Action Buttons */}
             <div className="flex justify-center mt-6 gap-4">
+              {user._id !== apply.customerId ? (
+                <>
+                  <ActionButton
+                    buttonColor="blue"
+                    onClick={() => navigate(`/apply/${applyId}/edit`)}
+                    className="cursor-pointer"
+                  >
+                    Edit
+                  </ActionButton>
+                </>
+              ) : (
+                applyAction === 'Pending' && (
+                  <>
+                    <ActionButton
+                      buttonColor="green"
+                      onClick={async () => {
+                        setStatusApplyLoading(true);
+                        setApplyAction('Accepted');
+                        await acceptApply(apply._id);
+                        const otherApplies = await getDetailedAppliesByPostId(
+                          apply.postId,
+                        );
+                        const rejectPromises = otherApplies
+                          .filter(
+                            (a) =>
+                              a._id !== apply._id && a.status !== 'Rejected',
+                          )
+                          .map((a) => rejectApply(a._id));
+                        await Promise.all(rejectPromises);
+                        setStatusApplyLoading(false);
+                      }}
+                      className={`${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
+                      disabled={isStatusApplyLoading}
+                    >
+                      {isStatusApplyLoading && (
+                        <Loader className="animate-spin" size={24} />
+                      )}
+                      Accept
+                    </ActionButton>
+
+                    <ActionButton
+                      buttonColor="red"
+                      onClick={async () => {
+                        setStatusApplyLoading(true);
+                        setApplyAction('Rejected');
+                        await rejectApply(apply._id);
+                        setStatusApplyLoading(false);
+                      }}
+                      className={`${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
+                      disabled={isStatusApplyLoading}
+                    >
+                      {isStatusApplyLoading && (
+                        <Loader className="animate-spin" size={24} />
+                      )}
+                      Reject
+                    </ActionButton>
+                  </>
+                )
+              )}
+
               <ActionButton
-                buttonColor="blue"
-                onClick={() => navigate(`/post/${post._id}`)}
-                className="cursor-pointer"
+                onClick={() => {
+                  navigate(-1);
+                }}
+                className={`${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
+                disabled={isStatusApplyLoading}
               >
-                View Post
-              </ActionButton>
-              <ActionButton
-                onClick={() => navigate(-1)}
-                className="cursor-pointer"
-              >
+                {isStatusApplyLoading && (
+                  <Loader className="animate-spin" size={24} />
+                )}
                 Back
               </ActionButton>
             </div>
