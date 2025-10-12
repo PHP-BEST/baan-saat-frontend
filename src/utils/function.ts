@@ -73,7 +73,7 @@ export function isInvalidPostForm(formData: PostFormInterface): boolean {
     formData.title.trim() === '' ||
     formData.budget === 0 ||
     formData.telNumber.trim() === '' ||
-    formData.date === null
+    formData.date === undefined
   );
 }
 

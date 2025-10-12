@@ -122,6 +122,7 @@ export const PostCreatePage: React.FC = () => {
   };
 
   const handleDatePicking = (date: Date | undefined) => {
+    setFormData((prev) => ({ ...prev, date }));
     if (date) {
       // Validate date
       const validation = postValidator(formData, 'date');
@@ -141,15 +142,9 @@ export const PostCreatePage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (
-      Object.keys(validationErrors).length === 0 &&
-      !adding &&
-      !isInvalidPostForm(formData)
-    ) {
-      setCanSubmit(true);
-    } else {
-      setCanSubmit(false);
-    }
+    const hasNoErrors = Object.keys(validationErrors).length === 0;
+    const isFormValid = !adding && hasNoErrors && !isInvalidPostForm(formData);
+    setCanSubmit(isFormValid);
   }, [formData, validationErrors, adding]);
 
   const handleSubmit = async (e?: FormEvent<HTMLFormElement>) => {

@@ -37,11 +37,9 @@ export const checkApply = async (
   providerId: string,
 ): Promise<Apply | null> => {
   try {
-    console.log('Post ID:', postId, 'Provider ID:', providerId);
     const response = await axios.get<ResponseInterface<Apply>>(
       `${API_BASE}/check/${providerId}/${postId}`,
     );
-    console.log('Check Apply Response:', response.data);
     return response.data.data;
   } catch (error) {
     console.error('Error checking apply existence:', error);

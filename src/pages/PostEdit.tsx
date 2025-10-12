@@ -120,16 +120,14 @@ export default function PostEditPage() {
   }, [postId]);
 
   useEffect(() => {
-    if (
-      Object.keys(validationErrors).length === 0 &&
+    const hasNoErrors = Object.keys(validationErrors).length === 0;
+    const isFormValid =
       !updating &&
+      hasNoErrors &&
       !isInvalidPostForm(formData) &&
-      !isFormDataSameAsOldPost(formData, post)
-    ) {
-      setCanSubmit(true);
-    } else {
-      setCanSubmit(false);
-    }
+      !isFormDataSameAsOldPost(formData, post);
+
+    setCanSubmit(isFormValid);
   }, [formData, validationErrors, updating, post]);
 
   if (loading) {
@@ -215,6 +213,7 @@ export default function PostEditPage() {
   };
 
   const handleDatePicking = (date: Date | undefined) => {
+    setFormData((prev) => ({ ...prev, date }));
     if (date) {
       // Validate date
       const validation = postValidator(formData, 'date');

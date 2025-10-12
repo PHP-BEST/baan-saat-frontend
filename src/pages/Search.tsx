@@ -103,9 +103,6 @@ export default function SearchPage() {
       startDate: startDate || undefined,
       endDate: endDate || undefined,
     };
-
-    console.log('Filter params:', params);
-
     let posts = await filterPosts(params);
     posts = posts.sort(
       (a, b) =>

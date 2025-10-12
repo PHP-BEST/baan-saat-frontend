@@ -183,7 +183,7 @@ export default function PostDetailPage() {
                     navigate(`/apply/${post._id}/create`);
                   }}
                 >
-                  Create
+                  Create Apply
                 </ActionButton>
               ) : (
                 <ActionButton

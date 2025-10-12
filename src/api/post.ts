@@ -126,7 +126,6 @@ export const filterPosts = async (
     );
 
     if (response.data.success) {
-      console.log('Filtered posts:', response.data.data);
       return response.data.data;
     } else {
       return [];
