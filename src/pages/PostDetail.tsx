@@ -12,8 +12,8 @@ import { getPostById } from '@/api/post';
 import type { User } from '@/interfaces/User';
 import { getUserById } from '@/api/user';
 import PostNotFound from '@/error/PostNotFound';
-import { checkApply } from '@/api/apply';
-import type { Apply } from '@/interfaces/Apply';
+import { checkMyApply, getDetailedAppliesByPostId } from '@/api/apply';
+import type { Apply, ApplyDetail } from '@/interfaces/Apply';
 
 export default function PostDetailPage() {
   const navigate = useNavigate();
@@ -22,7 +22,8 @@ export default function PostDetailPage() {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(false);
   const [customerUser, setCustomerUser] = useState<User | null>(null);
-  const [apply, setApply] = useState<Apply | null>(null);
+  const [myApply, setMyApply] = useState<Apply | null>(null);
+  const [providerApplies, setProviderApplies] = useState<ApplyDetail[]>([]);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -34,11 +35,13 @@ export default function PostDetailPage() {
         const currentCustomerUser = await getUserById(post.customerId);
         setCustomerUser(currentCustomerUser);
         if (!user) {
-          setApply(null);
+          setMyApply(null);
         } else {
-          const currentApply = await checkApply(post._id, user._id);
-          setApply(currentApply);
+          const currentMyApply = await checkMyApply(post._id, user._id);
+          setMyApply(currentMyApply);
         }
+        const currentApplies = await getDetailedAppliesByPostId(post._id);
+        setProviderApplies(currentApplies);
       }
       setLoading(false);
     };
@@ -163,6 +166,73 @@ export default function PostDetailPage() {
             </div>
           </div>
 
+          {/* Application from Providers */}
+          {user?._id === post.customerId && (
+            <div className="w-full max-h-[20vh] overflow-auto flex flex-col gap-2">
+              <h2 className="text-2xl font-semibold">Applies</h2>
+              {providerApplies && providerApplies.length > 0 ? (
+                <table className="table-fixed w-full border-collapse border border-gray-200">
+                  <thead className="sticky top-0 bg-table-row-header">
+                    <tr>
+                      <th className="border border-gray-200 p-2 w-1/5">Name</th>
+                      <th className="border border-gray-200 p-2 w-1/5">
+                        Price (THB)
+                      </th>
+                      <th className="border border-gray-200 p-2 w-1/5">Date</th>
+                      <th className="border border-gray-200 p-2 w-2/5">
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {providerApplies.map((apply: ApplyDetail, idx) => {
+                      return (
+                        <tr
+                          key={`provider-apply-${idx}`}
+                          className="bg-table-row-content"
+                        >
+                          <td className="border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap">
+                            {apply.provider.name}
+                          </td>
+                          <td className="border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap">
+                            {apply.appliedPrice}
+                          </td>
+                          <td className="border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap">
+                            {formatDateToDisplay(apply.date)}
+                          </td>
+                          <td className="flex gap-2 justify-center border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
+                            <ActionButton
+                              buttonType={'outline'}
+                              buttonColor="green"
+                              onClick={() => {
+                                alert('Accept this provider');
+                              }}
+                            >
+                              Accept
+                            </ActionButton>
+                            <ActionButton
+                              buttonType={'outline'}
+                              buttonColor="red"
+                              onClick={() => {
+                                alert('Reject this provider');
+                              }}
+                            >
+                              Reject
+                            </ActionButton>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="text-lg text-gray-700">
+                  No providers apply this post...
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="flex justify-end gap-4 my-8">
             {/* Edit Button */}
             {user?._id === post.customerId ? (
@@ -176,7 +246,7 @@ export default function PostDetailPage() {
               </ActionButton>
             ) : (
               user &&
-              (!apply ? (
+              (!myApply ? (
                 <ActionButton
                   className="cursor-pointer"
                   onClick={() => {
@@ -189,7 +259,7 @@ export default function PostDetailPage() {
                 <ActionButton
                   className="cursor-pointer"
                   onClick={() => {
-                    navigate(`/apply/${apply._id}/edit`);
+                    navigate(`/apply/${myApply._id}/edit`);
                   }}
                 >
                   Edit Apply

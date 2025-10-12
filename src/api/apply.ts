@@ -32,7 +32,7 @@ export const createApply = async (
   }
 };
 
-export const checkApply = async (
+export const checkMyApply = async (
   postId: string,
   providerId: string,
 ): Promise<Apply | null> => {
@@ -88,6 +88,32 @@ export const getDetailedAppliesByProviderId = async (
     return response.data.data;
   } catch (error) {
     console.error('Error fetching applys by provider ID:', error);
+    throw error;
+  }
+};
+
+export const getAppliesByPostId = async (postId: string): Promise<Apply[]> => {
+  try {
+    const response = await axios.get<ResponseInterface<ApplyDetail[]>>(
+      `${API_BASE}/post/${postId}`,
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching applys by post ID:', error);
+    throw error;
+  }
+};
+
+export const getDetailedAppliesByPostId = async (
+  postId: string,
+): Promise<ApplyDetail[]> => {
+  try {
+    const response = await axios.get<ResponseInterface<ApplyDetail[]>>(
+      `${API_BASE}/post/${postId}/detail`,
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching applys by post ID:', error);
     throw error;
   }
 };
