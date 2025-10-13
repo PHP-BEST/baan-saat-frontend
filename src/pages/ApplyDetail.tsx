@@ -15,7 +15,7 @@ import {
 } from '@/utils/function';
 import { Calendar, Loader, Phone } from 'lucide-react';
 import { getApplyById, getDetailedAppliesByPostId } from '@/api/apply';
-import { getPostById } from '@/api/post';
+import { deletePost, getPostById } from '@/api/post';
 import { getUserById } from '@/api/user';
 import { useUser } from '@/context/UserContext';
 import PostNotFound from '@/error/PostNotFound';
@@ -33,6 +33,9 @@ export default function ApplyDetailPage() {
   const [loading, setLoading] = useState(false);
   const [isStatusApplyLoading, setStatusApplyLoading] = useState(false);
   const [applyAction, setApplyAction] = useState<ApplyStatus>('Pending');
+  const [openCancelApplyModal, setOpenCancelApplyModal] = useState(false);
+  const [openAcceptApplyModal, setOpenAcceptApplyModal] = useState(false);
+  const [openRejectApplyModal, setOpenRejectApplyModal] = useState(false);
 
   useEffect(() => {
     const fetchApplyDetails = async () => {
@@ -286,55 +289,46 @@ export default function ApplyDetailPage() {
                     Edit
                   </ActionButton>
                 </>
-              ) : (
-                applyAction === 'Pending' && (
-                  <>
-                    <ActionButton
-                      buttonColor="green"
-                      onClick={async () => {
-                        setStatusApplyLoading(true);
-                        setApplyAction('Accepted');
-                        await acceptApply(apply._id);
-                        const otherApplies = await getDetailedAppliesByPostId(
-                          apply.postId,
-                        );
-                        const rejectPromises = otherApplies
-                          .filter(
-                            (a) =>
-                              a._id !== apply._id && a.status !== 'Rejected',
-                          )
-                          .map((a) => rejectApply(a._id));
-                        await Promise.all(rejectPromises);
-                        setStatusApplyLoading(false);
-                      }}
-                      className={`${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
-                      disabled={isStatusApplyLoading}
-                    >
-                      {isStatusApplyLoading && (
-                        <Loader className="animate-spin" size={24} />
-                      )}
-                      Accept
-                    </ActionButton>
+              ) : applyAction === 'Pending' ? (
+                <>
+                  <ActionButton
+                    buttonColor="green"
+                    onClick={() => {
+                      setOpenAcceptApplyModal(true);
+                    }}
+                    className="cursor-pointer"
+                  >
+                    Accept
+                  </ActionButton>
 
-                    <ActionButton
-                      buttonColor="red"
-                      onClick={async () => {
-                        setStatusApplyLoading(true);
-                        setApplyAction('Rejected');
-                        await rejectApply(apply._id);
-                        setStatusApplyLoading(false);
-                      }}
-                      className={`${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
-                      disabled={isStatusApplyLoading}
-                    >
-                      {isStatusApplyLoading && (
-                        <Loader className="animate-spin" size={24} />
-                      )}
-                      Reject
-                    </ActionButton>
-                  </>
-                )
-              )}
+                  <ActionButton
+                    buttonColor="red"
+                    onClick={() => {
+                      setOpenRejectApplyModal(true);
+                    }}
+                    className={`${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
+                    disabled={isStatusApplyLoading}
+                  >
+                    {isStatusApplyLoading && (
+                      <Loader className="animate-spin" size={24} />
+                    )}
+                    Reject
+                  </ActionButton>
+                </>
+              ) : applyAction === 'Accepted' ? (
+                <ActionButton
+                  buttonColor="red"
+                  onClick={() => {
+                    setOpenCancelApplyModal(true);
+                  }}
+                  disabled={isStatusApplyLoading}
+                >
+                  {isStatusApplyLoading && (
+                    <Loader className="animate-spin" size={24} />
+                  )}
+                  Cancel
+                </ActionButton>
+              ) : null}
 
               <ActionButton
                 onClick={() => {
@@ -351,6 +345,145 @@ export default function ApplyDetailPage() {
             </div>
           </div>
         </div>
+
+        {openAcceptApplyModal && (
+          <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
+              <p className="mb-2 text-lg font-semibold">
+                ต้องการ Accept Apply ใช่หรือไม่?
+              </p>
+              <p className="text-sm text-red-500 mb-4">
+                เมื่อกดยืนยัน ระบบจะทำการอนุมัติผู้สมัครนี้
+                และปฏิเสธผู้สมัครคนอื่นโดยอัตโนมัติ ไม่สามารถย้อนกลับได้
+              </p>
+              <div className="flex justify-center gap-4">
+                <ActionButton
+                  onClick={async () => {
+                    setStatusApplyLoading(true);
+                    setApplyAction('Accepted');
+                    await acceptApply(apply._id);
+                    const otherApplies = await getDetailedAppliesByPostId(
+                      apply.postId,
+                    );
+                    const rejectPromises = otherApplies
+                      .filter(
+                        (a) => a._id !== apply._id && a.status !== 'Rejected',
+                      )
+                      .map((a) => rejectApply(a._id));
+                    await Promise.all(rejectPromises);
+                    setStatusApplyLoading(false);
+                    setOpenAcceptApplyModal(false);
+                    window.location.reload();
+                  }}
+                  className={`${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
+                  disabled={isStatusApplyLoading}
+                >
+                  {isStatusApplyLoading && (
+                    <Loader className="animate-spin" size={24} />
+                  )}
+                  Yes
+                </ActionButton>
+                <ActionButton
+                  onClick={() => setOpenAcceptApplyModal(false)}
+                  className={`cursor-pointer bg-gray-200 text-black border-gray-200 
+            ${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
+                  disabled={isStatusApplyLoading}
+                >
+                  {isStatusApplyLoading && (
+                    <Loader className="animate-spin" size={24} />
+                  )}
+                  No
+                </ActionButton>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {openRejectApplyModal && (
+          <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
+              <p className="mb-2 text-lg font-semibold">
+                ต้องการ Reject Apply ใช่หรือไม่?
+              </p>
+              <p className="text-sm text-red-500 mb-4">
+                เมื่อกดยืนยัน ผู้สมัครนี้จะถูกปฏิเสธ และไม่สามารถกู้คืนได้
+              </p>
+              <div className="flex justify-center gap-4">
+                <ActionButton
+                  onClick={async () => {
+                    setStatusApplyLoading(true);
+                    setApplyAction('Rejected');
+                    await rejectApply(apply._id);
+                    setStatusApplyLoading(false);
+                    setOpenRejectApplyModal(false);
+                    window.location.reload();
+                  }}
+                  className={`${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
+                  disabled={isStatusApplyLoading}
+                >
+                  {isStatusApplyLoading && (
+                    <Loader className="animate-spin" size={24} />
+                  )}
+                  Yes
+                </ActionButton>
+                <ActionButton
+                  className={`cursor-pointer bg-gray-200 text-black border-gray-200 
+            ${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
+                  disabled={isStatusApplyLoading}
+                  onClick={() => setOpenRejectApplyModal(false)}
+                >
+                  {isStatusApplyLoading && (
+                    <Loader className="animate-spin" size={24} />
+                  )}
+                  No
+                </ActionButton>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {openCancelApplyModal && (
+          <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
+              <p className="mb-2 text-lg font-semibold">
+                ต้องการ Cancel Provider ใช่หรือไม่?
+              </p>
+              <p className="text-sm text-red-500 mb-4">
+                การยกเลิกจะลบโพสต์นี้อย่างถาวร รวมถึงข้อมูลการสมัครทั้งหมด
+                และไม่สามารถกู้คืนได้
+              </p>
+              <div className="flex justify-center gap-4">
+                <ActionButton
+                  onClick={async () => {
+                    setStatusApplyLoading(true);
+                    await deletePost(apply.postId);
+                    setStatusApplyLoading(false);
+                    setOpenCancelApplyModal(false);
+                    window.location.href = '/account/post';
+                  }}
+                  className={`${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
+                  disabled={isStatusApplyLoading}
+                >
+                  {isStatusApplyLoading && (
+                    <Loader className="animate-spin" size={24} />
+                  )}
+                  Yes
+                </ActionButton>
+                <ActionButton
+                  className={`cursor-pointer bg-gray-200 text-black border-gray-200 
+            ${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
+                  disabled={isStatusApplyLoading}
+                  onClick={() => setOpenCancelApplyModal(false)}
+                >
+                  {isStatusApplyLoading && (
+                    <Loader className="animate-spin" size={24} />
+                  )}
+                  No
+                </ActionButton>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
       <Footer />
     </div>

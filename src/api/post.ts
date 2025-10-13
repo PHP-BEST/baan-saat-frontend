@@ -195,3 +195,20 @@ export const updatePost = async (
     return false;
   }
 };
+
+export const deletePost = async (postId: string): Promise<boolean> => {
+  try {
+    const response = await axios.delete<ResponseInterface<Post>>(
+      `${API_BASE}/${postId}`,
+    );
+
+    if (response.data.success) {
+      return true;
+    } else {
+      throw new Error('Failed to delete post');
+    }
+  } catch (err) {
+    console.error('Error deleting post:', err);
+    return false;
+  }
+};
