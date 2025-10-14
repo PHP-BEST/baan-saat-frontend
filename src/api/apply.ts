@@ -59,6 +59,20 @@ export const getApplyById = async (applyId: string): Promise<Apply> => {
   }
 };
 
+export const getDetailedApplyById = async (
+  applyId: string,
+): Promise<ApplyDetail> => {
+  try {
+    const response = await axios.get<ResponseInterface<ApplyDetail>>(
+      `${API_BASE}/${applyId}/detail`,
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching detailed apply by ID:', error);
+    throw error;
+  }
+};
+
 export const updateApply = async (
   applyId: string,
   formData: ApplyFormInterface,

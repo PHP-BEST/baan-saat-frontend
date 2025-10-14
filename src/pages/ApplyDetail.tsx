@@ -38,7 +38,7 @@ export default function ApplyDetailPage() {
   const [openRejectApplyModal, setOpenRejectApplyModal] = useState(false);
 
   useEffect(() => {
-    const fetchApplyDetails = async () => {
+    const fetchApply = async () => {
       if (!applyId || !user) return;
 
       try {
@@ -67,7 +67,7 @@ export default function ApplyDetailPage() {
       }
     };
 
-    fetchApplyDetails();
+    fetchApply();
   }, [applyId, user]);
 
   if (!user) {
