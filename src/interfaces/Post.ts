@@ -8,7 +8,11 @@ export interface Post {
   location: string;
   tag: PostTag;
   other: string;
+  image1Url?: string;
+  image2Url?: string;
+  image3Url?: string;
   date: Date;
+  status: 'Not working' | 'In Progress' | 'Completed';
   coverPhotoUrl?: string;
   createdAt: Date;
   updatedAt: Date;

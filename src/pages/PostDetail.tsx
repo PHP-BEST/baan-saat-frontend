@@ -275,7 +275,7 @@ export default function PostDetailPage() {
                   <ActionButton
                     className="cursor-pointer"
                     onClick={() => {
-                      alert('Go to Chat Page!');
+                      navigate(`/chat/${acceptedApply?._id}`);
                     }}
                   >
                     Chat
@@ -311,7 +311,7 @@ export default function PostDetailPage() {
                       <ActionButton
                         className="cursor-pointer"
                         onClick={() => {
-                          alert('Go to Chat Page!');
+                          navigate(`/chat/${acceptedApply?._id}`);
                         }}
                       >
                         Chat
