@@ -262,7 +262,7 @@ export default function PostDetailPage() {
             {user && user?._id === post.customerId ? (
               <>
                 {/* Customer View */}
-                {!hasAcceptedApply && (
+                {!hasAcceptedApply ? (
                   <ActionButton
                     className="cursor-pointer"
                     onClick={() => {
@@ -270,6 +270,15 @@ export default function PostDetailPage() {
                     }}
                   >
                     Edit
+                  </ActionButton>
+                ) : (
+                  <ActionButton
+                    className="cursor-pointer"
+                    onClick={() => {
+                      alert('Go to Chat Page!');
+                    }}
+                  >
+                    Chat
                   </ActionButton>
                 )}
               </>
@@ -305,7 +314,7 @@ export default function PostDetailPage() {
                           alert('Go to Chat Page!');
                         }}
                       >
-                        Chat??
+                        Chat
                       </ActionButton>
                     )
                   )}
