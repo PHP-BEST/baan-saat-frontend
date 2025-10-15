@@ -3,6 +3,7 @@ import 'react-day-picker/style.css';
 import { useState } from 'react';
 interface MyDatePickerProps {
   onSendData: (date: Date | undefined) => void;
+  disabled?: boolean;
 }
 export default function MyDatePicker({ onSendData }: MyDatePickerProps) {
   const [selected, setSelected] = useState<Date>();

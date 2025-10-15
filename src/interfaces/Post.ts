@@ -9,6 +9,7 @@ export interface Post {
   tag: PostTag;
   other: string;
   date: Date;
+  coverPhotoUrl?: string;
   coverPhotoUrls: string[];
   createdAt: Date;
   updatedAt: Date;
