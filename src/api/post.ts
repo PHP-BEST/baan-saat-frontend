@@ -145,7 +145,7 @@ export interface PostFormInterface {
   telNumber: string;
   budget: number;
   location: string;
-  coverPhotoUrl?: string;
+  coverPhotoUrls: string[];
   date: Date | undefined;
 }
 
@@ -154,19 +154,23 @@ export const createPost = async (
   formData: PostFormInterface,
 ): Promise<boolean> => {
   try {
+    const payload = {
+      ...formData,
+      customerId: userId,
+      date: formData.date ? formData.date.toISOString() : undefined,
+      coverPhotoUrl:
+        (formData.coverPhotoUrls && formData.coverPhotoUrls[0]) ?? '',
+    };
+
     const response = await axios.post<ResponseInterface<Post>>(
       `${API_BASE}`,
-      { ...formData, customerId: userId },
+      payload,
       {
         headers: { 'Content-Type': 'application/json' },
       },
     );
 
-    if (response.data.success) {
-      return true;
-    } else {
-      throw new Error('Failed to create post');
-    }
+    return !!response.data.success;
   } catch (err) {
     console.error('Error creating post:', err);
     return false;
@@ -178,19 +182,22 @@ export const updatePost = async (
   formData: PostFormInterface,
 ): Promise<boolean> => {
   try {
+    const payload = {
+      ...formData,
+      date: formData.date ? formData.date.toISOString() : undefined,
+      coverPhotoUrl:
+        (formData.coverPhotoUrls && formData.coverPhotoUrls[0]) ?? '',
+    };
+
     const response = await axios.put<ResponseInterface<Post>>(
       `${API_BASE}/${postId}`,
-      formData,
+      payload,
       {
         headers: { 'Content-Type': 'application/json' },
       },
     );
 
-    if (response.data.success) {
-      return true;
-    } else {
-      throw new Error('Failed to update post');
-    }
+    return !!response.data.success;
   } catch (err) {
     console.error('Error updating post:', err);
     return false;

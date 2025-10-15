@@ -59,6 +59,12 @@ function isFormDataSameAsOldPost(
   const postDateStr = post.date
     ? new Date(post.date).toISOString().split('T')[0]
     : null;
+  const formUrls = (formData.coverPhotoUrls ?? []).slice(0, 3);
+  const postUrls = (post.coverPhotoUrls ?? []).slice(0, 3);
+
+  const arraysEqual =
+    formUrls.length === postUrls.length &&
+    formUrls.every((u, i) => u === postUrls[i]);
 
   return (
     formData.title === post.title &&
@@ -66,7 +72,7 @@ function isFormDataSameAsOldPost(
     formData.tag === post.tag &&
     formData.budget === post.budget &&
     formData.location === post.location &&
-    formData.coverPhotoUrl === post.coverPhotoUrl &&
+    arraysEqual &&
     formDateStr === postDateStr &&
     formData.telNumber === post.telNumber
   );
@@ -85,7 +91,7 @@ export default function PostEditPage() {
     other: '',
     budget: 0,
     location: '',
-    coverPhotoUrl: '',
+    coverPhotoUrls: [],
     telNumber: '',
     date: undefined,
   });
@@ -101,6 +107,40 @@ export default function PostEditPage() {
       setLoading(true);
       const currentPost = await getPostById(postId);
       setPost(currentPost);
+
+      type CoverFields = {
+        coverPhotoUrls?: unknown;
+        coverPhotoUrl?: unknown;
+      };
+
+      const postFields = currentPost as unknown as CoverFields;
+
+      let mappedCoverPhotoUrls: string[] = [];
+
+      if (Array.isArray(postFields.coverPhotoUrls)) {
+        mappedCoverPhotoUrls = postFields.coverPhotoUrls
+          .filter((v): v is string => typeof v === 'string')
+          .slice(0, 3);
+      } else if (
+        typeof postFields.coverPhotoUrl === 'string' &&
+        postFields.coverPhotoUrl.length
+      ) {
+        mappedCoverPhotoUrls = [postFields.coverPhotoUrl];
+      } else {
+        mappedCoverPhotoUrls = [];
+      }
+
+      const rawDate = currentPost?.date;
+      let parsedDate: Date | undefined;
+      if (rawDate instanceof Date) {
+        parsedDate = rawDate;
+      } else if (typeof rawDate === 'string' || typeof rawDate === 'number') {
+        const d = new Date(rawDate);
+        parsedDate = Number.isNaN(d.getTime()) ? undefined : d;
+      } else {
+        parsedDate = undefined;
+      }
+
       setFormData({
         title: currentPost?.title || '',
         description: currentPost?.description || '',
@@ -108,11 +148,10 @@ export default function PostEditPage() {
         other: currentPost?.other || '',
         budget: currentPost?.budget || 0,
         location: currentPost?.location || '',
-        coverPhotoUrl: currentPost?.coverPhotoUrl || '',
+        coverPhotoUrls: mappedCoverPhotoUrls,
         telNumber: currentPost?.telNumber || '',
-        date: currentPost?.date || undefined,
+        date: parsedDate,
       });
-
       setLoading(false);
     };
 
@@ -194,29 +233,31 @@ export default function PostEditPage() {
     }
   };
 
-  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      try {
-        const compressedCoverPhotoUrl = await getCompressedImageUrl(
-          file,
-          600,
-          0.6,
-        );
+  const handleImagesUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const input = e.currentTarget as HTMLInputElement;
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
 
-        setFormData((prev) => ({
-          ...prev,
-          coverPhotoUrl: compressedCoverPhotoUrl,
-        }));
-      } catch (err) {
-        console.error('Error processing image:', err);
-      }
+    try {
+      const urls = await Promise.all(
+        files.map((f) => getCompressedImageUrl(f, 600, 0.6)),
+      );
+      setFormData((prev) => {
+        const base = prev.coverPhotoUrls ?? [];
+        const next = [...base, ...urls].slice(0, 3); // hard cap at 3
+        return { ...prev, coverPhotoUrls: next };
+      });
+      // allow selecting the same file(s) again
+      input.value = '';
+    } catch (err) {
+      console.error('Error processing images:', err);
     }
   };
 
   const handleDatePicking = (date: Date | undefined) => {
     if (date) {
       // Validate date
+      formData.date = date;
       const validation = postValidator(formData, 'date');
       if (!validation.isValid) {
         setValidationErrors((prev) => ({
@@ -529,21 +570,49 @@ export default function PostEditPage() {
             {/* Cover Photo */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Cover Photo
+                Cover Photo (up to 3)
               </label>
 
               <div className="mt-1 flex flex-col items-start gap-4">
-                <div className="w-48 h-32 rounded-md bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300">
-                  {formData.coverPhotoUrl ? (
-                    <img
-                      src={formData.coverPhotoUrl}
-                      alt="Cover Preview"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-xs text-gray-500">Preview</span>
-                  )}
+                <div className="mt-1">
+                  <div className="grid grid-cols-3 gap-3">
+                    {formData.coverPhotoUrls.length > 0 ? (
+                      formData.coverPhotoUrls.slice(0, 3).map((url, i) => (
+                        <div
+                          key={i}
+                          className="relative w-48 h-32 rounded-md overflow-hidden"
+                        >
+                          <img
+                            src={url}
+                            alt={`Cover ${i + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            className="absolute top-2 right-2 bg-white/90 rounded w-6 h-6 px-1 text-m shadow"
+                            onClick={() =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                coverPhotoUrls: prev.coverPhotoUrls.filter(
+                                  (_, idx) => idx !== i,
+                                ),
+                              }))
+                            }
+                            disabled={updating}
+                            aria-label={`Remove image ${i + 1}`}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="col-span-3 w-48 h-32 rounded-md bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
+                        <span className="text-xs text-gray-500">Preview</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
+
                 <ActionButton
                   type="button"
                   onClick={() => {
@@ -552,8 +621,8 @@ export default function PostEditPage() {
                     }
                   }}
                   buttonColor="green"
-                  disabled={updating}
-                  className={`${updating ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                  disabled={updating || formData.coverPhotoUrls.length >= 3}
+                  className={`${updating || formData.coverPhotoUrls.length >= 3 ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                 >
                   Upload
                 </ActionButton>
@@ -562,9 +631,10 @@ export default function PostEditPage() {
                   name="cover-photo-upload"
                   type="file"
                   className="sr-only"
-                  onChange={handleImageUpload}
+                  onChange={handleImagesUpload}
                   accept="image/*"
-                  disabled={updating}
+                  multiple
+                  disabled={updating || formData.coverPhotoUrls.length >= 3}
                 />
               </div>
             </div>
