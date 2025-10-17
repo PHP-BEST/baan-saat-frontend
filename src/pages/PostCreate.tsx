@@ -11,16 +11,13 @@ import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import ActionButton from '@/components/our-components/actionButton';
 import { TAG_OPTIONS, type PostTag, type TagsOption } from '@/interfaces/Post';
-import {
-  formatDateToDisplay,
-  getCompressedImageUrl,
-  isInvalidPostForm,
-} from '@/utils/function';
+import { formatDateToDisplay, isInvalidPostForm } from '@/utils/function';
 import { postValidator } from '@/utils/postValidator';
 import { createPost, type PostFormInterface } from '@/api/post';
 import { AlertCircle, Loader } from 'lucide-react';
 import MyDatePicker from '@/components/ui/calendar';
 import { useUser } from '@/context/UserContext';
+import { uploadImages } from '@/api/upload';
 
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
@@ -104,24 +101,6 @@ export const PostCreatePage: React.FC = () => {
     }
   };
 
-  // const handleImagesUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-  //   const file = (e.target.files && e.target.files[0]) || null;
-  //   if (!file) return;
-
-  //   try {
-  //     const url = await getCompressedImageUrl(file, 600, 0.6);
-
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       coverPhotoUrl: url,
-  //     }));
-
-  //     e.target.value = '';
-  //   } catch (err) {
-  //     console.error('Error processing images:', err);
-  //   }
-  // };
-
   type UploadMode = 'cover' | 'support';
 
   const handleImagesUpload = async (
@@ -132,9 +111,10 @@ export const PostCreatePage: React.FC = () => {
     if (!files.length) return;
 
     try {
-      const urls = await Promise.all(
-        files.map((f) => getCompressedImageUrl(f, 600, 0.6)),
-      );
+      // const urls = await Promise.all(
+      //   files.map((f) => getCompressedImageUrl(f, 600, 0.6)),
+      // );
+      const urls = await uploadImages(files);
 
       setFormData((prev) => {
         if (mode === 'cover') {

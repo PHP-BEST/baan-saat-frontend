@@ -18,15 +18,12 @@ import {
 } from '@/interfaces/Post';
 import { postValidator } from '@/utils/postValidator';
 import { Loader, AlertCircle } from 'lucide-react';
-import {
-  formatDateToDisplay,
-  getCompressedImageUrl,
-  isInvalidPostForm,
-} from '@/utils/function';
+import { formatDateToDisplay, isInvalidPostForm } from '@/utils/function';
 import Loading from '@/components/our-components/loading';
 import { getPostById, updatePost, type PostFormInterface } from '@/api/post';
 import MyDatePicker from '@/components/ui/calendar';
 import PostNotFound from '@/error/PostNotFound';
+import { uploadImages } from '@/api/upload';
 
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
@@ -281,9 +278,10 @@ export default function PostEditPage() {
     if (!files.length) return;
 
     try {
-      const urls = await Promise.all(
-        files.map((f) => getCompressedImageUrl(f, 600, 0.6)),
-      );
+      // const urls = await Promise.all(
+      //   files.map((f) => getCompressedImageUrl(f, 600, 0.6)),
+      // );
+      const urls = await uploadImages(files);
 
       setFormData((prev) => {
         if (mode === 'cover') {
