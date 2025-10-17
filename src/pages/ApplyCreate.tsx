@@ -221,9 +221,9 @@ export default function ApplyCreatePage() {
             </h1>
 
             {/* Post Cover Image */}
-            {(post.coverPhotoUrl ?? post.image1) ? (
+            {(post.coverPhotoUrl ?? post.image1Url) ? (
               <img
-                src={(post.coverPhotoUrl ?? post.image1) as string}
+                src={(post.coverPhotoUrl ?? post.image1Url) as string}
                 alt={post.title}
                 className="w-full h-64 object-cover"
               />

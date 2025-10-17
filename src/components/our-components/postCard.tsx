@@ -17,7 +17,7 @@ export default function PostCard({ post, size = 'M' }: PostCardProps) {
   const cardHeight = sizeMap[size].height;
   const titleClass = sizeMap[size].title;
   const descClass = sizeMap[size].desc;
-  const cover = post.coverPhotoUrl || post.image1;
+  const cover = post.coverPhotoUrl || post.image1Url;
 
   return (
     <Link to={`/post/${post._id}`}>
