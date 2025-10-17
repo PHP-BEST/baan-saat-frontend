@@ -18,7 +18,13 @@ import MyApplyPage from './pages/MyApply';
 import CustomerProfilePostPage from './pages/CustomerProfilePost';
 import ApplyEditPage from './pages/ApplyEdit';
 import BecomeProvider from './pages/BecomeProvider';
+import ProviderAccountLayout from './layouts/ProviderAccountLayout';
+import Notification from './pages/Notification';
+import Management from './pages/Management';
+import Payments from './pages/Payments';
 import ProviderAccout from './pages/ProviderAccout';
+import Payouts from './pages/Payouts';
+import Balances from './pages/Balances';
 
 export const router = createBrowserRouter([
   {
@@ -42,7 +48,22 @@ export const router = createBrowserRouter([
           { path: 'become-provider', element: <BecomeProvider /> },
           { path: 'post', element: <MyPostPage /> },
           { path: 'apply', element: <MyApplyPage /> },
-          { path: 'provider-account', element: <ProviderAccout /> },
+        ],
+      },
+      {
+        path: 'account/provider-account',
+        element: (
+          <ProtectedRoute>
+            <ProviderAccountLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          { path: '', element: <Notification /> },
+          { path: 'management', element: <Management /> },
+          { path: 'payments', element: <Payments /> },
+          { path: 'payouts', element: <Payouts /> },
+          { path: 'balances', element: <Balances /> },
+          { path: 'account', element: <ProviderAccout /> },
         ],
       },
       {
