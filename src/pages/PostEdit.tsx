@@ -59,9 +59,9 @@ function isFormDataSameAsOldPost(
   type ImageFields = {
     coverPhotoUrl?: string | null;
     coverPhotoUrls?: string[] | null;
-    image1?: string | null;
-    image2?: string | null;
-    image3?: string | null;
+    image1Url?: string | null;
+    image2Url?: string | null;
+    image3Url?: string | null;
   };
 
   const normCover = (x: ImageFields): string => {
@@ -73,7 +73,7 @@ function isFormDataSameAsOldPost(
   };
 
   const normSupport = (x: ImageFields): string[] => {
-    const fromNew = [x.image1, x.image2, x.image3].filter(
+    const fromNew = [x.image1Url, x.image2Url, x.image3Url].filter(
       (v): v is string => typeof v === 'string' && v.length > 0,
     );
     if (fromNew.length > 0) return fromNew.slice(0, 3);
@@ -123,9 +123,9 @@ export default function PostEditPage() {
     budget: 0,
     location: '',
     coverPhotoUrl: '',
-    image1: '',
-    image2: '',
-    image3: '',
+    image1Url: '',
+    image2Url: '',
+    image3Url: '',
     telNumber: '',
     date: undefined,
   });
@@ -145,17 +145,19 @@ export default function PostEditPage() {
       type ImageFields = {
         coverPhotoUrl?: unknown;
         coverPhotoUrls?: unknown;
-        image1?: unknown;
-        image2?: unknown;
-        image3?: unknown;
+        image1Url?: unknown;
+        image2Url?: unknown;
+        image3Url?: unknown;
       };
       const img = (currentPost ?? {}) as ImageFields;
 
       const coverFromNew =
         typeof img.coverPhotoUrl === 'string' ? img.coverPhotoUrl : '';
-      const supportFromNew = [img.image1, img.image2, img.image3].filter(
-        (v): v is string => typeof v === 'string' && v.length > 0,
-      );
+      const supportFromNew = [
+        img.image1Url,
+        img.image2Url,
+        img.image3Url,
+      ].filter((v): v is string => typeof v === 'string' && v.length > 0);
 
       const cover = coverFromNew || '';
       const seen = new Set<string>();
@@ -184,9 +186,9 @@ export default function PostEditPage() {
         telNumber: currentPost?.telNumber || '',
         date: parsedDate,
         coverPhotoUrl: cover,
-        image1: support[0] ?? '',
-        image2: support[1] ?? '',
-        image3: support[2] ?? '',
+        image1Url: support[0] ?? '',
+        image2Url: support[1] ?? '',
+        image3Url: support[2] ?? '',
       });
       setLoading(false);
     };
@@ -278,9 +280,6 @@ export default function PostEditPage() {
     if (!files.length) return;
 
     try {
-      // const urls = await Promise.all(
-      //   files.map((f) => getCompressedImageUrl(f, 600, 0.6)),
-      // );
       const urls = await uploadImages(files);
 
       setFormData((prev) => {
@@ -291,7 +290,11 @@ export default function PostEditPage() {
           };
         }
 
-        const slots = [prev.image1 || '', prev.image2 || '', prev.image3 || ''];
+        const slots = [
+          prev.image1Url || '',
+          prev.image2Url || '',
+          prev.image3Url || '',
+        ];
         const seen = new Set<string>(
           [prev.coverPhotoUrl, ...slots].filter(Boolean) as string[],
         );
@@ -306,9 +309,9 @@ export default function PostEditPage() {
 
         return {
           ...prev,
-          image1: slots[0] || '',
-          image2: slots[1] || '',
-          image3: slots[2] || '',
+          image1Url: slots[0] || '',
+          image2Url: slots[1] || '',
+          image3Url: slots[2] || '',
         };
       });
 
@@ -320,14 +323,18 @@ export default function PostEditPage() {
 
   const handleImagesRemove = (idx: 1 | 2 | 3) =>
     setFormData((prev) => {
-      const slots = [prev.image1 || '', prev.image2 || '', prev.image3 || ''];
+      const slots = [
+        prev.image1Url || '',
+        prev.image2Url || '',
+        prev.image3Url || '',
+      ];
       slots[idx - 1] = '';
       const compact = slots.filter(Boolean);
       return {
         ...prev,
-        image1: compact[0] ?? '',
-        image2: compact[1] ?? '',
-        image3: compact[2] ?? '',
+        image1Url: compact[0] ?? '',
+        image2Url: compact[1] ?? '',
+        image3Url: compact[2] ?? '',
       };
     });
 
@@ -719,14 +726,16 @@ export default function PostEditPage() {
               <div className="mt-1 flex flex-col items-start gap-4">
                 <div className="mt-1">
                   <div className="grid grid-cols-3 gap-3">
-                    {[formData.image1, formData.image2, formData.image3].filter(
-                      Boolean,
-                    ).length > 0 ? (
+                    {[
+                      formData.image1Url,
+                      formData.image2Url,
+                      formData.image3Url,
+                    ].filter(Boolean).length > 0 ? (
                       <>
                         {[
-                          formData.image1,
-                          formData.image2,
-                          formData.image3,
+                          formData.image1Url,
+                          formData.image2Url,
+                          formData.image3Url,
                         ].map((url, i) =>
                           url ? (
                             <div
@@ -774,15 +783,19 @@ export default function PostEditPage() {
                   buttonColor="green"
                   disabled={
                     updating ||
-                    [formData.image1, formData.image2, formData.image3].filter(
-                      Boolean,
-                    ).length >= 3
+                    [
+                      formData.image1Url,
+                      formData.image2Url,
+                      formData.image3Url,
+                    ].filter(Boolean).length >= 3
                   }
                   className={`${
                     updating ||
-                    [formData.image1, formData.image2, formData.image3].filter(
-                      Boolean,
-                    ).length >= 3
+                    [
+                      formData.image1Url,
+                      formData.image2Url,
+                      formData.image3Url,
+                    ].filter(Boolean).length >= 3
                       ? 'cursor-not-allowed opacity-50'
                       : 'cursor-pointer'
                   }`}
@@ -799,9 +812,11 @@ export default function PostEditPage() {
                   multiple
                   disabled={
                     updating ||
-                    [formData.image1, formData.image2, formData.image3].filter(
-                      Boolean,
-                    ).length >= 3
+                    [
+                      formData.image1Url,
+                      formData.image2Url,
+                      formData.image3Url,
+                    ].filter(Boolean).length >= 3
                   }
                 />
               </div>

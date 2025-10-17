@@ -50,9 +50,9 @@ export const PostCreatePage: React.FC = () => {
     telNumber: user?.telNumber || '',
     location: '',
     coverPhotoUrl: '',
-    image1: '',
-    image2: '',
-    image3: '',
+    image1Url: '',
+    image2Url: '',
+    image3Url: '',
     date: undefined,
   });
 
@@ -111,9 +111,6 @@ export const PostCreatePage: React.FC = () => {
     if (!files.length) return;
 
     try {
-      // const urls = await Promise.all(
-      //   files.map((f) => getCompressedImageUrl(f, 600, 0.6)),
-      // );
       const urls = await uploadImages(files);
 
       setFormData((prev) => {
@@ -124,7 +121,11 @@ export const PostCreatePage: React.FC = () => {
           };
         }
 
-        const slots = [prev.image1 || '', prev.image2 || '', prev.image3 || ''];
+        const slots = [
+          prev.image1Url || '',
+          prev.image2Url || '',
+          prev.image3Url || '',
+        ];
         const seen = new Set<string>(
           [prev.coverPhotoUrl, ...slots].filter(Boolean) as string[],
         );
@@ -139,9 +140,9 @@ export const PostCreatePage: React.FC = () => {
 
         return {
           ...prev,
-          image1: slots[0] || '',
-          image2: slots[1] || '',
-          image3: slots[2] || '',
+          image1Url: slots[0] || '',
+          image2Url: slots[1] || '',
+          image3Url: slots[2] || '',
         };
       });
 
@@ -153,14 +154,18 @@ export const PostCreatePage: React.FC = () => {
 
   const handleImagesRemove = (idx: 1 | 2 | 3) =>
     setFormData((prev) => {
-      const slots = [prev.image1 || '', prev.image2 || '', prev.image3 || ''];
+      const slots = [
+        prev.image1Url || '',
+        prev.image2Url || '',
+        prev.image3Url || '',
+      ];
       slots[idx - 1] = '';
       const compact = slots.filter(Boolean);
       return {
         ...prev,
-        image1: compact[0] ?? '',
-        image2: compact[1] ?? '',
-        image3: compact[2] ?? '',
+        image1Url: compact[0] ?? '',
+        image2Url: compact[1] ?? '',
+        image3Url: compact[2] ?? '',
       };
     });
 
@@ -212,9 +217,9 @@ export const PostCreatePage: React.FC = () => {
           telNumber: user.telNumber || '',
           location: '',
           coverPhotoUrl: '',
-          image1: '',
-          image2: '',
-          image3: '',
+          image1Url: '',
+          image2Url: '',
+          image3Url: '',
           date: undefined,
         });
         window.location.href = `/account/post`;
@@ -546,15 +551,15 @@ export const PostCreatePage: React.FC = () => {
                   <div className="mt-1">
                     <div className="grid grid-cols-3 gap-3">
                       {[
-                        formData.image1,
-                        formData.image2,
-                        formData.image3,
+                        formData.image1Url,
+                        formData.image2Url,
+                        formData.image3Url,
                       ].filter(Boolean).length > 0 ? (
                         <>
                           {[
-                            formData.image1,
-                            formData.image2,
-                            formData.image3,
+                            formData.image1Url,
+                            formData.image2Url,
+                            formData.image3Url,
                           ].map((url, i) =>
                             url ? (
                               <div
@@ -603,17 +608,17 @@ export const PostCreatePage: React.FC = () => {
                     disabled={
                       adding ||
                       [
-                        formData.image1,
-                        formData.image2,
-                        formData.image3,
+                        formData.image1Url,
+                        formData.image2Url,
+                        formData.image3Url,
                       ].filter(Boolean).length >= 3
                     }
                     className={`${
                       adding ||
                       [
-                        formData.image1,
-                        formData.image2,
-                        formData.image3,
+                        formData.image1Url,
+                        formData.image2Url,
+                        formData.image3Url,
                       ].filter(Boolean).length >= 3
                         ? 'cursor-not-allowed opacity-50'
                         : 'cursor-pointer'
@@ -632,9 +637,9 @@ export const PostCreatePage: React.FC = () => {
                     disabled={
                       adding ||
                       [
-                        formData.image1,
-                        formData.image2,
-                        formData.image3,
+                        formData.image1Url,
+                        formData.image2Url,
+                        formData.image3Url,
                       ].filter(Boolean).length >= 3
                     }
                   />
