@@ -17,6 +17,8 @@ import SearchPage from './pages/Search';
 import MyApplyPage from './pages/MyApply';
 import CustomerProfilePostPage from './pages/CustomerProfilePost';
 import ApplyEditPage from './pages/ApplyEdit';
+import BecomeProvider from './pages/BecomeProvider';
+import ProviderAccout from './pages/ProviderAccout';
 
 export const router = createBrowserRouter([
   {
@@ -37,8 +39,10 @@ export const router = createBrowserRouter([
         ),
         children: [
           { path: '', element: <ProfilePage /> },
+          {path:'become-provider', element: <BecomeProvider />},
           { path: 'post', element: <MyPostPage /> },
           { path: 'apply', element: <MyApplyPage /> },
+          {path:'provider-account', element: <ProviderAccout />}
         ],
       },
       {
