@@ -39,10 +39,10 @@ export const router = createBrowserRouter([
         ),
         children: [
           { path: '', element: <ProfilePage /> },
-          {path:'become-provider', element: <BecomeProvider />},
+          { path: 'become-provider', element: <BecomeProvider /> },
           { path: 'post', element: <MyPostPage /> },
           { path: 'apply', element: <MyApplyPage /> },
-          {path:'provider-account', element: <ProviderAccout />}
+          { path: 'provider-account', element: <ProviderAccout /> },
         ],
       },
       {

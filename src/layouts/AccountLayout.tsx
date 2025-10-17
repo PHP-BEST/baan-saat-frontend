@@ -12,13 +12,12 @@ interface SidebarItem {
 
 const SidebarMenu: SidebarItem[] = [
   { name: 'Profile', path: '/', isDisabled: false },
-  { name: 'Become a Provider', path: '/become-provider', isDisabled: false }, 
+  { name: 'Become a Provider', path: '/become-provider', isDisabled: false },
   { name: 'Account Setting', path: '/setting', isDisabled: true },
   { name: 'Privacy', path: '/privacy', isDisabled: true },
   { name: 'My Applies', path: '/apply', isDisabled: false },
   { name: 'My Posts', path: '/post', isDisabled: false },
-  {name: 'Provider Account', path: '/provider-account', isDisabled: false}
-
+  { name: 'Provider Account', path: '/provider-account', isDisabled: false },
 ];
 
 const logout = async () => {
