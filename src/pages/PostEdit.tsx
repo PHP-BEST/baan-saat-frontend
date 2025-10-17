@@ -52,19 +52,52 @@ function isFormDataSameAsOldPost(
 ) {
   if (!post) return false;
 
-  // Handle date comparison separately
   const formDateStr = formData.date
     ? new Date(formData.date).toISOString().split('T')[0]
     : null;
   const postDateStr = post.date
     ? new Date(post.date).toISOString().split('T')[0]
     : null;
-  const formUrls = (formData.coverPhotoUrls ?? []).slice(0, 3);
-  const postUrls = (post.coverPhotoUrls ?? []).slice(0, 3);
 
-  const arraysEqual =
-    formUrls.length === postUrls.length &&
-    formUrls.every((u, i) => u === postUrls[i]);
+  type ImageFields = {
+    coverPhotoUrl?: string | null;
+    coverPhotoUrls?: string[] | null;
+    image1?: string | null;
+    image2?: string | null;
+    image3?: string | null;
+  };
+
+  const normCover = (x: ImageFields): string => {
+    if (x.coverPhotoUrl && x.coverPhotoUrl.length > 0) return x.coverPhotoUrl;
+    if (Array.isArray(x.coverPhotoUrls) && x.coverPhotoUrls.length > 0) {
+      return x.coverPhotoUrls[0] ?? '';
+    }
+    return '';
+  };
+
+  const normSupport = (x: ImageFields): string[] => {
+    const fromNew = [x.image1, x.image2, x.image3].filter(
+      (v): v is string => typeof v === 'string' && v.length > 0,
+    );
+    if (fromNew.length > 0) return fromNew.slice(0, 3);
+
+    if (Array.isArray(x.coverPhotoUrls)) {
+      return x.coverPhotoUrls
+        .slice(1, 4)
+        .filter((v): v is string => typeof v === 'string' && v.length > 0);
+    }
+    return [];
+  };
+
+  const formCover = normCover(formData);
+  const postCover = normCover(post);
+
+  const formSupport = normSupport(formData);
+  const postSupport = normSupport(post);
+
+  const supportsEqual =
+    formSupport.length === postSupport.length &&
+    formSupport.every((u, i) => u === postSupport[i]);
 
   return (
     formData.title === post.title &&
@@ -72,9 +105,10 @@ function isFormDataSameAsOldPost(
     formData.tag === post.tag &&
     formData.budget === post.budget &&
     formData.location === post.location &&
-    arraysEqual &&
-    formDateStr === postDateStr &&
-    formData.telNumber === post.telNumber
+    formData.telNumber === post.telNumber &&
+    formCover === postCover &&
+    supportsEqual &&
+    formDateStr === postDateStr
   );
 }
 
@@ -91,7 +125,10 @@ export default function PostEditPage() {
     other: '',
     budget: 0,
     location: '',
-    coverPhotoUrls: [],
+    coverPhotoUrl: '',
+    image1: '',
+    image2: '',
+    image3: '',
     telNumber: '',
     date: undefined,
   });
@@ -108,27 +145,27 @@ export default function PostEditPage() {
       const currentPost = await getPostById(postId);
       setPost(currentPost);
 
-      type CoverFields = {
-        coverPhotoUrls?: unknown;
+      type ImageFields = {
         coverPhotoUrl?: unknown;
+        coverPhotoUrls?: unknown;
+        image1?: unknown;
+        image2?: unknown;
+        image3?: unknown;
       };
+      const img = (currentPost ?? {}) as ImageFields;
 
-      const postFields = currentPost as unknown as CoverFields;
+      const coverFromNew =
+        typeof img.coverPhotoUrl === 'string' ? img.coverPhotoUrl : '';
+      const supportFromNew = [img.image1, img.image2, img.image3].filter(
+        (v): v is string => typeof v === 'string' && v.length > 0,
+      );
 
-      let mappedCoverPhotoUrls: string[] = [];
-
-      if (Array.isArray(postFields.coverPhotoUrls)) {
-        mappedCoverPhotoUrls = postFields.coverPhotoUrls
-          .filter((v): v is string => typeof v === 'string')
-          .slice(0, 3);
-      } else if (
-        typeof postFields.coverPhotoUrl === 'string' &&
-        postFields.coverPhotoUrl.length
-      ) {
-        mappedCoverPhotoUrls = [postFields.coverPhotoUrl];
-      } else {
-        mappedCoverPhotoUrls = [];
-      }
+      const cover = coverFromNew || '';
+      const seen = new Set<string>();
+      const support = supportFromNew
+        .filter((u) => !!u && u !== cover)
+        .filter((u) => (seen.has(u) ? false : (seen.add(u), true)))
+        .slice(0, 3);
 
       const rawDate = currentPost?.date;
       let parsedDate: Date | undefined;
@@ -140,7 +177,6 @@ export default function PostEditPage() {
       } else {
         parsedDate = undefined;
       }
-
       setFormData({
         title: currentPost?.title || '',
         description: currentPost?.description || '',
@@ -148,13 +184,15 @@ export default function PostEditPage() {
         other: currentPost?.other || '',
         budget: currentPost?.budget || 0,
         location: currentPost?.location || '',
-        coverPhotoUrls: mappedCoverPhotoUrls,
         telNumber: currentPost?.telNumber || '',
         date: parsedDate,
+        coverPhotoUrl: cover,
+        image1: support[0] ?? '',
+        image2: support[1] ?? '',
+        image3: support[2] ?? '',
       });
       setLoading(false);
     };
-
     fetchService();
   }, [postId]);
 
@@ -233,8 +271,12 @@ export default function PostEditPage() {
     }
   };
 
-  const handleImagesUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-    const input = e.currentTarget as HTMLInputElement;
+  type UploadMode = 'cover' | 'support';
+
+  const handleImagesUpload = async (
+    e: ChangeEvent<HTMLInputElement>,
+    mode: UploadMode,
+  ) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
 
@@ -242,17 +284,54 @@ export default function PostEditPage() {
       const urls = await Promise.all(
         files.map((f) => getCompressedImageUrl(f, 600, 0.6)),
       );
+
       setFormData((prev) => {
-        const base = prev.coverPhotoUrls ?? [];
-        const next = [...base, ...urls].slice(0, 3); // hard cap at 3
-        return { ...prev, coverPhotoUrls: next };
+        if (mode === 'cover') {
+          return {
+            ...prev,
+            coverPhotoUrl: urls[0] ?? '',
+          };
+        }
+
+        const slots = [prev.image1 || '', prev.image2 || '', prev.image3 || ''];
+        const seen = new Set<string>(
+          [prev.coverPhotoUrl, ...slots].filter(Boolean) as string[],
+        );
+
+        for (const u of urls) {
+          if (!u || seen.has(u)) continue;
+          const emptyIdx = slots.findIndex((s) => !s);
+          if (emptyIdx === -1) break;
+          slots[emptyIdx] = u;
+          seen.add(u);
+        }
+
+        return {
+          ...prev,
+          image1: slots[0] || '',
+          image2: slots[1] || '',
+          image3: slots[2] || '',
+        };
       });
-      // allow selecting the same file(s) again
-      input.value = '';
+
+      e.target.value = '';
     } catch (err) {
       console.error('Error processing images:', err);
     }
   };
+
+  const handleImagesRemove = (idx: 1 | 2 | 3) =>
+    setFormData((prev) => {
+      const slots = [prev.image1 || '', prev.image2 || '', prev.image3 || ''];
+      slots[idx - 1] = '';
+      const compact = slots.filter(Boolean);
+      return {
+        ...prev,
+        image1: compact[0] ?? '',
+        image2: compact[1] ?? '',
+        image3: compact[2] ?? '',
+      };
+    });
 
   const handleDatePicking = (date: Date | undefined) => {
     if (date) {
@@ -570,44 +649,40 @@ export default function PostEditPage() {
             {/* Cover Photo */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Cover Photo (up to 3)
+                Cover Photo (up to 1)
               </label>
 
               <div className="mt-1 flex flex-col items-start gap-4">
+                {/* Cover Photo */}
                 <div className="mt-1">
                   <div className="grid grid-cols-3 gap-3">
-                    {formData.coverPhotoUrls.length > 0 ? (
-                      formData.coverPhotoUrls.slice(0, 3).map((url, i) => (
-                        <div
-                          key={i}
-                          className="relative w-48 h-32 rounded-md overflow-hidden"
+                    {formData.coverPhotoUrl ? (
+                      <div className="relative w-48 h-32 rounded-md overflow-hidden">
+                        <img
+                          src={formData.coverPhotoUrl}
+                          alt="Cover"
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          className="absolute top-2 right-2 bg-white/90 rounded w-6 h-6 px-1 text-m shadow"
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              coverPhotoUrl: '',
+                            }))
+                          }
+                          disabled={updating}
+                          aria-label="Remove cover image"
                         >
-                          <img
-                            src={url}
-                            alt={`Cover ${i + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                          <button
-                            type="button"
-                            className="absolute top-2 right-2 bg-white/90 rounded w-6 h-6 px-1 text-m shadow"
-                            onClick={() =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                coverPhotoUrls: prev.coverPhotoUrls.filter(
-                                  (_, idx) => idx !== i,
-                                ),
-                              }))
-                            }
-                            disabled={updating}
-                            aria-label={`Remove image ${i + 1}`}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))
+                          ×
+                        </button>
+                      </div>
                     ) : (
                       <div className="col-span-3 w-48 h-32 rounded-md bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
-                        <span className="text-xs text-gray-500">Preview</span>
+                        <span className="text-xs text-gray-500">
+                          Cover Photo Preview
+                        </span>
                       </div>
                     )}
                   </div>
@@ -616,13 +691,12 @@ export default function PostEditPage() {
                 <ActionButton
                   type="button"
                   onClick={() => {
-                    if (!updating) {
+                    if (!updating)
                       document.getElementById('cover-photo-upload')?.click();
-                    }
                   }}
                   buttonColor="green"
-                  disabled={updating || formData.coverPhotoUrls.length >= 3}
-                  className={`${updating || formData.coverPhotoUrls.length >= 3 ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                  disabled={updating || !!formData.coverPhotoUrl}
+                  className={`${updating || !!formData.coverPhotoUrl ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                 >
                   Upload
                 </ActionButton>
@@ -631,10 +705,106 @@ export default function PostEditPage() {
                   name="cover-photo-upload"
                   type="file"
                   className="sr-only"
-                  onChange={handleImagesUpload}
+                  onChange={(e) => handleImagesUpload(e, 'cover')}
+                  accept="image/*"
+                  disabled={updating || !!formData.coverPhotoUrl}
+                />
+              </div>
+            </div>
+
+            {/* Supporting Photos */}
+            <div className="mt-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Supporting Photos (up to 3)
+              </label>
+
+              <div className="mt-1 flex flex-col items-start gap-4">
+                <div className="mt-1">
+                  <div className="grid grid-cols-3 gap-3">
+                    {[formData.image1, formData.image2, formData.image3].filter(
+                      Boolean,
+                    ).length > 0 ? (
+                      <>
+                        {[
+                          formData.image1,
+                          formData.image2,
+                          formData.image3,
+                        ].map((url, i) =>
+                          url ? (
+                            <div
+                              key={i}
+                              className="relative w-48 h-32 rounded-md overflow-hidden"
+                            >
+                              <img
+                                src={url}
+                                alt={`Supporting ${i + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                              <button
+                                type="button"
+                                className="absolute top-2 right-2 bg-white/90 rounded w-6 h-6 px-1 text-m shadow"
+                                onClick={() =>
+                                  handleImagesRemove((i + 1) as 1 | 2 | 3)
+                                }
+                                disabled={updating}
+                                aria-label={`Remove supporting image ${i + 1}`}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ) : null,
+                        )}
+                      </>
+                    ) : (
+                      <div className="col-span-3 w-48 h-32 rounded-md bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
+                        <span className="text-xs text-gray-500">
+                          Supporting Photo Preview
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <ActionButton
+                  type="button"
+                  onClick={() => {
+                    if (!updating)
+                      document
+                        .getElementById('supporting-photos-upload')
+                        ?.click();
+                  }}
+                  buttonColor="green"
+                  disabled={
+                    updating ||
+                    [formData.image1, formData.image2, formData.image3].filter(
+                      Boolean,
+                    ).length >= 3
+                  }
+                  className={`${
+                    updating ||
+                    [formData.image1, formData.image2, formData.image3].filter(
+                      Boolean,
+                    ).length >= 3
+                      ? 'cursor-not-allowed opacity-50'
+                      : 'cursor-pointer'
+                  }`}
+                >
+                  Upload
+                </ActionButton>
+                <input
+                  id="supporting-photos-upload"
+                  name="supporting-photos-upload"
+                  type="file"
+                  className="sr-only"
+                  onChange={(e) => handleImagesUpload(e, 'support')}
                   accept="image/*"
                   multiple
-                  disabled={updating || formData.coverPhotoUrls.length >= 3}
+                  disabled={
+                    updating ||
+                    [formData.image1, formData.image2, formData.image3].filter(
+                      Boolean,
+                    ).length >= 3
+                  }
                 />
               </div>
             </div>

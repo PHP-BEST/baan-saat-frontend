@@ -145,7 +145,10 @@ export interface PostFormInterface {
   telNumber: string;
   budget: number;
   location: string;
-  coverPhotoUrls: string[];
+  coverPhotoUrl?: string;
+  image1?: string;
+  image2?: string;
+  image3?: string;
   date: Date | undefined;
 }
 
@@ -158,8 +161,6 @@ export const createPost = async (
       ...formData,
       customerId: userId,
       date: formData.date ? formData.date.toISOString() : undefined,
-      coverPhotoUrl:
-        (formData.coverPhotoUrls && formData.coverPhotoUrls[0]) ?? '',
     };
 
     const response = await axios.post<ResponseInterface<Post>>(
@@ -185,8 +186,6 @@ export const updatePost = async (
     const payload = {
       ...formData,
       date: formData.date ? formData.date.toISOString() : undefined,
-      coverPhotoUrl:
-        (formData.coverPhotoUrls && formData.coverPhotoUrls[0]) ?? '',
     };
 
     const response = await axios.put<ResponseInterface<Post>>(

@@ -10,7 +10,9 @@ export interface Post {
   other: string;
   date: Date;
   coverPhotoUrl?: string;
-  coverPhotoUrls: string[];
+  image1?: string;
+  image2?: string;
+  image3?: string;
   createdAt: Date;
   updatedAt: Date;
 }

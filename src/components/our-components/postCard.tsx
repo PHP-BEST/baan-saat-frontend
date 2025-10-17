@@ -17,6 +17,7 @@ export default function PostCard({ post, size = 'M' }: PostCardProps) {
   const cardHeight = sizeMap[size].height;
   const titleClass = sizeMap[size].title;
   const descClass = sizeMap[size].desc;
+  const cover = post.coverPhotoUrl || post.image1;
 
   return (
     <Link to={`/post/${post._id}`}>
@@ -24,9 +25,9 @@ export default function PostCard({ post, size = 'M' }: PostCardProps) {
         className="w-full flex flex-col items-center bg-white border rounded-2xl shadow-sm m-0"
         style={{ maxWidth: `${cardWidth}px`, height: `${cardHeight}px` }}
       >
-        {post.coverPhotoUrl ? (
+        {cover ? (
           <img
-            src={post.coverPhotoUrl}
+            src={cover}
             alt="Post Cover Image"
             className="w-full h-2/3 object-cover rounded-t-2xl"
           />

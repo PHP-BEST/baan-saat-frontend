@@ -268,9 +268,9 @@ export default function ApplyEditPage() {
             </h1>
 
             {/* Post Cover Image */}
-            {post.coverPhotoUrl ? (
+            {(post.coverPhotoUrl ?? post.image1) ? (
               <img
-                src={post.coverPhotoUrl}
+                src={(post.coverPhotoUrl ?? post.image1) as string}
                 alt={post.title}
                 className="w-full h-64 object-cover"
               />
