@@ -190,14 +190,11 @@ export default function PostDetailPage() {
                   <div className="fixed inset-0 flex items-center justify-center bg-black/50">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-96">
                       <h2 className="text-2xl font-bold mb-4">Payments</h2>
-                      <ActionButton
-                        onClick={()=>
-                        setIsPayPop(false)}
-                      >
+                      <ActionButton onClick={() => setIsPayPop(false)}>
                         Close
                       </ActionButton>
-                      </div>
-                      </div>
+                    </div>
+                  </div>
                 )}
               </>
             ) : (
