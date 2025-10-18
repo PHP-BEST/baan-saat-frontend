@@ -25,6 +25,9 @@
   --color-button-upload: rgba(20, 174, 92, 1); /* Upload button */
   --color-button-cancel: rgba(255, 0, 0, 1); /* Cancel button */
 
+  --color-accept: rgba(20, 174, 92, 1); /* Accept */
+  --color-reject: rgba(255, 0, 0, 1); /* Reject */
+
   --color-border-request: rgba(175, 175, 175, 1); /* Request section border */
   --color-border-input: rgba(156, 156, 156, 1); /* Input field border */
 
