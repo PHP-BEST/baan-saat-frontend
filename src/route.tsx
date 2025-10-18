@@ -67,8 +67,8 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: 'onboard', 
-        element: <OnboardPage /> 
+        path: 'onboard',
+        element: <OnboardPage />,
       },
       {
         path: 'login',
