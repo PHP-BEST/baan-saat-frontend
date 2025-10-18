@@ -280,7 +280,7 @@ export default function ApplyDetailPage() {
             {/* Action Buttons */}
             <div className="flex justify-center mt-6 gap-4">
               {user._id !== apply.customerId ? (
-                <>
+                apply.status == 'Pending' ? (
                   <ActionButton
                     buttonColor="blue"
                     onClick={() => navigate(`/apply/${applyId}/edit`)}
@@ -288,7 +288,17 @@ export default function ApplyDetailPage() {
                   >
                     Edit
                   </ActionButton>
-                </>
+                ) : apply.status == 'Accepted' ? (
+                  <ActionButton
+                    buttonColor="blue"
+                    onClick={() => navigate(`/chat/${applyId}/`)}
+                    className="cursor-pointer"
+                  >
+                    Chat
+                  </ActionButton>
+                ) : (
+                  <></>
+                )
               ) : applyAction === 'Pending' ? (
                 <>
                   <ActionButton

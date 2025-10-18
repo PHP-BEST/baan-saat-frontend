@@ -1,5 +1,5 @@
 import { getDetailedApplyById } from '@/api/apply';
-import { deletePost } from '@/api/post';
+import { deletePost, updatePostStatus } from '@/api/post';
 import ActionButton from '@/components/our-components/actionButton';
 import Footer from '@/components/our-components/footer';
 import Header from '@/components/our-components/header';
@@ -58,6 +58,10 @@ export default function ChatPage() {
     return null;
   }
 
+  if (!post) {
+    return null;
+  }
+
   if (loading) {
     return (
       <div>
@@ -82,6 +86,16 @@ export default function ChatPage() {
     );
   }
 
+  const getNextStatus = () => {
+    if (post.status == 'Not working') {
+      return 'In progress';
+    } else if (post.status == 'In progress') {
+      return 'Completed';
+    } else {
+      return 'null';
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <Header />
@@ -99,10 +113,10 @@ export default function ChatPage() {
                 <span
                   className="text-button-action hover:underline cursor-pointer"
                   onClick={() => {
-                    navigate(`/post/${post?._id}`);
+                    navigate(`/post/${post._id}`);
                   }}
                 >
-                  {post?.title}
+                  {post.title}
                 </span>
               </div>
               <div className="font-medium text-lg">
@@ -135,22 +149,32 @@ export default function ChatPage() {
               </div>
               <div>
                 <span className="font-medium text-lg">Status:</span>{' '}
-                <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-                  Pending
+                <span className="px-3 py-1 bg-button-action text-white rounded-full text-sm font-medium">
+                  {post.status}
                 </span>
               </div>
             </div>
 
             <div className="flex gap-4 mt-6 items-center">
-              {user._id === apply.customerId && (
-                <ActionButton
-                  buttonColor="red"
-                  onClick={() => setOpenCancelApplyModal(true)}
-                >
-                  Cancel Apply
-                </ActionButton>
-              )}
-              {user._id === apply.providerId && (
+              {user._id === apply.customerId &&
+                (post.status === 'Not working' ? (
+                  <ActionButton
+                    buttonColor="red"
+                    onClick={() => setOpenCancelApplyModal(true)}
+                  >
+                    Cancel Apply
+                  </ActionButton>
+                ) : post.status == 'Completed' ? (
+                  <ActionButton
+                    onClick={() => alert('Navigate to Payment Page')}
+                  >
+                    Pay
+                  </ActionButton>
+                ) : (
+                  <></>
+                ))}
+
+              {user._id === apply.providerId && post.status != 'Completed' && (
                 <ActionButton
                   buttonColor="green"
                   onClick={() => setOpenUpdatePostStatusModal(true)}
@@ -207,7 +231,7 @@ export default function ChatPage() {
           <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
               <p className="mb-2 text-lg font-semibold">
-                ต้องการ Update Status เป็น ... ใช่หรือไม่?
+                ต้องการ Update Status เป็น {getNextStatus()} ใช่หรือไม่?
               </p>
               <p className="text-sm text-red-500 mb-4">
                 การอัปเดตสถานะจะเปลี่ยนสถานะของโพสต์นี้และไม่สามารถแก้ไขได้
@@ -216,7 +240,7 @@ export default function ChatPage() {
                 <ActionButton
                   onClick={async () => {
                     setUpdateStatusLoading(true);
-                    // await updateApplyStatus(apply._id, 'accepted');
+                    await updatePostStatus(post._id);
                     setUpdateStatusLoading(false);
                     setOpenUpdatePostStatusModal(false);
                     window.location.reload();
