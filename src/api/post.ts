@@ -172,6 +172,33 @@ export const createPost = async (
   }
 };
 
+export const updatePostStatus = async (postId: string) => {
+  try {
+    const post = await getPostById(postId);
+    let nextStatus = 'Not working';
+    if (post?.status == 'Not working') {
+      nextStatus = 'In progress';
+    } else if (post?.status == 'In progress') {
+      nextStatus = 'Completed';
+    }
+    const response = await axios.put<ResponseInterface<Post>>(
+      `${API_BASE}/${postId}`,
+      { status: nextStatus },
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+    if (response.data.success) {
+      return true;
+    } else {
+      throw new Error('Failed to update post');
+    }
+  } catch (err) {
+    console.error('Error updating post:', err);
+    return false;
+  }
+};
+
 export const updatePost = async (
   postId: string,
   formData: PostFormInterface,

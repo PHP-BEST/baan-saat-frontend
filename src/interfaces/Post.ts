@@ -12,7 +12,7 @@ export interface Post {
   image2Url?: string;
   image3Url?: string;
   date: Date;
-  status: 'Not working' | 'In Progress' | 'Completed';
+  status: 'Not working' | 'In progress' | 'Completed';
   coverPhotoUrl?: string;
   createdAt: Date;
   updatedAt: Date;
