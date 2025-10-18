@@ -25,7 +25,7 @@ import Payments from './pages/Payments';
 import ProviderAccout from './pages/ProviderAccout';
 import Payouts from './pages/Payouts';
 import Balances from './pages/Balances';
-
+import OnboardPage from './pages/Onboard';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -65,6 +65,10 @@ export const router = createBrowserRouter([
           { path: 'balances', element: <Balances /> },
           { path: 'account', element: <ProviderAccout /> },
         ],
+      },
+      {
+        path: 'onboard', 
+        element: <OnboardPage /> 
       },
       {
         path: 'login',
