@@ -23,6 +23,7 @@ export default function PostDetailPage() {
   const [loading, setLoading] = useState(false);
   const [customerUser, setCustomerUser] = useState<User | null>(null);
   const [offer, setApply] = useState<Apply | null>(null);
+  const [isPayPop, setIsPayPop] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -166,14 +167,39 @@ export default function PostDetailPage() {
           <div className="flex justify-end gap-4 my-8">
             {/* Edit Button */}
             {user?._id === post.customerId ? (
-              <ActionButton
-                className="cursor-pointer"
-                onClick={() => {
-                  navigate(`/post/${post._id}/edit`);
-                }}
-              >
-                Edit
-              </ActionButton>
+              <>
+                <ActionButton
+                  className="cursor-pointer"
+                  onClick={() => {
+                    navigate(`/post/${post._id}/edit`);
+                  }}
+                >
+                  Edit
+                </ActionButton>
+
+                <ActionButton
+                  className="cursor-pointer"
+                  onClick={() => {
+                    setIsPayPop(true);
+                  }}
+                >
+                  Payments
+                </ActionButton>
+
+                {isPayPop && (
+                  <div className="fixed inset-0 flex items-center justify-center bg-black/50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                      <h2 className="text-2xl font-bold mb-4">Payments</h2>
+                      <ActionButton
+                        onClick={()=>
+                        setIsPayPop(false)}
+                      >
+                        Close
+                      </ActionButton>
+                      </div>
+                      </div>
+                )}
+              </>
             ) : (
               user &&
               (!offer ? (
