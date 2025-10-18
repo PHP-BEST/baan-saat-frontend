@@ -15,6 +15,7 @@ import PostNotFound from '@/error/PostNotFound';
 import { checkApply } from '@/api/apply';
 import type { Apply } from '@/interfaces/Apply';
 import { X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 export default function PostDetailPage() {
   const navigate = useNavigate();
@@ -48,6 +49,16 @@ export default function PostDetailPage() {
     fetchPost();
   }, [postId]);
 
+  useEffect(() => {
+    if (openIdx !== null) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [openIdx]);
+
   if (loading) {
     return (
       <div>
@@ -80,7 +91,14 @@ export default function PostDetailPage() {
     (u): u is string => !!u && u.trim() !== '' && u !== post.coverPhotoUrl,
   );
 
-  const galleryImages = [post.coverPhotoUrl, ...supportingImages]
+  const hasCover =
+    typeof post.coverPhotoUrl === 'string' && post.coverPhotoUrl.trim() !== '';
+
+  const galleryImages = (
+    hasCover
+      ? [post.coverPhotoUrl!, ...supportingImages]
+      : [...supportingImages]
+  )
     .filter((u): u is string => !!u && u.trim() !== '')
     .filter((u, i, arr) => arr.indexOf(u) === i);
 
@@ -94,7 +112,7 @@ export default function PostDetailPage() {
             {post.title}
           </h1>
 
-          {/* Post Cover Image*/}
+          {/* Cover Photo */}
           <div className="relative">
             {post.coverPhotoUrl ? (
               <button
@@ -124,7 +142,7 @@ export default function PostDetailPage() {
                     <button
                       type="button"
                       className="block overflow-hidden rounded-lg border border-gray-200 hover:opacity-85"
-                      onClick={() => setOpenIdx(i + 1)}
+                      onClick={() => setOpenIdx(hasCover ? i + 1 : i)}
                       title="View photo"
                     >
                       <div className="w-28 h-20 md:w-36 md:h-28 bg-gray-100 cursor-zoom-in">
@@ -220,33 +238,34 @@ export default function PostDetailPage() {
             </div>
           </div>
 
-          {openIdx !== null && (
-            <div
-              role="dialog"
-              aria-modal="true"
-              className="fixed inset-0 z-[1000] bg-black/80 flex items-center justify-center"
-              onClick={() => setOpenIdx(null)}
-            >
+          {openIdx !== null &&
+            createPortal(
               <div
-                className="relative max-h-[65vh] max-w-[65vw]"
-                onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                className="fixed inset-0 z-[1000] bg-black/80 flex items-center justify-center"
+                onClick={() => setOpenIdx(null)}
               >
-                <img
-                  src={galleryImages[openIdx]}
-                  alt={`${post.title} — supporting photo`}
-                  className="max-h-[65vh] max-w-[65vw]"
+                <div
+                  className="relative max-h-[65vh] max-w-[65vw]"
                   onClick={(e) => e.stopPropagation()}
-                />
-                <button
-                  aria-label="Close"
-                  className="absolute -top-3 -right-3 md:top-2 md:right-2 h-8 w-8 rounded-full bg-white/95 hover:bg-white shadow flex items-center justify-center"
-                  onClick={() => setOpenIdx(null)}
                 >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-          )}
+                  <img
+                    src={galleryImages[openIdx]}
+                    alt={`${post.title} — supporting photo`}
+                    className="block max-w-[65vw] max-h-[65vh] rounded-lg shadow-xl"
+                  />
+                  <button
+                    aria-label="Close"
+                    className="absolute -top-3 -right-3 grid place-items-center w-9 h-9 rounded-full bg-white text-black shadow-lg"
+                    onClick={() => setOpenIdx(null)}
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>,
+              document.body,
+            )}
 
           <div className="flex justify-end gap-4 my-8">
             {/* Edit Button */}
