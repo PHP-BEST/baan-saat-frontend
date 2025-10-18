@@ -2,7 +2,7 @@ import ActionButton from '@/components/our-components/actionButton';
 import { API_ROOT } from '@/config/api';
 import { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 
 interface TermsModalProps {
   title: string;
@@ -54,10 +54,10 @@ export default function LoginPage() {
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
 
   useEffect(() => {
-    if (user !== null) { 
-      navigate(-1) // stay at the same page
+    if (user !== null) {
+      navigate(-1); // stay at the same page
     }
-  }, [])
+  }, []);
 
   const handleGoogleSignIn = () => {
     window.location.href = `${API_ROOT}/auth/google`;

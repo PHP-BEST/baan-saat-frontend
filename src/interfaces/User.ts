@@ -14,6 +14,7 @@ export interface User {
   address: string;
   lastLoginAt: Date;
   providerProfile?: ProviderProfile;
+  connectId: string;
   createdAt: Date;
   updatedAt: Date;
 }

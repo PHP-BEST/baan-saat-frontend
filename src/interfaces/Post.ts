@@ -9,6 +9,9 @@ export interface Post {
   tag: PostTag;
   other: string;
   date: Date;
+  paymentSecret: string,
+  paymentStatus: string,
+  paymentId: string,
   coverPhotoUrl?: string;
   createdAt: Date;
   updatedAt: Date;

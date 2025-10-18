@@ -17,6 +17,8 @@ import SearchPage from './pages/Search';
 import MyApplyPage from './pages/MyApply';
 import CustomerProfilePostPage from './pages/CustomerProfilePost';
 import ApplyEditPage from './pages/ApplyEdit';
+import AccountOnboardingUI from './pages/payment/AccountOnboarding';
+import PaymentElement from './pages/payment/PaymentElement';
 
 export const router = createBrowserRouter([
   {
@@ -93,6 +95,14 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      // {
+      //   path: 'payment',
+      //   element: <AccountOnboardingUI />,
+      // },
+      // {
+      //   path: 'element',
+      //   element: <PaymentElement />,
+      // },
     ],
   },
 ]);

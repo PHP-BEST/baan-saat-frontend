@@ -58,7 +58,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   }, [location.pathname, user]);
 
   if (isLoading) {
-    return <Loading />
+    return <Loading />;
   }
 
   return (
