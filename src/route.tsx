@@ -22,7 +22,6 @@ import ProviderAccountLayout from './layouts/ProviderAccountLayout';
 import Notification from './pages/Notification';
 import Management from './pages/Management';
 import Payments from './pages/Payments';
-import ProviderAccout from './pages/ProviderAccout';
 import Payouts from './pages/Payouts';
 import Balances from './pages/Balances';
 import OnboardPage from './pages/Onboard';
@@ -59,11 +58,10 @@ export const router = createBrowserRouter([
         ),
         children: [
           { path: '', element: <Notification /> },
-          { path: 'management', element: <Management /> },
+          { path: 'manage', element: <Management /> },
           { path: 'payments', element: <Payments /> },
           { path: 'payouts', element: <Payouts /> },
           { path: 'balances', element: <Balances /> },
-          { path: 'account', element: <ProviderAccout /> },
         ],
       },
       {
