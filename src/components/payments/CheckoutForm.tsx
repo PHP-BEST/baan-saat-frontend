@@ -1,5 +1,9 @@
-import {useState} from 'react';
-import {useStripe, useElements, PaymentElement} from '@stripe/react-stripe-js';
+import { useState } from 'react';
+import {
+  useStripe,
+  useElements,
+  PaymentElement,
+} from '@stripe/react-stripe-js';
 
 const CheckoutForm = () => {
   const stripe = useStripe();
@@ -7,7 +11,7 @@ const CheckoutForm = () => {
 
   const [errorMessage, setErrorMessage] = useState<string | undefined>('');
 
-	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     // We don't want to let default form submission happen here,
     // which would refresh the page.
     event.preventDefault();
@@ -18,14 +22,13 @@ const CheckoutForm = () => {
       return;
     }
 
-    const {error} = await stripe.confirmPayment({
+    const { error } = await stripe.confirmPayment({
       //`Elements` instance that was used to create the Payment Element
       elements,
       confirmParams: {
         return_url: 'http://localhost:5173/payment',
       },
     });
-
 
     if (error) {
       // This point will only be reached if there is an immediate error when
@@ -46,7 +49,7 @@ const CheckoutForm = () => {
       {/* Show error message to your customers */}
       {errorMessage && <div>{errorMessage}</div>}
     </form>
-  )
+  );
 };
 
 export default CheckoutForm;

@@ -1,5 +1,5 @@
 import { API_ROOT, type ResponseInterface } from '@/config/api';
-import type { Post, PostTag, TagsOption } from '@/interfaces/Post';
+import type { Post, PostTag } from '@/interfaces/Post';
 import axios from 'axios';
 
 const API_BASE = `${API_ROOT}/api/posts`;
@@ -105,7 +105,7 @@ export const searchPosts = async (query: string): Promise<Post[]> => {
 export interface FilterPostParams {
   userId?: string;
   title?: string;
-  tags: TagsOption[];
+  tags: PostTag[];
   other: string;
   minBudget?: number;
   maxBudget?: number;
@@ -121,17 +121,11 @@ export const filterPosts = async (
       `${API_BASE}/filter`,
       {
         headers: { 'Content-Type': 'application/json' },
-        params: {
-          ...params,
-          ...(params.tags.length
-            ? { tags: params.tags.map((tag) => tag.value) }
-            : {}),
-        },
+        params: params,
       },
     );
 
     if (response.data.success) {
-      console.log('Filtered posts:', response.data.data);
       return response.data.data;
     } else {
       return [];
@@ -178,6 +172,33 @@ export const createPost = async (
   }
 };
 
+export const updatePostStatus = async (postId: string) => {
+  try {
+    const post = await getPostById(postId);
+    let nextStatus = 'Not working';
+    if (post?.status == 'Not working') {
+      nextStatus = 'In progress';
+    } else if (post?.status == 'In progress') {
+      nextStatus = 'Completed';
+    }
+    const response = await axios.put<ResponseInterface<Post>>(
+      `${API_BASE}/${postId}`,
+      { status: nextStatus },
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+    if (response.data.success) {
+      return true;
+    } else {
+      throw new Error('Failed to update post');
+    }
+  } catch (err) {
+    console.error('Error updating post:', err);
+    return false;
+  }
+};
+
 export const updatePost = async (
   postId: string,
   formData: PostFormInterface,
@@ -198,6 +219,23 @@ export const updatePost = async (
     }
   } catch (err) {
     console.error('Error updating post:', err);
+    return false;
+  }
+};
+
+export const deletePost = async (postId: string): Promise<boolean> => {
+  try {
+    const response = await axios.delete<ResponseInterface<Post>>(
+      `${API_BASE}/${postId}`,
+    );
+
+    if (response.data.success) {
+      return true;
+    } else {
+      throw new Error('Failed to delete post');
+    }
+  } catch (err) {
+    console.error('Error deleting post:', err);
     return false;
   }
 };

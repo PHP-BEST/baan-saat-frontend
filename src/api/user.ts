@@ -1,6 +1,6 @@
 import { API_ROOT, type ResponseInterface } from '@/config/api';
 import Axios from '@/config/axios-config';
-import type { SkillsType, User } from '@/interfaces/User';
+import type { User } from '@/interfaces/User';
 
 const API_BASE = `${API_ROOT}/api/users`;
 
@@ -25,8 +25,6 @@ export interface UpdateUserParams {
   address?: string;
   avatarUrl?: string;
   providerProfile?: {
-    title?: string;
-    skills?: SkillsType[];
     description?: string;
   };
 }
@@ -87,4 +85,4 @@ export const promoteUser = async () => {
     console.error('Error promoting user role:', error);
     return null;
   }
-}
+};

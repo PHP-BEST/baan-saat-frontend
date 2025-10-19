@@ -10,7 +10,7 @@ describe('ActionButton', () => {
     expect(screen.getByRole('button')).toHaveTextContent('Click');
   });
 
-  it('applies default props correctly', () => {
+  it('apply default props correctly', () => {
     render(<ActionButton>Default</ActionButton>);
     const button = screen.getByRole('button');
 
@@ -32,7 +32,7 @@ describe('ActionButton', () => {
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('applies cursor-pointer when onClick is provided', () => {
+  it('apply cursor-pointer when onClick is provided', () => {
     const handleClick = jest.fn();
     render(<ActionButton onClick={handleClick}>Clickable</ActionButton>);
 
@@ -45,13 +45,13 @@ describe('ActionButton', () => {
     expect(screen.getByRole('button')).not.toHaveClass('cursor-pointer');
   });
 
-  it('applies random className', () => {
+  it('apply random className', () => {
     render(<ActionButton className="custom-class">Styled</ActionButton>);
 
     expect(screen.getByRole('button')).toHaveClass('custom-class');
   });
 
-  it('applies custom className for TailwindCSS', () => {
+  it('apply custom className for TailwindCSS', () => {
     render(
       <ActionButton className="bg-blue-500 text-white hover:bg-blue-700">
         Tailwind Button
@@ -66,14 +66,14 @@ describe('ActionButton', () => {
     );
   });
 
-  it('applies custom fontSize', () => {
+  it('apply custom fontSize', () => {
     render(<ActionButton fontSize={16}>Small text</ActionButton>);
 
     expect(screen.getByRole('button')).toHaveStyle({ fontSize: '16px' });
   });
 
   describe('Button Colors', () => {
-    it('applies blue color by default', () => {
+    it('apply blue color by default', () => {
       render(<ActionButton>Blue</ActionButton>);
       const button = screen.getByRole('button');
 
@@ -84,7 +84,7 @@ describe('ActionButton', () => {
       );
     });
 
-    it('applies red color', () => {
+    it('apply red color', () => {
       render(<ActionButton buttonColor="red">Red</ActionButton>);
       const button = screen.getByRole('button');
 
@@ -95,7 +95,7 @@ describe('ActionButton', () => {
       );
     });
 
-    it('applies green color', () => {
+    it('apply green color', () => {
       render(<ActionButton buttonColor="green">Green</ActionButton>);
       const button = screen.getByRole('button');
 
@@ -108,7 +108,7 @@ describe('ActionButton', () => {
   });
 
   describe('Button Types', () => {
-    it('applies filled style by default', () => {
+    it('apply filled style by default', () => {
       render(<ActionButton>Filled</ActionButton>);
       const button = screen.getByRole('button');
 
@@ -119,7 +119,7 @@ describe('ActionButton', () => {
       );
     });
 
-    it('applies outline style', () => {
+    it('apply outline style', () => {
       render(<ActionButton buttonType="outline">Outline</ActionButton>);
       const button = screen.getByRole('button');
 
@@ -181,7 +181,7 @@ describe('ActionButton', () => {
     ];
 
     testCases.forEach(({ color, type, expectedClasses }) => {
-      it(`applies correct styles for ${color} ${type}`, () => {
+      it(`apply correct styles for ${color} ${type}`, () => {
         render(
           <ActionButton buttonColor={color} buttonType={type}>
             {color} {type} Button

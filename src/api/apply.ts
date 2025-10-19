@@ -1,8 +1,8 @@
 import { API_ROOT, type ResponseInterface } from '@/config/api';
-import type { Apply, ApplyDetail } from '@/interfaces/Apply';
+import type { Apply, ApplyDetail, ApplyStatus } from '@/interfaces/Apply';
 import axios from 'axios';
 
-const API_BASE = `${API_ROOT}/api/applys`;
+const API_BASE = `${API_ROOT}/api/applies`;
 
 export interface ApplyFormInterface {
   date: Date | undefined;
@@ -32,16 +32,14 @@ export const createApply = async (
   }
 };
 
-export const checkApply = async (
+export const checkMyApply = async (
   postId: string,
   providerId: string,
 ): Promise<Apply | null> => {
   try {
-    console.log('Post ID:', postId, 'Provider ID:', providerId);
     const response = await axios.get<ResponseInterface<Apply>>(
       `${API_BASE}/check/${providerId}/${postId}`,
     );
-    console.log('Check Apply Response:', response.data);
     return response.data.data;
   } catch (error) {
     console.error('Error checking apply existence:', error);
@@ -57,6 +55,20 @@ export const getApplyById = async (applyId: string): Promise<Apply> => {
     return response.data.data;
   } catch (error) {
     console.error('Error fetching apply by ID:', error);
+    throw error;
+  }
+};
+
+export const getDetailedApplyById = async (
+  applyId: string,
+): Promise<ApplyDetail> => {
+  try {
+    const response = await axios.get<ResponseInterface<ApplyDetail>>(
+      `${API_BASE}/${applyId}/detail`,
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching detailed apply by ID:', error);
     throw error;
   }
 };
@@ -80,7 +92,26 @@ export const updateApply = async (
   }
 };
 
-export const getDetailedApplysByProviderId = async (
+export const updateApplyStatus = async (
+  applyId: string,
+  applyStatus: ApplyStatus,
+): Promise<boolean> => {
+  try {
+    const response = await axios.put<ResponseInterface<Apply>>(
+      `${API_BASE}/${applyId}`,
+      { status: applyStatus },
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+    return response.data.success;
+  } catch (error) {
+    console.error('Error updating apply:', error);
+    return false;
+  }
+};
+
+export const getDetailedAppliesByProviderId = async (
   providerId: string,
 ): Promise<ApplyDetail[]> => {
   try {
@@ -90,6 +121,32 @@ export const getDetailedApplysByProviderId = async (
     return response.data.data;
   } catch (error) {
     console.error('Error fetching applys by provider ID:', error);
+    throw error;
+  }
+};
+
+export const getAppliesByPostId = async (postId: string): Promise<Apply[]> => {
+  try {
+    const response = await axios.get<ResponseInterface<ApplyDetail[]>>(
+      `${API_BASE}/post/${postId}`,
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching applys by post ID:', error);
+    throw error;
+  }
+};
+
+export const getDetailedAppliesByPostId = async (
+  postId: string,
+): Promise<ApplyDetail[]> => {
+  try {
+    const response = await axios.get<ResponseInterface<ApplyDetail[]>>(
+      `${API_BASE}/post/${postId}/detail`,
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching applys by post ID:', error);
     throw error;
   }
 };

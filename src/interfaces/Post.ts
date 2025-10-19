@@ -8,10 +8,11 @@ export interface Post {
   location: string;
   tag: PostTag;
   other: string;
+  image1Url?: string;
+  image2Url?: string;
+  image3Url?: string;
   date: Date;
-  paymentSecret: string,
-  paymentStatus: string,
-  paymentId: string,
+  status: 'Not working' | 'In progress' | 'Completed';
   coverPhotoUrl?: string;
   createdAt: Date;
   updatedAt: Date;

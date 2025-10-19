@@ -15,11 +15,37 @@ export const getConnectClientSecret = async () => {
   }
 };
 
+export const getPaymentIntentSecret = async (postId: string) => {
+  try {
+    const response = await Axios.get(`${API_BASE}/payment-intent/${postId}`);
+    const { client_secret: clientSecret } = response.data;
+    return clientSecret;
+  } catch (error: any) {
+    const errorMessage = error.response?.data?.error || error.message;
+    console.error('An error occurred: ', errorMessage);
+    return null;
+  }
+};
+
 export const createIntentClientSecret = async (
   postId: string,
-  providerId: string, 
-  amount: number
+  providerId: string,
+  amount: number,
 ) => {
+  // Add validation before making the request
+  if (!postId) {
+    console.error('Missing required parameters for payment intent creation');
+    return null;
+  }
+  if (!providerId) {
+    console.error('Missing required parameters for payment intent creation');
+    return null;
+  }
+  if (amount === undefined || amount === null) {
+    console.error('Missing required parameters for payment intent creation');
+    return null;
+  }
+
   try {
     const response = await Axios.post(`${API_BASE}/payment-intent`, {
       postId: postId,
@@ -45,4 +71,4 @@ export const getPaymentStatusByPostId = async (postId: string) => {
     console.error('An error occurred: ', errorMessage);
     return null;
   }
-}
+};

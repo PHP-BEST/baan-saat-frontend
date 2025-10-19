@@ -2,7 +2,12 @@ import { Filter } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
-import { TAG_OPTIONS, type Post, type TagsOption } from '@/interfaces/Post';
+import {
+  TAG_OPTIONS,
+  type Post,
+  type PostTag,
+  type TagsOption,
+} from '@/interfaces/Post';
 import { useSearchParams } from 'react-router-dom';
 import {
   filterPosts,
@@ -84,16 +89,20 @@ export default function SearchPage() {
     setFilterError(undefined);
     setLoading(true);
 
+    const postTags = tags.map((tag) => tag.value as PostTag);
+
     const params: FilterPostParams = {
       title: postTitle || undefined,
-      tags: tags,
-      other: other,
+      tags:
+        otherSelected && other.trim() !== ''
+          ? [...postTags, 'others' as PostTag]
+          : postTags,
+      other: otherSelected ? other : '',
       minBudget,
       maxBudget,
       startDate: startDate || undefined,
       endDate: endDate || undefined,
     };
-
     let posts = await filterPosts(params);
     posts = posts.sort(
       (a, b) =>
