@@ -1,8 +1,8 @@
 import GenericAccountLayout from './GenericAccountLayout';
 
 const ProviderSidebarMenu = [
-  { name: 'Notification', path: '/', isDisabled: false },
-  { name: 'Account Management', path: '/manage', isDisabled: false },
+  { name: 'Account Management', path: '/', isDisabled: false },
+  { name: 'Notification', path: '/notify', isDisabled: false },
   { name: 'Payments', path: '/payments', isDisabled: false },
   { name: 'Payouts', path: '/payouts', isDisabled: false },
   { name: 'Balances', path: '/balances', isDisabled: false },

@@ -8,7 +8,7 @@ export interface Apply {
   providerId: string;
   date: Date;
   appliedPrice: number;
-  status: OfferStatus;
+  status: ApplyStatus;
   description?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -24,10 +24,10 @@ export interface ApplyDetail {
   providerId: string;
   date: Date;
   appliedPrice: number;
-  status: OfferStatus;
+  status: ApplyStatus;
   description?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type OfferStatus = 'Pending' | 'Accepted' | 'Rejected';
+export type ApplyStatus = 'Pending' | 'Accepted' | 'Rejected';

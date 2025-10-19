@@ -25,6 +25,9 @@ import Payments from './pages/Payments';
 import Payouts from './pages/Payouts';
 import Balances from './pages/Balances';
 import OnboardPage from './pages/Onboard';
+import ApplyDetailPage from './pages/ApplyDetail';
+import ChatPage from './pages/Chat';
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -57,8 +60,8 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
         children: [
-          { path: '', element: <Notification /> },
-          { path: 'manage', element: <Management /> },
+          { path: 'notify', element: <Notification /> },
+          { path: '', element: <Management /> },
           { path: 'payments', element: <Payments /> },
           { path: 'payouts', element: <Payouts /> },
           { path: 'balances', element: <Balances /> },
@@ -117,6 +120,22 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ApplyEditPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'apply/:applyId',
+        element: (
+          <ProtectedRoute>
+            <ApplyDetailPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'chat/:applyId',
+        element: (
+          <ProtectedRoute>
+            <ChatPage />
           </ProtectedRoute>
         ),
       },
