@@ -19,12 +19,12 @@ import CustomerProfilePostPage from './pages/CustomerProfilePost';
 import ApplyEditPage from './pages/ApplyEdit';
 import BecomeProvider from './pages/BecomeProvider';
 import ProviderAccountLayout from './layouts/ProviderAccountLayout';
-import Notification from './pages/Notification';
-import Management from './pages/Management';
-import Payments from './pages/Payments';
-import Payouts from './pages/Payouts';
-import Balances from './pages/Balances';
-import OnboardPage from './pages/Onboard';
+import Notification from './pages/payments/Notification';
+import Management from './pages/payments/Management';
+import Payments from './pages/payments/Payments';
+import Payouts from './pages/payments/Payouts';
+import Balances from './pages/payments/Balances';
+import OnboardPage from './pages/payments/Onboard';
 import ApplyDetailPage from './pages/ApplyDetail';
 import ChatPage from './pages/Chat';
 
