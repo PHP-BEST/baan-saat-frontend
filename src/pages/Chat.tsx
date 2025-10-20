@@ -16,6 +16,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { DialogDescription } from '@radix-ui/react-dialog';
 import PaymentIntent from '@/components/payments/PaymentIntent';
+import PaymentButton from '@/components/payments/PaymentButton';
 export default function ChatPage() {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -160,9 +161,9 @@ export default function ChatPage() {
             </div>
 
             <Dialog open={openPayModal} onOpenChange={setOpenPayModal}>
-              <DialogContent className="h-[40vh] bg-white">
+              <DialogContent className="h-[85vh] bg-white">
                 <DialogDescription>
-                  <PaymentIntent 
+                  <PaymentIntent
                     postId={apply.postId}
                     providerConnectId={provider?.connectId || ''}
                   />
@@ -180,7 +181,11 @@ export default function ChatPage() {
                     Cancel Apply
                   </ActionButton>
                 ) : post.status == 'Completed' ? (
-                  <ActionButton onClick={() => setOpenPayModal(true)}>Pay</ActionButton>
+                  // <ActionButton onClick={() => setOpenPayModal(true)}>Pay</ActionButton>
+                  <PaymentButton
+                    postId={apply.postId}
+                    openModal={setOpenPayModal}
+                  />
                 ) : (
                   <></>
                 ))}

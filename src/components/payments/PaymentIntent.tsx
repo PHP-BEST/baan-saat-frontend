@@ -5,9 +5,9 @@ import { getPaymentIntentSecret } from '@/api/payment';
 import { useState } from 'react';
 
 type PaymentIntentType = {
-  postId: string,
-  providerConnectId: string,
-}
+  postId: string;
+  providerConnectId: string;
+};
 
 const PaymentIntent = ({ postId, providerConnectId }: PaymentIntentType) => {
   // Make sure to call `loadStripe` outside of a component’s render to avoid
@@ -32,7 +32,9 @@ const PaymentIntent = ({ postId, providerConnectId }: PaymentIntentType) => {
     // pass the client secret from the previous step
     clientSecret: clientSecret,
     // Fully customizable with the Appearance API
-    appearance: {/*...*/},
+    appearance: {
+      /*...*/
+    },
   };
 
   // Don't render Elements until we have the clientSecret
