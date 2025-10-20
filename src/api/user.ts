@@ -73,3 +73,16 @@ export const updateUser = async (
     return false;
   }
 };
+
+export const promoteUser = async () => {
+  try {
+    const response = await Axios.post(`${API_BASE}/promotion`);
+    if (response.status === 200) {
+      return response.data;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error promoting user role:', error);
+    return null;
+  }
+};

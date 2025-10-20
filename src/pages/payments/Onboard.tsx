@@ -1,6 +1,8 @@
 import Footer from '@/components/our-components/footer';
 import Header from '@/components/our-components/header';
 import { Link } from 'react-router-dom';
+import { AccountOnboarding } from '@/components/payments/paymentComponents';
+
 export default function Onboard() {
   return (
     <>
@@ -11,11 +13,7 @@ export default function Onboard() {
         </div>
         <div className=" px-12 py-8 bg-gray-100 min-h-[60vh] rounded-2xl shadow-lg">
           <div>
-            <h3 className="text-3xl font-bold text-center mb-5">
-              Onboarding Component
-            </h3>
-            <p className="mb-5"> ทำว่างๆไว้</p>
-            <p className="mb-5"> เดี๋ยวเราเอามาใส่</p>
+            <AccountOnboarding />
           </div>
         </div>
       </div>

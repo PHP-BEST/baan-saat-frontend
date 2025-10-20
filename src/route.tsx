@@ -19,13 +19,12 @@ import CustomerProfilePostPage from './pages/CustomerProfilePost';
 import ApplyEditPage from './pages/ApplyEdit';
 import BecomeProvider from './pages/BecomeProvider';
 import ProviderAccountLayout from './layouts/ProviderAccountLayout';
-import Notification from './pages/Notification';
-import Management from './pages/Management';
-import Payments from './pages/Payments';
-import ProviderAccout from './pages/ProviderAccout';
-import Payouts from './pages/Payouts';
-import Balances from './pages/Balances';
-import OnboardPage from './pages/Onboard';
+import Notification from './pages/payments/Notification';
+import Management from './pages/payments/Management';
+import Payments from './pages/payments/Payments';
+import Payouts from './pages/payments/Payouts';
+import Balances from './pages/payments/Balances';
+import OnboardPage from './pages/payments/Onboard';
 import ApplyDetailPage from './pages/ApplyDetail';
 import ChatPage from './pages/Chat';
 
@@ -61,12 +60,11 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
         children: [
-          { path: '', element: <Notification /> },
-          { path: 'management', element: <Management /> },
+          { path: 'notify', element: <Notification /> },
+          { path: '', element: <Management /> },
           { path: 'payments', element: <Payments /> },
           { path: 'payouts', element: <Payouts /> },
           { path: 'balances', element: <Balances /> },
-          { path: 'account', element: <ProviderAccout /> },
         ],
       },
       {
