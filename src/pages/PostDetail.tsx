@@ -26,6 +26,7 @@ export default function PostDetailPage() {
   const [providerApplies, setProviderApplies] = useState<ApplyDetail[]>([]);
   const [acceptedApply, setAcceptedApply] = useState<ApplyDetail | null>();
   const [hasAcceptedApply, setHasAcceptedApply] = useState(false);
+  const [isPayPop, setPayPop] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -93,7 +94,6 @@ export default function PostDetailPage() {
           <h1 title={post.title} className="text-3xl font-bold text-gray-900">
             {post.title}
           </h1>
-
           {/* Post Cover Image */}
           {post.coverPhotoUrl ? (
             <img
@@ -104,7 +104,6 @@ export default function PostDetailPage() {
           ) : (
             <div className="w-full h-64 bg-gray-200 flex items-center justify-center"></div>
           )}
-
           {/* Post Description */}
           <div className="w-full flex flex-col gap-2">
             <h2 className="text-2xl font-semibold">Description</h2>
@@ -112,7 +111,6 @@ export default function PostDetailPage() {
               {post.description || 'No description provided.'}
             </p>
           </div>
-
           {/* Post Customer Name */}
           <div className="w-full flex flex-col gap-2">
             <h2 className="text-2xl font-semibold">Posted By</h2>
@@ -125,7 +123,6 @@ export default function PostDetailPage() {
               {customerUser ? customerUser.name : 'Unknown'}
             </p>
           </div>
-
           {/* Post Location */}
           <div className="w-full flex flex-col gap-2">
             <h2 className="text-2xl font-semibold">Location</h2>
@@ -133,13 +130,11 @@ export default function PostDetailPage() {
               {post.location ? post.location : 'Unknown'}
             </p>
           </div>
-
           {/* Post Budget */}
           <div className="w-full flex flex-col gap-2">
             <h2 className="text-2xl font-semibold">Budget</h2>
             <p className="text-lg text-gray-700">฿ {post.budget}</p>
           </div>
-
           {/* Post Contact */}
           <div className="w-full flex flex-col gap-2">
             <h2 className="text-2xl font-semibold">Contact</h2>
@@ -148,7 +143,6 @@ export default function PostDetailPage() {
               <p className="text-lg text-gray-700">{post.telNumber}</p>
             </div>
           </div>
-
           {/* Post Tag */}
           {post.tag && (
             <div className="w-full flex flex-col gap-2">
@@ -165,7 +159,6 @@ export default function PostDetailPage() {
               </div>
             </div>
           )}
-
           {/* Post Date */}
           <div className="w-full flex flex-col gap-2">
             <h2 className="text-2xl font-semibold">Date to Perform</h2>
@@ -176,7 +169,6 @@ export default function PostDetailPage() {
               </p>
             </div>
           </div>
-
           {/* Application from Providers */}
           {user?._id === post.customerId ? (
             <div className="w-full flex flex-col gap-2">
@@ -256,8 +248,7 @@ export default function PostDetailPage() {
               )}
             </div>
           )}
-
-          {/* Buttons */}
+          {/* Buttons */}z
           <div className="flex justify-end gap-4 my-8">
             {user && user?._id === post.customerId ? (
               <>
@@ -265,22 +256,46 @@ export default function PostDetailPage() {
                 {!hasAcceptedApply ? (
                   <ActionButton
                     className="cursor-pointer"
-                    onClick={() => {
-                      navigate(`/post/${post._id}/edit`);
-                    }}
+                    onClick={() => navigate(`/post/${post._id}/edit`)}
                   >
                     Edit
                   </ActionButton>
                 ) : (
                   <ActionButton
                     className="cursor-pointer"
-                    onClick={() => {
-                      navigate(`/chat/${acceptedApply?._id}`);
-                    }}
+                    onClick={() => navigate(`/chat/${acceptedApply?._id}`)}
                   >
                     Chat
                   </ActionButton>
                 )}
+
+                {/* Pay Button */}
+                {post.status === 'Completed' &&
+                  post.payStatus === 'Not paid' && (
+                    <>
+                      <ActionButton onClick={() => setPayPop(true)}>
+                        Pay
+                      </ActionButton>
+
+                      {isPayPop && (
+                        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                          <div className="bg-white p-6 rounded-lg shadow-lg w-80">
+                            <h2 className="text-lg font-semibold mb-4">
+                              Payment Popup
+                            </h2>
+                            <p>
+                              This is a placeholder for future functionality.
+                            </p>
+                            <div className="mt-4 flex justify-end">
+                              <ActionButton onClick={() => setPayPop(false)}>
+                                Close
+                              </ActionButton>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
               </>
             ) : (
               user && (

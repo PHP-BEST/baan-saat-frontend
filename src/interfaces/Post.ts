@@ -13,6 +13,7 @@ export interface Post {
   image3Url?: string;
   date: Date;
   status: 'Not working' | 'In progress' | 'Completed';
+  payStatus: 'Not paid' | 'Paid';
   coverPhotoUrl?: string;
   createdAt: Date;
   updatedAt: Date;
