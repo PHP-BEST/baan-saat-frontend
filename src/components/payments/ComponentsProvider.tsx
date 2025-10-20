@@ -9,7 +9,7 @@ const ComponentsProvider = ({ children }: { children: React.ReactNode }) => {
     return loadConnectAndInitialize({
       // This is your test publishable API key.
       publishableKey:
-        'pk_test_51SEVXBDq0RRgQFS2Dtho4kyz7fivUZQRTg4yri6p5n31e8NtRcpUqwJqLkSY5MOO0yP53XAdytrXvpkQXcKSO6gH00h72GstKA',
+        'pk_test_51SJVRvFaQigwOapPZIdy29BOTGvshns6JzXHbSFp4vAtRPHjJwRo98aCaONEmAbujA8FzDpZr8Vfr6oPdzSq56IW00glgjw7sA',
       fetchClientSecret: getConnectClientSecret,
       appearance: {
         variables: {

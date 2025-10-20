@@ -1,28 +1,44 @@
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import CheckoutForm from './CheckoutForm';
-import { useUser } from '@/context/UserContext';
 import { getPaymentIntentSecret } from '@/api/payment';
+import { useState } from 'react';
 
-const PaymentIntent = async (postId: string) => {
+type PaymentIntentType = {
+  postId: string,
+  providerConnectId: string,
+}
+
+const PaymentIntent = ({ postId, providerConnectId }: PaymentIntentType) => {
   // Make sure to call `loadStripe` outside of a component’s render to avoid
   // recreating the `Stripe` object on every render.
-  const { user } = useUser();
-  const CONNECTED_ACCOUNT_ID = user?.connectId;
+  const [clientSecret, setClientSecret] = useState<string>('');
 
   const stripePromise = loadStripe(
-    'pk_test_51SEVXBDq0RRgQFS2Dtho4kyz7fivUZQRTg4yri6p5n31e8NtRcpUqwJqLkSY5MOO0yP53XAdytrXvpkQXcKSO6gH00h72GstKA',
-    { stripeAccount: CONNECTED_ACCOUNT_ID },
+    'pk_test_51SJVRvFaQigwOapPZIdy29BOTGvshns6JzXHbSFp4vAtRPHjJwRo98aCaONEmAbujA8FzDpZr8Vfr6oPdzSq56IW00glgjw7sA',
+    { stripeAccount: providerConnectId },
   );
 
-  const clientSecret = await getPaymentIntentSecret(postId);
+  (async () => {
+    try {
+      const secret = await getPaymentIntentSecret(postId);
+      setClientSecret(secret);
+    } catch (error) {
+      console.error('Error fetching payment intent:', error);
+    }
+  })();
 
   const options = {
     // pass the client secret from the previous step
     clientSecret: clientSecret,
     // Fully customizable with the Appearance API
-    // appearance: {/*...*/},
+    appearance: {/*...*/},
   };
+
+  // Don't render Elements until we have the clientSecret
+  if (!clientSecret) {
+    return <div>Loading payment form...</div>;
+  }
 
   return (
     <Elements stripe={stripePromise} options={options}>

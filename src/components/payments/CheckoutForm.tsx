@@ -23,10 +23,10 @@ const CheckoutForm = () => {
     }
 
     const { error } = await stripe.confirmPayment({
-      //`Elements` instance that was used to create the Payment Element
+      // `Elements` instance that was used to create the Payment Element
       elements,
       confirmParams: {
-        return_url: 'http://localhost:5173/payment',
+        return_url: window.location.href,
       },
     });
 
