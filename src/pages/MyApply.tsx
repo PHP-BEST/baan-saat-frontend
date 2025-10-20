@@ -4,9 +4,11 @@ import { useUser } from '@/context/UserContext';
 import type { ApplyDetail } from '@/interfaces/Apply';
 import { formatDateToDisplay } from '@/utils/function';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function MyApplyPage() {
   const { user } = useUser();
+  const navigate = useNavigate();
 
   if (!user) return;
 
@@ -26,7 +28,7 @@ export default function MyApplyPage() {
   if (loading) {
     return (
       <>
-        <h1 className="text-2xl font-bold mb-2">My Applie</h1>
+        <h1 className="text-2xl font-bold mb-2">My Applies</h1>
         <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
           <Loading />
         </div>
@@ -39,7 +41,9 @@ export default function MyApplyPage() {
       <>
         <h1 className="text-2xl font-bold mb-2">My Applies</h1>
         <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
-          <p className="text-gray-700 text-2xl">You have no applies yet.</p>
+          <p className="text-xl text-center font-semibold">
+            You haven&apos;t created any applies yet...
+          </p>
         </div>
       </>
     );
@@ -70,6 +74,9 @@ export default function MyApplyPage() {
                 <tr
                   key={`customer-request-${idx}`}
                   className="bg-table-row-content text-center cursor-pointer hover:bg-gray-100"
+                  onClick={() => {
+                    navigate(`/apply/${apply._id}`);
+                  }}
                 >
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
                     {apply.post.title}
@@ -83,7 +90,9 @@ export default function MyApplyPage() {
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
                     {apply.appliedPrice} THB
                   </td>
-                  <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
+                  <td
+                    className={`border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap font-bold ${apply.status == 'Accepted' ? 'text-accept' : apply.status == 'Rejected' ? 'text-reject' : ''}`}
+                  >
                     {apply.status}
                   </td>
                 </tr>

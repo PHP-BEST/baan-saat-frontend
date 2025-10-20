@@ -12,8 +12,8 @@ import { getPostById } from '@/api/post';
 import type { User } from '@/interfaces/User';
 import { getUserById } from '@/api/user';
 import PostNotFound from '@/error/PostNotFound';
-import { checkApply } from '@/api/apply';
-import type { Apply } from '@/interfaces/Apply';
+import { checkMyApply, getDetailedAppliesByPostId } from '@/api/apply';
+import type { Apply, ApplyDetail } from '@/interfaces/Apply';
 import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
@@ -24,7 +24,10 @@ export default function PostDetailPage() {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(false);
   const [customerUser, setCustomerUser] = useState<User | null>(null);
-  const [offer, setApply] = useState<Apply | null>(null);
+  const [myApply, setMyApply] = useState<Apply | null>(null);
+  const [providerApplies, setProviderApplies] = useState<ApplyDetail[]>([]);
+  const [acceptedApply, setAcceptedApply] = useState<ApplyDetail | null>();
+  const [hasAcceptedApply, setHasAcceptedApply] = useState(false);
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   useEffect(() => {
@@ -37,10 +40,21 @@ export default function PostDetailPage() {
         const currentCustomerUser = await getUserById(post.customerId);
         setCustomerUser(currentCustomerUser);
         if (!user) {
-          setApply(null);
+          setMyApply(null);
         } else {
-          const offer = await checkApply(post._id, user._id);
-          setApply(offer);
+          const currentMyApply = await checkMyApply(post._id, user._id);
+          setMyApply(currentMyApply);
+        }
+        const currentApplies = await getDetailedAppliesByPostId(post._id);
+        setProviderApplies(currentApplies);
+        const acceptedApplies = currentApplies.filter(
+          (apply: ApplyDetail) => apply.status == 'Accepted',
+        );
+        setHasAcceptedApply(acceptedApplies.length != 0);
+        if (acceptedApplies.length != 0) {
+          setAcceptedApply(acceptedApplies[0]);
+        } else {
+          setAcceptedApply(null);
         }
       }
       setLoading(false);
@@ -125,7 +139,7 @@ export default function PostDetailPage() {
                 <img
                   src={post.coverPhotoUrl}
                   alt={post.title}
-                  className="w-full h-64 object-cover cursor-zoom-in"
+                  className="w-full h-64 object-cover cursor-pointer"
                 />
               </button>
             ) : (
@@ -145,7 +159,7 @@ export default function PostDetailPage() {
                       onClick={() => setOpenIdx(hasCover ? i + 1 : i)}
                       title="View photo"
                     >
-                      <div className="w-28 h-20 md:w-36 md:h-28 bg-gray-100 cursor-zoom-in">
+                      <div className="w-28 h-20 md:w-36 md:h-28 bg-gray-100 cursor-pointer">
                         <img
                           src={src}
                           alt={`${post.title} — supporting photo`}
@@ -174,7 +188,7 @@ export default function PostDetailPage() {
             </p>
           </div>
 
-          {/* Post Provider Name */}
+          {/* Post Customer Name */}
           <div className="w-full flex flex-col gap-2">
             <h2 className="text-2xl font-semibold">Posted By</h2>
             <p
@@ -238,6 +252,87 @@ export default function PostDetailPage() {
             </div>
           </div>
 
+          {/* Application from Providers */}
+          {user?._id === post.customerId ? (
+            <div className="w-full flex flex-col gap-2">
+              <h2 className="text-2xl font-semibold">Applies</h2>
+              {providerApplies && providerApplies.length > 0 ? (
+                <table className="table-fixed w-full border-collapse border border-gray-200 max-h-[20vh] overflow-auto">
+                  <thead className="sticky top-0 bg-table-row-header">
+                    <tr>
+                      <th className="border border-gray-200 p-2 w-1/5">Name</th>
+                      <th className="border border-gray-200 p-2 w-1/5">
+                        Price (THB)
+                      </th>
+                      <th className="border border-gray-200 p-2 w-1/5">Date</th>
+                      <th className="border border-gray-200 p-2 w-2/5">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {providerApplies.map((apply: ApplyDetail, idx) => {
+                      return (
+                        <tr
+                          key={`provider-apply-${idx}`}
+                          className={`bg-table-row-content cursor-pointer hover:bg-gray-100 text-center`}
+                          onClick={() => {
+                            navigate(`/apply/${apply._id}`);
+                          }}
+                        >
+                          <td className="border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap">
+                            {apply.provider.name}
+                          </td>
+                          <td className="border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap">
+                            {apply.appliedPrice}
+                          </td>
+                          <td className="border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap">
+                            {formatDateToDisplay(apply.date)}
+                          </td>
+                          <td
+                            className={`border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap 
+                              ${
+                                apply.status == 'Accepted'
+                                  ? 'text-accept'
+                                  : apply.status == 'Rejected'
+                                    ? 'text-reject'
+                                    : 'text-black'
+                              }`}
+                          >
+                            {apply.status}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="text-lg text-gray-700">
+                  No providers apply this post...
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="w-full flex flex-col gap-2">
+              <h2 className="text-2xl font-semibold">Provider</h2>
+              {hasAcceptedApply ? (
+                <p
+                  className="text-lg font-semibold text-button-action hover:underline cursor-pointer"
+                  onClick={() => {
+                    navigate(`/user/${acceptedApply?.providerId}`);
+                  }}
+                >
+                  {acceptedApply ? acceptedApply.provider.name : 'Unknown'}
+                </p>
+              ) : (
+                <p className="text-lg text-gray-700">
+                  No providers match this post...
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Buttons */}
           {openIdx !== null &&
             createPortal(
               <div
@@ -268,39 +363,68 @@ export default function PostDetailPage() {
             )}
 
           <div className="flex justify-end gap-4 my-8">
-            {/* Edit Button */}
-            {user?._id === post.customerId ? (
-              <ActionButton
-                className="cursor-pointer"
-                onClick={() => {
-                  navigate(`/post/${post._id}/edit`);
-                }}
-              >
-                Edit
-              </ActionButton>
+            {user && user?._id === post.customerId ? (
+              <>
+                {/* Customer View */}
+                {!hasAcceptedApply ? (
+                  <ActionButton
+                    className="cursor-pointer"
+                    onClick={() => {
+                      navigate(`/post/${post._id}/edit`);
+                    }}
+                  >
+                    Edit
+                  </ActionButton>
+                ) : (
+                  <ActionButton
+                    className="cursor-pointer"
+                    onClick={() => {
+                      navigate(`/chat/${acceptedApply?._id}`);
+                    }}
+                  >
+                    Chat
+                  </ActionButton>
+                )}
+              </>
             ) : (
-              user &&
-              (!offer ? (
-                <ActionButton
-                  className="cursor-pointer"
-                  onClick={() => {
-                    navigate(`/offer/${post._id}/create`);
-                  }}
-                >
-                  Create
-                </ActionButton>
-              ) : (
-                <ActionButton
-                  className="cursor-pointer"
-                  onClick={() => {
-                    navigate(`/offer/${offer._id}/edit`);
-                  }}
-                >
-                  Edit Apply
-                </ActionButton>
-              ))
+              user && (
+                <>
+                  {/* Provider View */}
+                  {!myApply ? (
+                    !hasAcceptedApply && (
+                      <ActionButton
+                        className="cursor-pointer"
+                        onClick={() => {
+                          navigate(`/apply/${post._id}/create`);
+                        }}
+                      >
+                        Create Apply
+                      </ActionButton>
+                    )
+                  ) : !hasAcceptedApply ? (
+                    <ActionButton
+                      className="cursor-pointer"
+                      onClick={() => {
+                        navigate(`/apply/${myApply._id}`);
+                      }}
+                    >
+                      View Apply
+                    </ActionButton>
+                  ) : (
+                    myApply._id == acceptedApply?._id && (
+                      <ActionButton
+                        className="cursor-pointer"
+                        onClick={() => {
+                          navigate(`/chat/${acceptedApply?._id}`);
+                        }}
+                      >
+                        Chat
+                      </ActionButton>
+                    )
+                  )}
+                </>
+              )
             )}
-            {/* Back Button */}
             <ActionButton
               buttonColor="red"
               className="cursor-pointer"

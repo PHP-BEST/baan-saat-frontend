@@ -137,10 +137,6 @@ export const validateDate = (date: Date | undefined): ValidationResult => {
     return { isValid: false, error: 'Date cannot be empty' };
   }
 
-  if (isNaN(date.getTime())) {
-    return { isValid: false, error: 'Invalid date format' };
-  }
-
   // Check if date is in the past
   const today = new Date();
   today.setHours(0, 0, 0, 0);

@@ -29,7 +29,6 @@ export const validateAppliedPrice = (
 
   const appliedPriceNum =
     typeof appliedPrice === 'string' ? parseFloat(appliedPrice) : appliedPrice;
-  const budgetNum = typeof budget === 'string' ? parseFloat(budget) : budget;
 
   if (isNaN(appliedPriceNum)) {
     return { isValid: false, error: 'Applied price must be a valid number' };
@@ -52,13 +51,6 @@ export const validateAppliedPrice = (
     return {
       isValid: false,
       error: 'Applied price must have at most 2 decimal places',
-    };
-  }
-
-  if (appliedPriceNum > budgetNum) {
-    return {
-      isValid: false,
-      error: 'Applied price cannot exceed the service budget',
     };
   }
 
