@@ -2,16 +2,9 @@ import { useRef, useEffect } from 'react';
 import { Pencil, Check, AlertCircle } from 'lucide-react';
 import { profileValidator } from '@/utils/profileValidator';
 
-interface SkillOption {
-  label: string;
-  value: string;
-  order: number;
-}
-
 interface ProfileFieldProps {
   label: string;
   field: string;
-  skillOptions?: SkillOption[];
   editingField: string | null;
   tempValues: Record<string, string>;
   validationErrors: Record<string, string>;
@@ -28,14 +21,11 @@ interface ProfileFieldProps {
   setValidationErrors: React.Dispatch<
     React.SetStateAction<Record<string, string>>
   >;
-  setSkillsChanged: React.Dispatch<React.SetStateAction<boolean>>;
-  userSkills?: string[];
 }
 
 export default function ProfileField({
   label,
   field,
-  skillOptions = [],
   editingField,
   tempValues,
   validationErrors,
@@ -48,8 +38,6 @@ export default function ProfileField({
   setTempValues,
   setCursorPositions,
   setValidationErrors,
-  setSkillsChanged,
-  userSkills = [],
 }: ProfileFieldProps) {
   const inputRefs = useRef<
     Record<string, HTMLInputElement | HTMLTextAreaElement | null>
@@ -94,60 +82,7 @@ export default function ProfileField({
 
       {editingField === field ? (
         <div className="flex flex-col gap-2 mt-1">
-          {field === 'skills' ? (
-            <div className="grid grid-cols-2 gap-2">
-              {skillOptions.map((skillOption) => {
-                const currentSkills = tempValues['skills']
-                  ? tempValues['skills']
-                      .split(', ')
-                      .filter((s) => s.trim() !== '')
-                  : userSkills || [];
-
-                const isChecked = currentSkills.includes(skillOption.value);
-
-                return (
-                  <label
-                    key={skillOption.value}
-                    className="flex items-center space-x-2"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={(e) => {
-                        setSkillsChanged(true);
-                        let newSkills;
-                        if (e.target.checked) {
-                          newSkills = [...currentSkills, skillOption.value];
-                        } else {
-                          newSkills = currentSkills.filter(
-                            (s) => s !== skillOption.value,
-                          );
-                        }
-
-                        const sortedSkills = skillOptions
-                          .filter((skill) => newSkills.includes(skill.value))
-                          .sort((a, b) => a.order - b.order)
-                          .map((skill) => skill.value);
-
-                        setTempValues((prev) => ({
-                          ...prev,
-                          skills: sortedSkills.join(', '),
-                        }));
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          saveEditing(field);
-                        }
-                      }}
-                      className="rounded"
-                    />
-                    <span className="text-sm">{skillOption.label}</span>
-                  </label>
-                );
-              })}
-            </div>
-          ) : field === 'description' ? (
+          {field === 'description' ? (
             <>
               <textarea
                 ref={(el) => {
@@ -277,64 +212,32 @@ export default function ProfileField({
         </div>
       ) : (
         <>
-          {field === 'skills' ? (
-            <div className="flex flex-wrap gap-2 mt-1">
-              {(() => {
-                const currentSkills = tempValues['skills']
-                  ? tempValues['skills']
-                      .split(', ')
-                      .filter((s) => s.trim() !== '')
-                  : userSkills || [];
-
-                return currentSkills.length ? (
-                  currentSkills.map((skillValue, index) => {
-                    const skillOption = skillOptions.find(
-                      (s) => s.value === skillValue,
-                    );
-                    return (
-                      <span
-                        key={index}
-                        className="px-3 py-1 bg-background border border-gray-300 rounded-full text-sm text-black"
-                      >
-                        {skillOption?.label || skillValue}
-                      </span>
-                    );
-                  })
-                ) : (
-                  <p className="text-gray-500">No skills selected</p>
-                );
-              })()}
-            </div>
+          {getDisplayValue(field) ? (
+            field === 'description' ? (
+              <div
+                className={`whitespace-pre-wrap break-words ${
+                  tempValues[field] !== undefined &&
+                  tempValues[field] !== getFieldValue(field)
+                    ? 'text-button-upload font-medium'
+                    : ''
+                }`}
+              >
+                {getDisplayValue(field)}
+              </div>
+            ) : (
+              <p
+                className={
+                  tempValues[field] !== undefined &&
+                  tempValues[field] !== getFieldValue(field)
+                    ? 'text-button-upload font-medium'
+                    : ''
+                }
+              >
+                {getDisplayValue(field)}
+              </p>
+            )
           ) : (
-            <>
-              {getDisplayValue(field) ? (
-                field === 'description' ? (
-                  <div
-                    className={`whitespace-pre-wrap break-words ${
-                      tempValues[field] !== undefined &&
-                      tempValues[field] !== getFieldValue(field)
-                        ? 'text-button-upload font-medium'
-                        : ''
-                    }`}
-                  >
-                    {getDisplayValue(field)}
-                  </div>
-                ) : (
-                  <p
-                    className={
-                      tempValues[field] !== undefined &&
-                      tempValues[field] !== getFieldValue(field)
-                        ? 'text-button-upload font-medium'
-                        : ''
-                    }
-                  >
-                    {getDisplayValue(field)}
-                  </p>
-                )
-              ) : (
-                <p className="text-gray-500">{getPlaceholderText(field)}</p>
-              )}
-            </>
+            <p className="text-gray-500">{getPlaceholderText(field)}</p>
           )}
         </>
       )}

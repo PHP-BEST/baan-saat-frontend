@@ -26,6 +26,9 @@ import ProviderAccout from './pages/ProviderAccout';
 import Payouts from './pages/Payouts';
 import Balances from './pages/Balances';
 import OnboardPage from './pages/Onboard';
+import ApplyDetailPage from './pages/ApplyDetail';
+import ChatPage from './pages/Chat';
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -119,6 +122,22 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ApplyEditPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'apply/:applyId',
+        element: (
+          <ProtectedRoute>
+            <ApplyDetailPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'chat/:applyId',
+        element: (
+          <ProtectedRoute>
+            <ChatPage />
           </ProtectedRoute>
         ),
       },

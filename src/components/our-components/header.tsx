@@ -1,4 +1,4 @@
-import { MessageCircle, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useState } from 'react';
 import AvatarImage from './accountImage';
 import { useNavigate } from 'react-router-dom';
@@ -18,10 +18,6 @@ const Header = ({ isHideSearchBar = false }: HeaderProps) => {
     if (query) {
       navigate(`/search?query=${encodeURIComponent(query)}`);
     }
-  };
-
-  const handleClickChat = () => {
-    alert('Chat feature is coming soon!');
   };
 
   return (
@@ -73,13 +69,6 @@ const Header = ({ isHideSearchBar = false }: HeaderProps) => {
       <div className="w-fit max-w-[50%] flex gap-3 items-center">
         {user ? (
           <>
-            {/* Chat */}
-            <MessageCircle
-              width={48}
-              height={48}
-              className="cursor-pointer"
-              onClick={handleClickChat}
-            />
             {/* Avatar Image */}
             <AvatarImage />
           </>

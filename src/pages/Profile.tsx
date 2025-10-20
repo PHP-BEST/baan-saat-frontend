@@ -4,7 +4,6 @@ import { useUser } from '@/context/UserContext';
 import ActionButton from '@/components/our-components/actionButton';
 import ProfileField from '@/components/our-components/profileField';
 import { profileValidator } from '@/utils/profileValidator';
-import { SKILL_OPTIONS, type SkillsType } from '@/interfaces/User';
 import { updateUser } from '@/api/user';
 import { getCompressedImageUrl } from '@/utils/function';
 
@@ -15,7 +14,6 @@ export default function ProfilePage() {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValues, setTempValues] = useState<Record<string, string>>({});
   const [hasChanges, setHasChanges] = useState(false);
-  const [skillsChanged, setSkillsChanged] = useState(false);
   const [tempAvatarUrl, setTempAvatarUrl] = useState<string>('');
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
@@ -27,11 +25,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const hasUnsavedChanges =
-      Object.keys(tempValues).length > 0 ||
-      skillsChanged ||
-      tempAvatarUrl !== '';
+      Object.keys(tempValues).length > 0 || tempAvatarUrl !== '';
     setHasChanges(hasUnsavedChanges);
-  }, [tempValues, skillsChanged, tempAvatarUrl]);
+  }, [tempValues, tempAvatarUrl]);
 
   const getFieldValue = (field: string): string => {
     switch (field) {
@@ -43,8 +39,6 @@ export default function ProfilePage() {
         return user.email;
       case 'description':
         return user.providerProfile?.description || '';
-      case 'skills':
-        return user.providerProfile?.skills.join(', ') || '';
       default:
         return '';
     }
@@ -107,11 +101,6 @@ export default function ProfilePage() {
           return newValues;
         });
         setEditingField(null);
-
-        if (field === 'skills') {
-          setSkillsChanged(false);
-        }
-
         return;
       }
 
@@ -139,7 +128,6 @@ export default function ProfilePage() {
     setEditingField(null);
     setTempValues({});
     setHasChanges(false);
-    setSkillsChanged(false);
     setTempAvatarUrl('');
     setValidationErrors({});
   };
@@ -174,21 +162,7 @@ export default function ProfilePage() {
         userForm = {
           ...userForm,
           providerProfile: {
-            title: userForm.providerProfile?.title || '',
             description: value,
-            skills: userForm.providerProfile?.skills || [],
-          },
-        };
-      } else if (field === 'skills') {
-        const skillsArray = value
-          ? value.split(', ').filter((s) => s.trim() !== '')
-          : [];
-        userForm = {
-          ...userForm,
-          providerProfile: {
-            title: userForm.providerProfile?.title || '',
-            description: userForm.providerProfile?.description || '',
-            skills: skillsArray as SkillsType[],
           },
         };
       } else {
@@ -202,7 +176,6 @@ export default function ProfilePage() {
       setEditingField(null);
       setTempValues({});
       setHasChanges(false);
-      setSkillsChanged(false);
       setTempAvatarUrl('');
       setValidationErrors({});
       window.location.reload();
@@ -278,7 +251,6 @@ export default function ProfilePage() {
               cursorPositions={cursorPositions}
               setCursorPositions={setCursorPositions}
               {...commonFieldProperties}
-              setSkillsChanged={setSkillsChanged}
             />
 
             <ProfileField
@@ -287,7 +259,6 @@ export default function ProfilePage() {
               {...commonFieldProperties}
               cursorPositions={cursorPositions}
               setCursorPositions={setCursorPositions}
-              setSkillsChanged={setSkillsChanged}
             />
             <ProfileField
               label="Email"
@@ -295,7 +266,6 @@ export default function ProfilePage() {
               {...commonFieldProperties}
               cursorPositions={cursorPositions}
               setCursorPositions={setCursorPositions}
-              setSkillsChanged={setSkillsChanged}
             />
             <ProfileField
               label="Description"
@@ -303,17 +273,6 @@ export default function ProfilePage() {
               {...commonFieldProperties}
               cursorPositions={cursorPositions}
               setCursorPositions={setCursorPositions}
-              setSkillsChanged={setSkillsChanged}
-            />
-            <ProfileField
-              label="Skill & Experiences"
-              field="skills"
-              skillOptions={SKILL_OPTIONS}
-              {...commonFieldProperties}
-              cursorPositions={cursorPositions}
-              setCursorPositions={setCursorPositions}
-              setSkillsChanged={setSkillsChanged}
-              userSkills={user.providerProfile?.skills}
             />
           </div>
         </div>
