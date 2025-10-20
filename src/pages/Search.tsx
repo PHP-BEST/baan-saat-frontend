@@ -11,12 +11,7 @@ import {
   type PostTag,
   type TagsOption,
 } from '@/interfaces/Post';
-import {
-  filterPosts,
-  getAllPosts,
-  searchPosts,
-  type FilterPostParams,
-} from '@/api/post';
+import { filterPosts, searchPosts, type FilterPostParams } from '@/api/post';
 import PostCard from '@/components/our-components/postCard';
 import Loading from '@/components/our-components/loading';
 import ActionButton from '@/components/our-components/actionButton';
@@ -24,110 +19,111 @@ import { filterValidator } from '@/utils/filterValidator';
 
 export default function SearchPage() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  // UI & Loading
   const [showFilter, setShowFilter] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
-  const [filteredProviders, setFilteredProviders] = useState<User[]>([]);
 
   // Tabs
   const [activeTab, setActiveTab] = useState<'Provider' | 'Post'>('Post');
 
-  // Filter states
+  // Search box
+  const [query, setQuery] = useState(searchParams.get('query') || '');
+
+  // Data
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
+  const [filteredProviders, setFilteredProviders] = useState<User[]>([]);
+
+  // Filters (for Posts)
   const [postTitle, setPostTitle] = useState('');
   const [tags, setTags] = useState<TagsOption[]>([]);
   const [other, setOther] = useState('');
   const [otherSelected, setOtherSelected] = useState(false);
-  const [minBudget, setMinBudget] = useState(''); // now string
-  const [maxBudget, setMaxBudget] = useState(''); // now string
+  const [minBudget, setMinBudget] = useState('');
+  const [maxBudget, setMaxBudget] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [filterError, setFilterError] = useState<string | undefined>();
 
-  // Search box
-  const navigate = useNavigate();
-  const [query, setQuery] = useState(searchParams.get('query') || '');
-
+  // Handle search navigation
   const handleSearch = () => {
-    if (query.trim()) {
-      navigate(`/search?query=${encodeURIComponent(query)}`);
-    }
+    navigate(`/search?query=${encodeURIComponent(query)}`);
   };
 
+  // Sync search params from URL
   useEffect(() => {
     setQuery(searchParams.get('query') || '');
   }, [searchParams]);
 
-  // Reset filters when switching away from Post tab
+  // Fetch data when query or tab changes
   useEffect(() => {
-    if (activeTab !== 'Post') {
-      // clear post-related states
-      setShowFilter(false);
-      setPostTitle('');
-      setTags([]);
-      setOther('');
-      setOtherSelected(false);
-      setMinBudget('');
-      setMaxBudget('');
-      setStartDate('');
-      setEndDate('');
-      setFilterError(undefined);
-      setFilteredPosts([]);
-    }
-  }, [activeTab]);
-
-  // Fetch initial data when tab or query changes
-  useEffect(() => {
-    const fetchInitialData = async () => {
+    const fetchData = async () => {
       setLoading(true);
-      const query = searchParams.get('query') || '';
+      const queryParam = searchParams.get('query')?.trim() || '';
 
-      if (activeTab === 'Post') {
-        let posts = await searchPosts(query);
-        if (posts.length === 0) {
-          posts = await getAllPosts();
-          posts = posts
-            .sort(
-              (a, b) =>
-                new Date(b.updatedAt).getTime() -
-                new Date(a.updatedAt).getTime(),
-            )
-            .slice(0, 10);
-        } else {
-          posts = posts.sort(
+      try {
+        if (activeTab === 'Post') {
+          let posts: Post[] = [];
+
+          if (queryParam) {
+            // 🔍 Search normally
+            posts = await searchPosts(queryParam);
+          } else {
+            // 📜 Show all posts if query is empty
+            posts = await filterPosts({
+              tags: [],
+              other: '',
+            });
+          }
+
+          // Sort newest first (optional)
+          const sorted = posts.sort(
             (a, b) =>
               new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
           );
-        }
-        setFilteredPosts(posts);
-      }
+          setPostTitle(queryParam);
 
-      if (activeTab === 'Provider') {
-        let providers = await searchProviders(query);
-        if (providers.length === 0) {
-          providers = await searchProviders('');
-        }
-        setFilteredProviders(providers.slice(0, 10));
-      }
+          setFilteredPosts(sorted);
+        } else {
+          let providers: User[] = [];
 
-      setLoading(false);
+          if (queryParam) {
+            // 🔍 Search normally
+            providers = await searchProviders(queryParam);
+          } else {
+            // 📜 Show all providers if query is empty
+            const all = await searchProviders(''); // your API can return all if empty
+            providers = all;
+          }
+
+          setFilteredProviders(providers);
+        }
+      } finally {
+        setLoading(false);
+      }
     };
 
-    fetchInitialData();
+    fetchData();
   }, [searchParams, activeTab]);
 
-  if (loading) {
-    return (
-      <>
-        <Header />
-        <main className="flex flex-col items-center min-h-screen px-12 py-8 gap-6 bg-gray-50">
-          <Loading />
-        </main>
-        <Footer />
-      </>
-    );
-  }
+  // 🧹 Reset filters & data when switching tabs
+  useEffect(() => {
+    setShowFilter(false);
+    setFilteredPosts([]);
+    setFilteredProviders([]);
+    setPostTitle('');
+    setTags([]);
+    setOther('');
+    setOtherSelected(false);
+    setMinBudget('');
+    setMaxBudget('');
+    setStartDate('');
+    setEndDate('');
+    setFilterError(undefined);
+  }, [activeTab]);
 
-  // Handle filter logic for posts
+  // 🔍 Handle filtering for posts
   const handleFilterSearch = async () => {
     const minBudgetNum = minBudget ? Number(minBudget) : undefined;
     const maxBudgetNum = maxBudget ? Number(maxBudget) : undefined;
@@ -160,15 +156,13 @@ export default function SearchPage() {
       endDate: endDate || undefined,
     };
 
-    console.log('Filter params:', params);
-
-    let posts = await filterPosts(params);
-    posts = posts.sort(
+    const posts = await filterPosts(params);
+    const sorted = posts.sort(
       (a, b) =>
         new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
     );
 
-    setFilteredPosts(posts);
+    setFilteredPosts(sorted);
     setShowFilter(false);
     setLoading(false);
   };
@@ -179,9 +173,21 @@ export default function SearchPage() {
     );
   };
 
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <main className="flex flex-col items-center min-h-screen px-12 py-8 gap-6 bg-gray-50">
+          <Loading />
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
   return (
     <>
-      <Header isHideSearchBar={true} />
+      <Header />
       <main className="flex flex-col items-center min-h-screen px-6 py-8 gap-6 bg-gray-50">
         {/* Title */}
         <div className="w-full max-w-6xl text-center mb-4">
@@ -251,10 +257,12 @@ export default function SearchPage() {
               </button>
             </div>
 
+            {/* Filters */}
             {showFilter && (
               <div className="w-full max-w-6xl bg-white p-4 rounded-md shadow-md">
                 <h3 className="text-lg font-semibold mb-2">Filter Posts</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Left Column */}
                   <div>
                     <label className="font-medium text-black block mb-1">
                       Post Title
@@ -309,6 +317,7 @@ export default function SearchPage() {
                     </div>
                   </div>
 
+                  {/* Right Column */}
                   <div>
                     <label className="font-medium text-black block mb-1">
                       Price Range
@@ -331,6 +340,7 @@ export default function SearchPage() {
                         min={0}
                       />
                     </div>
+
                     <label className="font-medium text-black block mb-1">
                       Date Range
                     </label>
@@ -348,6 +358,7 @@ export default function SearchPage() {
                         className="w-1/2 border rounded-md p-2 border-gray-300"
                       />
                     </div>
+
                     {filterError && (
                       <div className="text-red-500 text-sm mt-2">
                         {filterError}
@@ -374,22 +385,22 @@ export default function SearchPage() {
                 ))
               ) : (
                 <p className="col-span-full text-center text-gray-500 text-lg">
-                  No results match your search and filter criteria.
+                  No posts found.
                 </p>
               )}
             </div>
           </>
         )}
 
-        {/* PROVIDERS */}
+        {/* PROVIDERS TAB */}
         {activeTab === 'Provider' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl px-4 md:px-0 mt-4">
             {filteredProviders.length > 0 ? (
               filteredProviders.map((provider) => (
                 <div
                   key={provider._id}
-                  onClick={() => navigate(`/user/${provider._id}`)}
                   className="bg-white rounded-xl shadow-md p-5 flex flex-col items-center text-center hover:shadow-lg transition"
+                  onClick={() => navigate(`/user/${provider._id}`)}
                 >
                   <img
                     src={provider.avatarUrl || '/default-avatar.png'}
