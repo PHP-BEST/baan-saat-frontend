@@ -13,7 +13,10 @@ import { formatDateToDisplay } from '@/utils/function';
 import { Loader } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { DialogDescription } from '@radix-ui/react-dialog';
+import PaymentIntent from '@/components/payments/PaymentIntent';
+import PaymentButton from '@/components/payments/PaymentButton';
 export default function ChatPage() {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -27,7 +30,7 @@ export default function ChatPage() {
   const [openUpdatePostStatusModal, setOpenUpdatePostStatusModal] =
     useState(false);
   const [openCancelApplyModal, setOpenCancelApplyModal] = useState(false);
-
+  const [openPayModal, setOpenPayModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isUpdateStatusLoading, setUpdateStatusLoading] = useState(false);
 
@@ -95,7 +98,9 @@ export default function ChatPage() {
       return 'null';
     }
   };
-
+  const modalDialog = () => {
+    setOpenPayModal(true);
+  };
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <Header />
@@ -155,6 +160,17 @@ export default function ChatPage() {
               </div>
             </div>
 
+            <Dialog open={openPayModal} onOpenChange={setOpenPayModal}>
+              <DialogContent className="h-[85vh] bg-white">
+                <DialogDescription>
+                  <PaymentIntent
+                    postId={apply.postId}
+                    providerConnectId={provider?.connectId || ''}
+                  />
+                </DialogDescription>
+              </DialogContent>
+            </Dialog>
+
             <div className="flex gap-4 mt-6 items-center">
               {user._id === apply.customerId &&
                 (post.status === 'Not working' ? (
@@ -165,11 +181,11 @@ export default function ChatPage() {
                     Cancel Apply
                   </ActionButton>
                 ) : post.status == 'Completed' ? (
-                  <ActionButton
-                    onClick={() => alert('Navigate to Payment Page')}
-                  >
-                    Pay
-                  </ActionButton>
+                  // <ActionButton onClick={() => setOpenPayModal(true)}>Pay</ActionButton>
+                  <PaymentButton
+                    postId={apply.postId}
+                    openModal={setOpenPayModal}
+                  />
                 ) : (
                   <></>
                 ))}
