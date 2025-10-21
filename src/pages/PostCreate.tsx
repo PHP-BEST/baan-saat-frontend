@@ -11,16 +11,13 @@ import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import ActionButton from '@/components/our-components/actionButton';
 import { TAG_OPTIONS, type PostTag, type TagsOption } from '@/interfaces/Post';
-import {
-  formatDateToDisplay,
-  getCompressedImageUrl,
-  isInvalidPostForm,
-} from '@/utils/function';
+import { formatDateToDisplay, isInvalidPostForm } from '@/utils/function';
 import { postValidator } from '@/utils/postValidator';
 import { createPost, type PostFormInterface } from '@/api/post';
 import { AlertCircle, Loader } from 'lucide-react';
 import MyDatePicker from '@/components/ui/calendar';
 import { useUser } from '@/context/UserContext';
+import { uploadImages } from '@/api/upload';
 
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
@@ -53,6 +50,9 @@ export const PostCreatePage: React.FC = () => {
     telNumber: user?.telNumber || '',
     location: '',
     coverPhotoUrl: '',
+    image1Url: '',
+    image2Url: '',
+    image3Url: '',
     date: undefined,
   });
 
@@ -120,25 +120,73 @@ export const PostCreatePage: React.FC = () => {
     }
   };
 
-  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      try {
-        const compressedCoverPhotoUrl = await getCompressedImageUrl(
-          file,
-          600,
-          0.6,
+  type UploadMode = 'cover' | 'support';
+
+  const handleImagesUpload = async (
+    e: ChangeEvent<HTMLInputElement>,
+    mode: UploadMode,
+  ) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+
+    try {
+      const urls = await uploadImages(files);
+
+      setFormData((prev) => {
+        if (mode === 'cover') {
+          return {
+            ...prev,
+            coverPhotoUrl: urls[0] ?? '',
+          };
+        }
+
+        const slots = [
+          prev.image1Url || '',
+          prev.image2Url || '',
+          prev.image3Url || '',
+        ];
+        const seen = new Set<string>(
+          [prev.coverPhotoUrl, ...slots].filter(Boolean) as string[],
         );
 
-        setFormData((prev) => ({
+        for (const u of urls) {
+          if (!u || seen.has(u)) continue;
+          const emptyIdx = slots.findIndex((s) => !s);
+          if (emptyIdx === -1) break;
+          slots[emptyIdx] = u;
+          seen.add(u);
+        }
+
+        return {
           ...prev,
-          coverPhotoUrl: compressedCoverPhotoUrl,
-        }));
-      } catch (err) {
-        console.error('Error processing image:', err);
-      }
+          image1Url: slots[0] || '',
+          image2Url: slots[1] || '',
+          image3Url: slots[2] || '',
+        };
+      });
+
+      e.target.value = '';
+    } catch (err) {
+      console.error('Error processing images:', err);
     }
   };
+
+  const handleImagesRemove = (idx: 1 | 2 | 3) =>
+    setFormData((prev) => {
+      const slots = [
+        prev.image1Url || '',
+        prev.image2Url || '',
+        prev.image3Url || '',
+      ];
+      slots[idx - 1] = '';
+      const compact = slots.filter(Boolean);
+      return {
+        ...prev,
+        image1Url: compact[0] ?? '',
+        image2Url: compact[1] ?? '',
+        image3Url: compact[2] ?? '',
+      };
+    });
 
   const handleDatePicking = (date: Date | undefined) => {
     if (!date) return;
@@ -181,6 +229,9 @@ export const PostCreatePage: React.FC = () => {
           telNumber: user.telNumber || '',
           location: '',
           coverPhotoUrl: '',
+          image1Url: '',
+          image2Url: '',
+          image3Url: '',
           date: undefined,
         });
         window.location.href = `/account/post`;
@@ -440,31 +491,54 @@ export const PostCreatePage: React.FC = () => {
             {/* Cover Photo */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Cover Photo
+                Cover Photo (up to 1)
               </label>
 
               <div className="mt-1 flex flex-col items-start gap-4">
-                <div className="w-48 h-32 rounded-md bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300">
-                  {formData.coverPhotoUrl ? (
-                    <img
-                      src={formData.coverPhotoUrl}
-                      alt="Cover Preview"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-xs text-gray-500">Preview</span>
-                  )}
+                {/* Cover Photo */}
+                <div className="mt-1">
+                  <div className="grid grid-cols-3 gap-3">
+                    {formData.coverPhotoUrl ? (
+                      <div className="relative w-48 h-32 rounded-md overflow-hidden">
+                        <img
+                          src={formData.coverPhotoUrl}
+                          alt="Cover"
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          className="absolute top-2 right-2 bg-white/90 rounded w-6 h-6 px-1 text-m shadow"
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              coverPhotoUrl: '',
+                            }))
+                          }
+                          disabled={adding}
+                          aria-label="Remove cover image"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="col-span-3 w-48 h-32 rounded-md bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
+                        <span className="text-xs text-gray-500">
+                          Cover Photo Preview
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
+
                 <ActionButton
                   type="button"
                   onClick={() => {
-                    if (!adding) {
+                    if (!adding)
                       document.getElementById('cover-photo-upload')?.click();
-                    }
                   }}
                   buttonColor="green"
-                  disabled={adding}
-                  className={`${adding ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                  disabled={adding || !!formData.coverPhotoUrl}
+                  className={`${adding || !!formData.coverPhotoUrl ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                 >
                   Upload
                 </ActionButton>
@@ -473,10 +547,115 @@ export const PostCreatePage: React.FC = () => {
                   name="cover-photo-upload"
                   type="file"
                   className="sr-only"
-                  onChange={handleImageUpload}
+                  onChange={(e) => handleImagesUpload(e, 'cover')}
                   accept="image/*"
-                  disabled={adding}
+                  disabled={adding || !!formData.coverPhotoUrl}
                 />
+              </div>
+
+              {/* Supporting Photos */}
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Supporting Photos (up to 3)
+                </label>
+
+                <div className="mt-1 flex flex-col items-start gap-4">
+                  <div className="mt-1">
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        formData.image1Url,
+                        formData.image2Url,
+                        formData.image3Url,
+                      ].filter(Boolean).length > 0 ? (
+                        <>
+                          {[
+                            formData.image1Url,
+                            formData.image2Url,
+                            formData.image3Url,
+                          ].map((url, i) =>
+                            url ? (
+                              <div
+                                key={i}
+                                className="relative w-48 h-32 rounded-md overflow-hidden"
+                              >
+                                <img
+                                  src={url}
+                                  alt={`Supporting ${i + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  className="absolute top-2 right-2 bg-white/90 rounded w-6 h-6 px-1 text-m shadow"
+                                  onClick={() =>
+                                    handleImagesRemove((i + 1) as 1 | 2 | 3)
+                                  }
+                                  disabled={adding}
+                                  aria-label={`Remove supporting image ${i + 1}`}
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ) : null,
+                          )}
+                        </>
+                      ) : (
+                        <div className="col-span-3 w-48 h-32 rounded-md bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
+                          <span className="text-xs text-gray-500">
+                            Supporting Photo Preview
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <ActionButton
+                    type="button"
+                    onClick={() => {
+                      if (!adding)
+                        document
+                          .getElementById('supporting-photos-upload')
+                          ?.click();
+                    }}
+                    buttonColor="green"
+                    disabled={
+                      adding ||
+                      [
+                        formData.image1Url,
+                        formData.image2Url,
+                        formData.image3Url,
+                      ].filter(Boolean).length >= 3
+                    }
+                    className={`${
+                      adding ||
+                      [
+                        formData.image1Url,
+                        formData.image2Url,
+                        formData.image3Url,
+                      ].filter(Boolean).length >= 3
+                        ? 'cursor-not-allowed opacity-50'
+                        : 'cursor-pointer'
+                    }`}
+                  >
+                    Upload
+                  </ActionButton>
+                  <input
+                    id="supporting-photos-upload"
+                    name="supporting-photos-upload"
+                    type="file"
+                    className="sr-only"
+                    onChange={(e) => handleImagesUpload(e, 'support')}
+                    accept="image/*"
+                    multiple
+                    disabled={
+                      adding ||
+                      [
+                        formData.image1Url,
+                        formData.image2Url,
+                        formData.image3Url,
+                      ].filter(Boolean).length >= 3
+                    }
+                  />
+                </div>
               </div>
             </div>
 

@@ -18,15 +18,12 @@ import {
 } from '@/interfaces/Post';
 import { postValidator } from '@/utils/postValidator';
 import { Loader, AlertCircle } from 'lucide-react';
-import {
-  formatDateToDisplay,
-  getCompressedImageUrl,
-  isInvalidPostForm,
-} from '@/utils/function';
+import { formatDateToDisplay, isInvalidPostForm } from '@/utils/function';
 import Loading from '@/components/our-components/loading';
 import { getPostById, updatePost, type PostFormInterface } from '@/api/post';
 import MyDatePicker from '@/components/ui/calendar';
 import PostNotFound from '@/error/PostNotFound';
+import { uploadImages } from '@/api/upload';
 
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
@@ -52,7 +49,6 @@ function isFormDataSameAsOldPost(
 ) {
   if (!post) return false;
 
-  // Handle date comparison separately
   const formDateStr = formData.date
     ? new Date(formData.date).toISOString().split('T')[0]
     : null;
@@ -60,15 +56,56 @@ function isFormDataSameAsOldPost(
     ? new Date(post.date).toISOString().split('T')[0]
     : null;
 
+  type ImageFields = {
+    coverPhotoUrl?: string | null;
+    coverPhotoUrls?: string[] | null;
+    image1Url?: string | null;
+    image2Url?: string | null;
+    image3Url?: string | null;
+  };
+
+  const normCover = (x: ImageFields): string => {
+    if (x.coverPhotoUrl && x.coverPhotoUrl.length > 0) return x.coverPhotoUrl;
+    if (Array.isArray(x.coverPhotoUrls) && x.coverPhotoUrls.length > 0) {
+      return x.coverPhotoUrls[0] ?? '';
+    }
+    return '';
+  };
+
+  const normSupport = (x: ImageFields): string[] => {
+    const fromNew = [x.image1Url, x.image2Url, x.image3Url].filter(
+      (v): v is string => typeof v === 'string' && v.length > 0,
+    );
+    if (fromNew.length > 0) return fromNew.slice(0, 3);
+
+    if (Array.isArray(x.coverPhotoUrls)) {
+      return x.coverPhotoUrls
+        .slice(1, 4)
+        .filter((v): v is string => typeof v === 'string' && v.length > 0);
+    }
+    return [];
+  };
+
+  const formCover = normCover(formData);
+  const postCover = normCover(post);
+
+  const formSupport = normSupport(formData);
+  const postSupport = normSupport(post);
+
+  const supportsEqual =
+    formSupport.length === postSupport.length &&
+    formSupport.every((u, i) => u === postSupport[i]);
+
   return (
     formData.title === post.title &&
     formData.description === post.description &&
     formData.tag === post.tag &&
     formData.budget === post.budget &&
     formData.location === post.location &&
-    formData.coverPhotoUrl === post.coverPhotoUrl &&
-    formDateStr === postDateStr &&
-    formData.telNumber === post.telNumber
+    formData.telNumber === post.telNumber &&
+    formCover === postCover &&
+    supportsEqual &&
+    formDateStr === postDateStr
   );
 }
 
@@ -86,6 +123,9 @@ export default function PostEditPage() {
     budget: 0,
     location: '',
     coverPhotoUrl: '',
+    image1Url: '',
+    image2Url: '',
+    image3Url: '',
     telNumber: '',
     date: undefined,
   });
@@ -101,6 +141,41 @@ export default function PostEditPage() {
       setLoading(true);
       const currentPost = await getPostById(postId);
       setPost(currentPost);
+
+      type ImageFields = {
+        coverPhotoUrl?: unknown;
+        coverPhotoUrls?: unknown;
+        image1Url?: unknown;
+        image2Url?: unknown;
+        image3Url?: unknown;
+      };
+      const img = (currentPost ?? {}) as ImageFields;
+
+      const coverFromNew =
+        typeof img.coverPhotoUrl === 'string' ? img.coverPhotoUrl : '';
+      const supportFromNew = [
+        img.image1Url,
+        img.image2Url,
+        img.image3Url,
+      ].filter((v): v is string => typeof v === 'string' && v.length > 0);
+
+      const cover = coverFromNew || '';
+      const seen = new Set<string>();
+      const support = supportFromNew
+        .filter((u) => !!u && u !== cover)
+        .filter((u) => (seen.has(u) ? false : (seen.add(u), true)))
+        .slice(0, 3);
+
+      const rawDate = currentPost?.date;
+      let parsedDate: Date | undefined;
+      if (rawDate instanceof Date) {
+        parsedDate = rawDate;
+      } else if (typeof rawDate === 'string' || typeof rawDate === 'number') {
+        const d = new Date(rawDate);
+        parsedDate = Number.isNaN(d.getTime()) ? undefined : d;
+      } else {
+        parsedDate = undefined;
+      }
       setFormData({
         title: currentPost?.title || '',
         description: currentPost?.description || '',
@@ -108,25 +183,30 @@ export default function PostEditPage() {
         other: currentPost?.other || '',
         budget: currentPost?.budget || 0,
         location: currentPost?.location || '',
-        coverPhotoUrl: currentPost?.coverPhotoUrl || '',
         telNumber: currentPost?.telNumber || '',
-        date: currentPost?.date || undefined,
+        date: parsedDate,
+        coverPhotoUrl: cover,
+        image1Url: support[0] ?? '',
+        image2Url: support[1] ?? '',
+        image3Url: support[2] ?? '',
       });
-
       setLoading(false);
     };
-
     fetchService();
   }, [postId]);
 
   useEffect(() => {
-    const isFormValid =
+    if (
+      Object.keys(validationErrors).length === 0 &&
       !updating &&
       !isInvalidPostForm(formData) &&
-      !isFormDataSameAsOldPost(formData, post);
-
-    setCanSubmit(isFormValid);
-  }, [formData, updating, post]);
+      !isFormDataSameAsOldPost(formData, post)
+    ) {
+      setCanSubmit(true);
+    } else {
+      setCanSubmit(false);
+    }
+  }, [formData, validationErrors, updating, post]);
 
   if (loading) {
     return (
@@ -209,27 +289,92 @@ export default function PostEditPage() {
     }
   };
 
-  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      try {
-        const compressedCoverPhotoUrl = await getCompressedImageUrl(
-          file,
-          600,
-          0.6,
+  type UploadMode = 'cover' | 'support';
+
+  const handleImagesUpload = async (
+    e: ChangeEvent<HTMLInputElement>,
+    mode: UploadMode,
+  ) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+
+    try {
+      const urls = await uploadImages(files);
+
+      setFormData((prev) => {
+        if (mode === 'cover') {
+          return {
+            ...prev,
+            coverPhotoUrl: urls[0] ?? '',
+          };
+        }
+
+        const slots = [
+          prev.image1Url || '',
+          prev.image2Url || '',
+          prev.image3Url || '',
+        ];
+        const seen = new Set<string>(
+          [prev.coverPhotoUrl, ...slots].filter(Boolean) as string[],
         );
 
-        setFormData((prev) => ({
+        for (const u of urls) {
+          if (!u || seen.has(u)) continue;
+          const emptyIdx = slots.findIndex((s) => !s);
+          if (emptyIdx === -1) break;
+          slots[emptyIdx] = u;
+          seen.add(u);
+        }
+
+        return {
           ...prev,
-          coverPhotoUrl: compressedCoverPhotoUrl,
-        }));
-      } catch (err) {
-        console.error('Error processing image:', err);
-      }
+          image1Url: slots[0] || '',
+          image2Url: slots[1] || '',
+          image3Url: slots[2] || '',
+        };
+      });
+
+      e.target.value = '';
+    } catch (err) {
+      console.error('Error processing images:', err);
     }
   };
 
+  const handleImagesRemove = (idx: 1 | 2 | 3) =>
+    setFormData((prev) => {
+      const slots = [
+        prev.image1Url || '',
+        prev.image2Url || '',
+        prev.image3Url || '',
+      ];
+      slots[idx - 1] = '';
+      const compact = slots.filter(Boolean);
+      return {
+        ...prev,
+        image1Url: compact[0] ?? '',
+        image2Url: compact[1] ?? '',
+        image3Url: compact[2] ?? '',
+      };
+    });
+
   const handleDatePicking = (date: Date | undefined) => {
+    if (date) {
+      // Validate date
+      formData.date = date;
+      const validation = postValidator(formData, 'date');
+      if (!validation.isValid) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          date: validation.error || '',
+        }));
+      } else {
+        setValidationErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.date;
+          return newErrors;
+        });
+      }
+    }
     if (!date) return;
 
     setFormData((prev) => {
@@ -545,31 +690,54 @@ export default function PostEditPage() {
             {/* Cover Photo */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Cover Photo
+                Cover Photo (up to 1)
               </label>
 
               <div className="mt-1 flex flex-col items-start gap-4">
-                <div className="w-48 h-32 rounded-md bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300">
-                  {formData.coverPhotoUrl ? (
-                    <img
-                      src={formData.coverPhotoUrl}
-                      alt="Cover Preview"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-xs text-gray-500">Preview</span>
-                  )}
+                {/* Cover Photo */}
+                <div className="mt-1">
+                  <div className="grid grid-cols-3 gap-3">
+                    {formData.coverPhotoUrl ? (
+                      <div className="relative w-48 h-32 rounded-md overflow-hidden">
+                        <img
+                          src={formData.coverPhotoUrl}
+                          alt="Cover"
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          className="absolute top-2 right-2 bg-white/90 rounded w-6 h-6 px-1 text-m shadow"
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              coverPhotoUrl: '',
+                            }))
+                          }
+                          disabled={updating}
+                          aria-label="Remove cover image"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="col-span-3 w-48 h-32 rounded-md bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
+                        <span className="text-xs text-gray-500">
+                          Cover Photo Preview
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
+
                 <ActionButton
                   type="button"
                   onClick={() => {
-                    if (!updating) {
+                    if (!updating)
                       document.getElementById('cover-photo-upload')?.click();
-                    }
                   }}
                   buttonColor="green"
-                  disabled={updating}
-                  className={`${updating ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                  disabled={updating || !!formData.coverPhotoUrl}
+                  className={`${updating || !!formData.coverPhotoUrl ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                 >
                   Upload
                 </ActionButton>
@@ -578,9 +746,114 @@ export default function PostEditPage() {
                   name="cover-photo-upload"
                   type="file"
                   className="sr-only"
-                  onChange={handleImageUpload}
+                  onChange={(e) => handleImagesUpload(e, 'cover')}
                   accept="image/*"
-                  disabled={updating}
+                  disabled={updating || !!formData.coverPhotoUrl}
+                />
+              </div>
+            </div>
+
+            {/* Supporting Photos */}
+            <div className="mt-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Supporting Photos (up to 3)
+              </label>
+
+              <div className="mt-1 flex flex-col items-start gap-4">
+                <div className="mt-1">
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      formData.image1Url,
+                      formData.image2Url,
+                      formData.image3Url,
+                    ].filter(Boolean).length > 0 ? (
+                      <>
+                        {[
+                          formData.image1Url,
+                          formData.image2Url,
+                          formData.image3Url,
+                        ].map((url, i) =>
+                          url ? (
+                            <div
+                              key={i}
+                              className="relative w-48 h-32 rounded-md overflow-hidden"
+                            >
+                              <img
+                                src={url}
+                                alt={`Supporting ${i + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                              <button
+                                type="button"
+                                className="absolute top-2 right-2 bg-white/90 rounded w-6 h-6 px-1 text-m shadow"
+                                onClick={() =>
+                                  handleImagesRemove((i + 1) as 1 | 2 | 3)
+                                }
+                                disabled={updating}
+                                aria-label={`Remove supporting image ${i + 1}`}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ) : null,
+                        )}
+                      </>
+                    ) : (
+                      <div className="col-span-3 w-48 h-32 rounded-md bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300">
+                        <span className="text-xs text-gray-500">
+                          Supporting Photo Preview
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <ActionButton
+                  type="button"
+                  onClick={() => {
+                    if (!updating)
+                      document
+                        .getElementById('supporting-photos-upload')
+                        ?.click();
+                  }}
+                  buttonColor="green"
+                  disabled={
+                    updating ||
+                    [
+                      formData.image1Url,
+                      formData.image2Url,
+                      formData.image3Url,
+                    ].filter(Boolean).length >= 3
+                  }
+                  className={`${
+                    updating ||
+                    [
+                      formData.image1Url,
+                      formData.image2Url,
+                      formData.image3Url,
+                    ].filter(Boolean).length >= 3
+                      ? 'cursor-not-allowed opacity-50'
+                      : 'cursor-pointer'
+                  }`}
+                >
+                  Upload
+                </ActionButton>
+                <input
+                  id="supporting-photos-upload"
+                  name="supporting-photos-upload"
+                  type="file"
+                  className="sr-only"
+                  onChange={(e) => handleImagesUpload(e, 'support')}
+                  accept="image/*"
+                  multiple
+                  disabled={
+                    updating ||
+                    [
+                      formData.image1Url,
+                      formData.image2Url,
+                      formData.image3Url,
+                    ].filter(Boolean).length >= 3
+                  }
                 />
               </div>
             </div>
