@@ -8,8 +8,9 @@ export const getConnectClientSecret = async () => {
     const response = await Axios.post(`${API_BASE}/account-session`);
     const { client_secret: clientSecret } = response.data;
     return clientSecret;
-  } catch (error: any) {
-    const errorMessage = error.response?.data?.error || error.message;
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     console.error('An error occurred: ', errorMessage);
     return null;
   }
@@ -20,8 +21,9 @@ export const getPaymentIntentSecret = async (postId: string) => {
     const response = await Axios.get(`${API_BASE}/payment-intent/${postId}`);
     const { client_secret: clientSecret } = response.data;
     return clientSecret;
-  } catch (error: any) {
-    const errorMessage = error.response?.data?.error || error.message;
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     console.error('An error occurred: ', errorMessage);
     return null;
   }
@@ -54,8 +56,9 @@ export const createIntentClientSecret = async (
     });
     const { client_secret: clientSecret } = response.data;
     return clientSecret;
-  } catch (error: any) {
-    const errorMessage = error.response?.data?.error || error.message;
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     console.error('An error occurred: ', errorMessage);
     return null;
   }
@@ -66,8 +69,9 @@ export const getPaymentStatusByPostId = async (postId: string) => {
     const response = await Axios.put(`${API_BASE}/status/${postId}`);
     const { status } = response.data;
     return status;
-  } catch (error: any) {
-    const errorMessage = error.response?.data?.error || error.message;
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     console.error('An error occurred: ', errorMessage);
     return null;
   }
