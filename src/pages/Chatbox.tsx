@@ -3,8 +3,9 @@ import { useUser } from '@/context/UserContext';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { fetchMessages, sentMessage } from '@/api/message.ts';
 import { io } from 'socket.io-client';
+import { API_ROOT } from '@/config/api';
 
-const socket = io('http://localhost:3000');
+const socket = io(`${API_ROOT}`);
 
 export interface Message {
   receiver: string;
@@ -22,6 +23,8 @@ interface ChatProps {
 export function Chatbox({ id: receiverId }: ChatProps) {
   const { user } = useUser();
   const [input, setInput] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [room, setRoom] = useState<string>('');
@@ -81,21 +84,55 @@ export function Chatbox({ id: receiverId }: ChatProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = () => {
-    if (input.trim() && user) {
-      const roomId = [user._id, receiverId].sort().join('_');
+  const handleSend = async () => {
+    if ((!input.trim() && !selectedFile) || !user) return;
+
+    const roomId = [user._id, receiverId].sort().join('_');
+    let fileUrl = '';
+
+    try {
+      if (selectedFile) {
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        const uploadRes = await fetch(`${API_ROOT}/api/storage`, {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await uploadRes.json();
+
+        // ⚡ Fix: use fileUrlList from backend response
+        fileUrl = data.fileUrlList?.[0] || '';
+        setIsUploading(false);
+      }
+
+      // 2️⃣ Construct message
       const message: Message = {
         room: roomId,
         receiver: receiverId,
         sender: user._id,
-        text: input,
-        url: '',
+        text: input.trim(),
+        url: fileUrl,
         createdAt: new Date().toISOString(),
       };
+
+      // 3️⃣ Update UI instantly
       setMessages((prev) => [...prev, message]);
+
+      // 4️⃣ Save to DB
       mutation.mutate(message);
+
+      // 5️⃣ Emit via socket
       socket.emit('message', message);
+
+      // 6️⃣ Reset inputs
       setInput('');
+      setSelectedFile(null);
+    } catch (err) {
+      console.error('Error sending message with file:', err);
+      setIsUploading(false);
     }
   };
 
@@ -149,10 +186,16 @@ export function Chatbox({ id: receiverId }: ChatProps) {
 
               {/* Message bubble */}
               <div
-                className={`mb-3 flex ${isMine ? 'justify-end' : 'justify-start'}`}
+                className={`mb-3 flex ${
+                  isMine ? 'justify-end' : 'justify-start'
+                }`}
               >
                 <div
-                  className={`p-2 rounded-2xl shadow-sm max-w-[70%] break-words ${isMine ? 'bg-blue-500 text-white rounded-br-none' : 'bg-gray-200 text-black rounded-bl-none'}`}
+                  className={`p-2 rounded-2xl shadow-sm max-w-[70%] break-words ${
+                    isMine
+                      ? 'bg-blue-500 text-white rounded-br-none'
+                      : 'bg-gray-200 text-black rounded-bl-none'
+                  }`}
                 >
                   {/* File preview */}
                   {msg.url && (
@@ -189,7 +232,11 @@ export function Chatbox({ id: receiverId }: ChatProps) {
 
                   {/* Time */}
                   <div
-                    className={`text-[0.7rem] mt-1 ${isMine ? 'text-blue-100 text-right' : 'text-gray-500 text-left'}`}
+                    className={`text-[0.7rem] mt-1 ${
+                      isMine
+                        ? 'text-blue-100 text-right'
+                        : 'text-gray-500 text-left'
+                    }`}
                   >
                     {time}
                   </div>
@@ -201,18 +248,60 @@ export function Chatbox({ id: receiverId }: ChatProps) {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* File preview before send */}
+      {selectedFile && (
+        <div className="px-4 py-2 bg-gray-100 flex items-center justify-between text-sm border-t">
+          <span className="truncate">{selectedFile.name}</span>
+          <button
+            onClick={() => setSelectedFile(null)}
+            className="text-red-500 hover:text-red-700"
+          >
+            ✖
+          </button>
+        </div>
+      )}
+
+      {/* Uploading indicator */}
+      {isUploading && (
+        <div className="text-center text-gray-400 text-sm py-1">
+          Uploading file...
+        </div>
+      )}
+
       {/* Input area */}
       <div className="p-3 bg-gray-50 border-t flex items-center gap-2">
+        <input
+          type="file"
+          accept="image/*,video/*"
+          id="fileUpload"
+          className="hidden"
+          onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+        />
+        <label
+          htmlFor="fileUpload"
+          className="cursor-pointer bg-gray-200 px-3 py-2 rounded-lg hover:bg-gray-300 transition"
+        >
+          📎
+        </label>
+
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault(); // prevent new line
+              handleSend();
+            }
+          }}
           placeholder="Type a message..."
           className="flex-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
+
         <button
           onClick={handleSend}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+          disabled={isUploading}
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
         >
           Send
         </button>

@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { API_ROOT } from '@/config/api';
 
-const BASE_URL = 'http://localhost:3000/api/messages';
+const BASE_URL = `${API_ROOT}/api/messages`;
 
 export interface Message {
   receiver: string;
