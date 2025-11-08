@@ -4,6 +4,7 @@ import { API_ROOT } from '@/config/api';
 const BASE_URL = `${API_ROOT}/api/messages`;
 
 export interface Message {
+  room: string;
   receiver: string;
   sender: string;
   text: string;
@@ -12,10 +13,10 @@ export interface Message {
 }
 
 // Fetch messages safely
-export const fetchMessages = async (receiverId: string): Promise<Message[]> => {
-  if (!receiverId) return [];
+export const fetchMessages = async (room: string): Promise<Message[]> => {
+  if (!room) return [];
   try {
-    const { data } = await axios.get<Message[]>(`${BASE_URL}/${receiverId}`, {
+    const { data } = await axios.get<Message[]>(`${BASE_URL}/${room}`, {
       withCredentials: true,
     });
     return data;

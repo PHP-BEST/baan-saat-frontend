@@ -13,14 +13,14 @@ export interface Message {
   text: string;
   url: string;
   createdAt?: string;
-  room?: string;
+  room: string;
 }
 
 interface ChatProps {
-  id: string;
+  id: string[];
 }
 
-export function Chatbox({ id: receiverId }: ChatProps) {
+export function Chatbox({ id: receiveId }: ChatProps) {
   const { user } = useUser();
   const [input, setInput] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -30,8 +30,8 @@ export function Chatbox({ id: receiverId }: ChatProps) {
   const [room, setRoom] = useState<string>('');
 
   const { data } = useQuery({
-    queryKey: ['messages', receiverId],
-    queryFn: () => fetchMessages(receiverId),
+    queryKey: ['messages', receiveId],
+    queryFn: () => fetchMessages(receiveId[1]),
   });
 
   const mutation = useMutation({
@@ -64,7 +64,7 @@ export function Chatbox({ id: receiverId }: ChatProps) {
   // Join/leave room
   useEffect(() => {
     if (user) {
-      const roomId = [user._id, receiverId].sort().join('_');
+      const roomId = receiveId[1];
       setRoom(roomId);
       socket.emit('join_room', roomId);
       setMessages([]);
@@ -72,7 +72,7 @@ export function Chatbox({ id: receiverId }: ChatProps) {
     return () => {
       if (room) socket.emit('leave_room', room);
     };
-  }, [receiverId, user]);
+  }, [receiveId[1], user, receiveId[0]]);
 
   // Load messages from API
   useEffect(() => {
@@ -87,7 +87,7 @@ export function Chatbox({ id: receiverId }: ChatProps) {
   const handleSend = async () => {
     if ((!input.trim() && !selectedFile) || !user) return;
 
-    const roomId = [user._id, receiverId].sort().join('_');
+    const roomId = receiveId[1];
     let fileUrl = '';
 
     try {
@@ -111,7 +111,7 @@ export function Chatbox({ id: receiverId }: ChatProps) {
       // 2️⃣ Construct message
       const message: Message = {
         room: roomId,
-        receiver: receiverId,
+        receiver: receiveId[0],
         sender: user._id,
         text: input.trim(),
         url: fileUrl,

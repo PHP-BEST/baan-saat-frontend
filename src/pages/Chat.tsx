@@ -220,7 +220,7 @@ export default function ChatPage() {
 
             {/* Chat Content */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden">
-              <Chatbox id={receiverid || ''} />
+              <Chatbox id={[receiverid || '', post._id]} />
             </div>
           </div>
         </div>
