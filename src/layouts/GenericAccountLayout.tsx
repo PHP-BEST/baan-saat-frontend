@@ -3,12 +3,8 @@ import Footer from '@/components/our-components/footer';
 import Header from '@/components/our-components/header';
 import ActionButton from '@/components/our-components/actionButton';
 import axios from 'axios';
-
-interface SidebarItem {
-  name: string;
-  path: string;
-  isDisabled?: boolean;
-}
+import { useUser } from '@/context/UserContext';
+import type { SidebarMenu } from './AccountLayout';
 
 interface SecondaryAction {
   text: string;
@@ -18,7 +14,7 @@ interface SecondaryAction {
 interface GenericAccountLayoutProps {
   title: string;
   basePath: string;
-  menuItems: SidebarItem[];
+  menuItems: SidebarMenu[];
   secondaryAction?: SecondaryAction;
 }
 
@@ -37,28 +33,45 @@ export default function GenericAccountLayout({
   menuItems,
   secondaryAction,
 }: GenericAccountLayoutProps) {
+  const { user } = useUser();
+
   return (
     <>
-      <Header />
+      <Header isHideSearchBar={user?.role != 'provider'} />
       <div className="w-full min-h-screen px-12 py-8 flex gap-6 bg-gray-50 justify-center">
+        {/* Sidebar */}
         <div className="flex flex-col w-1/4 min-w-[160px] max-w-[240px]">
           <h1 className="text-2xl font-bold mb-2">{title}</h1>
-          <div className="w-full h-full bg-background-sidebar border border-border-sidebar rounded-2xl px-4 pb-4 pt-8 flex flex-col gap-4 shadow-sm text-center ">
-            {menuItems.map((item: SidebarItem) => (
-              <div key={item.name}>
-                <NavLink
-                  key={item.path}
-                  to={basePath + item.path}
-                  className={`font-medium ${item.isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:text-button-action'}`}
-                  onClick={
-                    item.isDisabled ? (e) => e.preventDefault() : undefined
-                  }
-                >
-                  {item.name}
-                </NavLink>
-                {item.name === 'Privacy' && <hr className="my-2" />}
-              </div>
-            ))}
+
+          <div className="w-full h-full bg-background-sidebar border border-border-sidebar rounded-2xl px-4 pb-4 pt-8 flex flex-col gap-4 shadow-sm text-center">
+            {menuItems.map((item: SidebarMenu) => {
+              if (
+                item.roleToDisplay !== 'both' &&
+                item.roleToDisplay !== user?.role
+              ) {
+                return null;
+              }
+
+              return (
+                <div key={item.name}>
+                  <NavLink
+                    to={basePath + item.path}
+                    className={`font-medium ${
+                      item.isDisabled
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'hover:text-button-action'
+                    }`}
+                    onClick={
+                      item.isDisabled ? (e) => e.preventDefault() : undefined
+                    }
+                  >
+                    {item.name}
+                  </NavLink>
+
+                  {item.name === 'Privacy' && <hr className="my-2" />}
+                </div>
+              );
+            })}
 
             <div className="mt-auto pt-4">
               {secondaryAction && (

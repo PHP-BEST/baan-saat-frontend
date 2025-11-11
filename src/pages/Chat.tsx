@@ -68,7 +68,7 @@ export default function ChatPage() {
   if (loading) {
     return (
       <div>
-        <Header />
+        <Header isHideSearchBar={user?.role != 'provider'} />
         <div className="px-16 py-10 w-full min-h-screen flex flex-col gap-10 bg-white">
           <Loading />
         </div>
@@ -80,7 +80,7 @@ export default function ChatPage() {
   if (!apply) {
     return (
       <div>
-        <Header />
+        <Header isHideSearchBar={user?.role != 'provider'} />
         <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
           <ApplyNotFound />
         </div>
@@ -101,7 +101,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      <Header />
+      <Header isHideSearchBar={user?.role != 'provider'} />
       <main className="flex-grow flex justify-center py-12 px-4">
         <div className="w-full max-w-6xl bg-white rounded-2xl shadow-md border border-gray-200 flex flex-col lg:flex-row overflow-hidden">
           {/* Apply Info */}

@@ -32,7 +32,11 @@ const Header = ({ isHideSearchBar = false }: HeaderProps) => {
           alt="Baan Saat Logo"
           className="cursor-pointer"
           onClick={() => {
-            navigate('/');
+            if (user) {
+              navigate('/account');
+            } else {
+              navigate('/');
+            }
           }}
         />
 

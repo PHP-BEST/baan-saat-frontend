@@ -24,6 +24,7 @@ import { getPostById, updatePost, type PostFormInterface } from '@/api/post';
 import MyDatePicker from '@/components/ui/calendar';
 import PostNotFound from '@/error/PostNotFound';
 import { uploadImages } from '@/api/upload';
+import { useUser } from '@/context/UserContext';
 
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
@@ -110,6 +111,7 @@ function isFormDataSameAsOldPost(
 }
 
 export default function PostEditPage() {
+  const { user } = useUser();
   const { postId } = useParams<{ postId: string }>();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(false);
@@ -211,7 +213,7 @@ export default function PostEditPage() {
   if (loading) {
     return (
       <div>
-        <Header />
+        <Header isHideSearchBar={user?.role != 'provider'} />
         <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
           <Loading />
         </div>
@@ -223,7 +225,7 @@ export default function PostEditPage() {
   if (!post) {
     return (
       <div>
-        <Header />
+        <Header isHideSearchBar={user?.role != 'provider'} />
         <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
           <PostNotFound />
         </div>
@@ -443,7 +445,7 @@ export default function PostEditPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      <Header />
+      <Header isHideSearchBar={user?.role != 'provider'} />
       <main className="flex-grow flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-2xl space-y-8">
           <h1 className="text-3xl font-bold text-gray-900">Update a Post</h1>
