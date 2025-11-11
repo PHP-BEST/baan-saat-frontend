@@ -1,0 +1,300 @@
+import { useState, useRef, useEffect } from 'react';
+import { Pencil, Save, X } from 'lucide-react';
+import { useUser } from '@/context/UserContext';
+import ActionButton from '@/components/our-components/actionButton';
+import ProfileField from '@/components/our-components/profileField';
+import { profileValidator } from '@/utils/profileValidator';
+import { updateUser } from '@/api/user';
+import { getCompressedImageUrl } from '@/utils/function';
+
+export default function ProfilePage() {
+  const { user } = useUser();
+  if (!user) return;
+
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [tempValues, setTempValues] = useState<Record<string, string>>({});
+  const [hasChanges, setHasChanges] = useState(false);
+  const [tempAvatarUrl, setTempAvatarUrl] = useState<string>('');
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
+  const [cursorPositions, setCursorPositions] = useState<
+    Record<string, number>
+  >({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const hasUnsavedChanges =
+      Object.keys(tempValues).length > 0 || tempAvatarUrl !== '';
+    setHasChanges(hasUnsavedChanges);
+  }, [tempValues, tempAvatarUrl]);
+
+  const getFieldValue = (field: string): string => {
+    switch (field) {
+      case 'name':
+        return user.name;
+      case 'telNumber':
+        return user.telNumber;
+      case 'email':
+        return user.email;
+      case 'description':
+        return user.providerProfile?.description || '';
+      default:
+        return '';
+    }
+  };
+
+  const getDisplayValue = (field: string): string => {
+    if (tempValues[field] !== undefined) {
+      return tempValues[field];
+    }
+    return getFieldValue(field);
+  };
+
+  const getPlaceholderText = (field: string): string => {
+    switch (field) {
+      case 'name':
+        return 'No name provided';
+      case 'telNumber':
+        return 'No phone number provided';
+      case 'email':
+        return 'No email provided';
+      case 'description':
+        return 'No description provided';
+      default:
+        return 'No information provided';
+    }
+  };
+
+  const startEditing = (field: string) => {
+    // If already editing another field, validate current field first
+    if (editingField && editingField !== field) {
+      const currentValue = tempValues[editingField] || '';
+      const validation = profileValidator(editingField, currentValue);
+
+      if (!validation.isValid) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          [editingField]: validation.error || '',
+        }));
+        return;
+      }
+
+      // Save current field if valid
+      saveEditing(editingField);
+    }
+
+    setEditingField(field);
+    setTempValues((prev) => ({ ...prev, [field]: getDisplayValue(field) }));
+  };
+
+  const saveEditing = (field: string) => {
+    if (editingField === field) {
+      const currentValue = tempValues[field] || '';
+      const originalValue = getFieldValue(field);
+
+      // If value is same as original, remove from temp values
+      if (currentValue === originalValue) {
+        setTempValues((prev) => {
+          const newValues = { ...prev };
+          delete newValues[field];
+          return newValues;
+        });
+        setEditingField(null);
+        return;
+      }
+
+      const validation = profileValidator(field, currentValue);
+
+      if (!validation.isValid) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          [field]: validation.error || '',
+        }));
+        return;
+      }
+
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+
+      setEditingField(null);
+    }
+  };
+
+  const cancelAllChanges = () => {
+    setEditingField(null);
+    setTempValues({});
+    setHasChanges(false);
+    setTempAvatarUrl('');
+    setValidationErrors({});
+  };
+
+  const handleAvatarClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const imageUrl = await getCompressedImageUrl(file);
+      setTempAvatarUrl(imageUrl);
+    }
+  };
+
+  const submitAllChanges = async () => {
+    let userForm = { ...user };
+
+    // Apply avatar change if exists
+    if (tempAvatarUrl) {
+      userForm = { ...userForm, avatarUrl: tempAvatarUrl };
+    }
+
+    Object.entries(tempValues).forEach(([field, value]) => {
+      if (field === 'description') {
+        userForm = {
+          ...userForm,
+          providerProfile: {
+            description: value,
+          },
+        };
+      } else {
+        userForm = { ...userForm, [field]: value };
+      }
+    });
+
+    const success = await updateUser(user._id, userForm);
+
+    if (success) {
+      setEditingField(null);
+      setTempValues({});
+      setHasChanges(false);
+      setTempAvatarUrl('');
+      setValidationErrors({});
+      window.location.reload();
+    } else {
+      alert('Failed to update profile. Please try again.');
+      return;
+    }
+  };
+
+  const canSave = hasChanges && editingField === null;
+
+  const commonFieldProperties = {
+    editingField,
+    tempValues,
+    validationErrors,
+    getDisplayValue,
+    getFieldValue,
+    getPlaceholderText,
+    startEditing,
+    saveEditing,
+    setTempValues,
+    setValidationErrors,
+  };
+
+  return (
+    <>
+      {/* Header */}
+      <h1 className="text-2xl font-bold mb-2">Profile</h1>
+
+      {/* Content */}
+      <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
+        {/* Avatar */}
+        <div
+          onClick={handleAvatarClick}
+          className="w-28 h-28 rounded-full bg-background-sidebar flex items-center justify-center mb-6 cursor-pointer hover:bg-background-header-footer transition-colors overflow-hidden relative group"
+        >
+          {tempAvatarUrl || user.avatarUrl ? (
+            <>
+              <img
+                src={tempAvatarUrl || user.avatarUrl}
+                alt="Profile Avatar"
+                className="w-full h-full object-cover rounded-full"
+              />
+              {/* Hover overlay */}
+              <div className="absolute inset-0 bg-black bg-opacity-70 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Pencil className="w-6 h-6 text-white" />
+              </div>
+              {/* Change indicator */}
+              {tempAvatarUrl && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-button-upload rounded-full border-2 border-white"></div>
+              )}
+            </>
+          ) : (
+            <Pencil className="w-6 h-6 text-gray-500" />
+          )}
+        </div>
+
+        <div className="pb-16 w-full">
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+
+          {/* Editable Fields */}
+          <div className="space-y-4 w-full">
+            <ProfileField
+              label="Name"
+              field="name"
+              cursorPositions={cursorPositions}
+              setCursorPositions={setCursorPositions}
+              {...commonFieldProperties}
+            />
+
+            <ProfileField
+              label="Telephone"
+              field="telNumber"
+              {...commonFieldProperties}
+              cursorPositions={cursorPositions}
+              setCursorPositions={setCursorPositions}
+            />
+            <ProfileField
+              label="Email"
+              field="email"
+              {...commonFieldProperties}
+              cursorPositions={cursorPositions}
+              setCursorPositions={setCursorPositions}
+            />
+            <ProfileField
+              label="Description"
+              field="description"
+              {...commonFieldProperties}
+              cursorPositions={cursorPositions}
+              setCursorPositions={setCursorPositions}
+            />
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        {canSave && (
+          <div className="mt-auto flex gap-3">
+            <ActionButton buttonColor="red" onClick={cancelAllChanges}>
+              <X className="w-4 h-4" />
+              Cancel
+            </ActionButton>
+            <ActionButton
+              buttonColor="blue"
+              buttonType="filled"
+              onClick={submitAllChanges}
+            >
+              <Save className="w-4 h-4" />
+              Save
+            </ActionButton>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}

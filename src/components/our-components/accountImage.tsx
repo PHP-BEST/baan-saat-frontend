@@ -1,0 +1,44 @@
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '@/context/UserContext';
+
+interface AccountImageProps {
+  width?: number;
+}
+
+const AvatarImage = ({ width = 52 }: AccountImageProps) => {
+  const navigate = useNavigate();
+  const { user } = useUser();
+  if (!user) return;
+
+  const handleClick = () => {
+    navigate('/account');
+  };
+
+  if (!width) {
+    width = 52;
+  }
+
+  return (
+    <div
+      className={`bg-background-profile rounded-full flex items-center justify-center overflow-hidden cursor-pointer`}
+      onClick={handleClick}
+      style={{ width: width, height: width }}
+    >
+      {user.avatarUrl ? (
+        <img
+          src={user.avatarUrl}
+          alt="Avatar Image"
+          className="w-full h-full object-cover"
+          referrerPolicy="no-referrer"
+          crossOrigin="anonymous"
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <div className="w-full h-full" />
+      )}
+    </div>
+  );
+};
+
+export default AvatarImage;

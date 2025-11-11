@@ -1,27 +1,26 @@
-import MainLayout from './layouts/MainLayout';
-import { ErrorPage } from './pages/ErrorPage';
-import { LandingPage } from './pages/LandingPage';
-import { RegisterPage } from './pages/RegisterPage';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
+import { router } from './route';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { NODE_ENV } from './config/env';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
 function App() {
-  const router = createBrowserRouter([
-    {
-      path: '/',
-      element: <LandingPage />,
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: '/register',
-      element: <RegisterPage />,
-      errorElement: <ErrorPage />,
-    },
-  ]);
-
   return (
-    <MainLayout>
+    <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
-    </MainLayout>
+      {NODE_ENV !== 'production' && (
+        <ReactQueryDevtools initialIsOpen={false} />
+      )}
+    </QueryClientProvider>
   );
 }
 

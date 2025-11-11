@@ -1,4 +1,5 @@
-import { API_ROOT, apiFetch } from '@/config/api';
+import { API_ROOT } from '@/config/api';
+import axios from 'axios';
 
 export interface Sample {
   _id: string;
@@ -7,26 +8,16 @@ export interface Sample {
   description: string;
 }
 
-interface GetSamplesResponse {
-  success: boolean;
-  data: Sample[];
-}
-
 // GET /samples
 export async function getSamples(): Promise<Sample[]> {
-  const result = await apiFetch<GetSamplesResponse>(`${API_ROOT}/samples`);
-  if (result.success) return result.data;
+  const result = await axios.get(`${API_ROOT}/samples`);
+  if (result.data.success) return result.data.data;
   return [];
-}
-
-interface GetSampleResponse {
-  success: boolean;
-  data: Sample;
 }
 
 // GET /samples/{id}
 export async function getSampleById(id: number): Promise<Sample | null> {
-  const result = await apiFetch<GetSampleResponse>(`${API_ROOT}/samples/${id}`);
-  if (result.success) return result.data;
+  const result = await axios.get(`${API_ROOT}/samples/${id}`);
+  if (result.data.success) return result.data.data;
   return null;
 }

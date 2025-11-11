@@ -1,5 +1,4 @@
 import { API_ROOT_DEV, API_ROOT_LOCAL, API_ROOT_PROD, NODE_ENV } from './env';
-
 export let API_ROOT: string;
 
 if (NODE_ENV === 'development') {
@@ -13,17 +12,7 @@ if (NODE_ENV === 'development') {
   API_ROOT = API_ROOT_LOCAL;
 }
 
-export async function apiFetch<T>(
-  url: string,
-  options?: RequestInit,
-): Promise<T> {
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options?.headers || {}),
-    },
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+export interface ResponseInterface<T> {
+  success: boolean;
+  data: T;
 }

@@ -1,11 +1,14 @@
-import { type ReactNode } from 'react';
+import { UserProvider } from '@/context/UserContext';
+import { Outlet } from 'react-router-dom';
 
-const MainLayout = ({ children }: { children: ReactNode }) => {
+const MainLayout = () => {
   return (
-    <div className="min-h-screen w-full bg-background font-serif">
-      {/* Add Other Layout Here */}
-      {children}
-    </div>
+    <UserProvider>
+      <div className="w-full min-h-screen bg-background-header-footer font-serif">
+        {/* Add any common layout elements like header, navigation, etc. */}
+        <Outlet />
+      </div>
+    </UserProvider>
   );
 };
 
