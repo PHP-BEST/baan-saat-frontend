@@ -33,7 +33,7 @@ const PaymentButton = ({ postId, openModal }: PaymentButtonType) => {
     fetchPaymentStatus();
   }, [postId]);
 
-  let buttonDetail: PaymentButtonDetail = {
+  const buttonDetail: PaymentButtonDetail = {
     text: 'Pay',
     color: 'blue',
     disabled: loading, // Disable while loading

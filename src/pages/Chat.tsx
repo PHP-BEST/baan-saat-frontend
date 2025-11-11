@@ -98,9 +98,7 @@ export default function ChatPage() {
       return 'null';
     }
   };
-  const modalDialog = () => {
-    setOpenPayModal(true);
-  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <Header />
