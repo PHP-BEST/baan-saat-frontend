@@ -11,9 +11,11 @@ import { getPostsByUserId } from '@/api/post';
 import PostCard from '@/components/our-components/postCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import UserNotFound from '@/error/UserNotFound';
+import { useUser } from '@/context/UserContext';
 
 export default function CustomerProfilePage() {
   const navigate = useNavigate();
+  const { user } = useUser();
   const { userId } = useParams<{ userId: string }>();
   const [customerUser, setCustomerUser] = useState<User | null>(null);
   const [customerPosts, setCustomerPosts] = useState<Post[]>([]);
@@ -23,12 +25,13 @@ export default function CustomerProfilePage() {
     const getCustomerUser = async () => {
       setLoading(true);
       if (!userId) return;
-      const user = await getUserById(userId);
-      setCustomerUser(user);
-      if (user) {
-        const posts = (await getPostsByUserId(userId))
-          .filter((p) => p.isMatched == false)
-          .filter((p) => p.status != 'Deleted');
+      const customerUser = await getUserById(userId);
+      setCustomerUser(customerUser);
+      if (customerUser) {
+        const posts = (await getPostsByUserId(userId)).sort(
+          (a, b) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+        );
         setCustomerPosts(posts);
       }
       setLoading(false);
@@ -124,7 +127,9 @@ export default function CustomerProfilePage() {
         <div className="flex flex-col gap-4">
           {/* Header */}
           <div className="flex justify-between">
-            <h2 className="font-bold text-2xl">Posts by {customerUser.name}</h2>
+            <h2 className="font-bold text-2xl">
+              {userId != user?._id && 'Available'} Posts by {customerUser.name}
+            </h2>
             <button
               className="font-bold text-lg cursor-pointer text-button-action flex gap-1 items-center"
               onClick={() => navigate(`/user/${customerUser._id}/post`)}
@@ -136,13 +141,28 @@ export default function CustomerProfilePage() {
 
           {/* Some Posts */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {customerPosts.length > 0 ? (
+            {userId == user?._id ? (
+              customerPosts.length > 0 ? (
+                customerPosts
+                  .slice(0, 6)
+                  .map((post) => (
+                    <PostCard key={post._id} post={post} size="L" />
+                  ))
+              ) : (
+                <p className="text-gray-500 text-xl font-medium">
+                  You have no posts listed.
+                </p>
+              )
+            ) : customerPosts.filter(
+                (p) => p.isMatched == false && p.status != 'Deleted',
+              ).length > 0 ? (
               customerPosts
+                .filter((p) => p.isMatched == false && p.status != 'Deleted')
                 .slice(0, 6)
                 .map((post) => <PostCard key={post._id} post={post} size="L" />)
             ) : (
               <p className="text-gray-500 text-xl font-medium">
-                This customer has no posts listed.
+                This customer has no available posts listed.
               </p>
             )}
           </div>
