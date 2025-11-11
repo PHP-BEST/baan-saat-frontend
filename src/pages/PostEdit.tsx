@@ -180,7 +180,7 @@ export default function PostEditPage() {
         title: currentPost?.title || '',
         description: currentPost?.description || '',
         tag: currentPost?.tag || null,
-        other: currentPost?.other || '',
+        other: currentPost?.others || '',
         budget: currentPost?.budget || 0,
         location: currentPost?.location || '',
         telNumber: currentPost?.telNumber || '',

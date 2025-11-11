@@ -4,16 +4,17 @@ export interface Post {
   title: string;
   description?: string;
   budget: number;
-  telNumber: string;
-  location: string;
-  tag: PostTag;
-  other: string;
   coverPhotoUrl?: string;
   image1Url?: string;
   image2Url?: string;
   image3Url?: string;
-  date: Date;
+  telNumber: string;
+  location: string;
+  tag: PostTag;
+  others: string;
   status: 'Not working' | 'In progress' | 'Completed';
+  isMatched: boolean;
+  date: Date;
   createdAt: Date;
   updatedAt: Date;
 }

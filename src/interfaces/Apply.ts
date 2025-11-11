@@ -6,10 +6,10 @@ export interface Apply {
   postId: string;
   customerId: string;
   providerId: string;
-  date: Date;
-  appliedPrice: number;
-  status: ApplyStatus;
   description?: string;
+  appliedPrice: number;
+  date: Date;
+  status: ApplyStatus;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,4 +30,4 @@ export interface ApplyDetail {
   updatedAt: Date;
 }
 
-export type ApplyStatus = 'Pending' | 'Accepted' | 'Rejected';
+export type ApplyStatus = 'Pending' | 'Accepted' | 'Rejected' | 'Deleted';
