@@ -4,15 +4,23 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import ActionButton from '@/components/our-components/actionButton';
-import { convertTagsToLabels, formatDateToDisplay } from '@/utils/function';
-import { Calendar, Phone } from 'lucide-react';
+import {
+  convertTagsToLabels,
+  formatDateToDisplay,
+  rejectApply,
+} from '@/utils/function';
+import { Calendar, Loader, Phone } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import Loading from '@/components/our-components/loading';
-import { getPostById } from '@/api/post';
+import { getPostById, updatePostStatus } from '@/api/post';
 import type { User } from '@/interfaces/User';
 import { getUserById } from '@/api/user';
 import PostNotFound from '@/error/PostNotFound';
-import { checkMyApply, getDetailedAppliesByPostId } from '@/api/apply';
+import {
+  checkMyApply,
+  getAppliesByPostId,
+  getDetailedAppliesByPostId,
+} from '@/api/apply';
 import type { Apply, ApplyDetail } from '@/interfaces/Apply';
 import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
@@ -29,6 +37,9 @@ export default function PostDetailPage() {
   const [acceptedApply, setAcceptedApply] = useState<ApplyDetail | null>();
   const [hasAcceptedApply, setHasAcceptedApply] = useState(false);
   const [openIdx, setOpenIdx] = useState<number | null>(null);
+
+  const [isStatusPostLoading, setStatusPostLoading] = useState(false);
+  const [openDeletePostModal, setOpenDeletePostModal] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -363,7 +374,9 @@ export default function PostDetailPage() {
             )}
 
           <div className="flex justify-end gap-4 my-8">
-            {user && user?._id === post.customerId ? (
+            {user &&
+            user?._id === post.customerId &&
+            post.status != 'Deleted' ? (
               <>
                 {/* Customer View */}
                 {!hasAcceptedApply ? (
@@ -385,6 +398,14 @@ export default function PostDetailPage() {
                     Chat
                   </ActionButton>
                 )}
+                <ActionButton
+                  className="cursor-pointer"
+                  onClick={() => {
+                    setOpenDeletePostModal(true);
+                  }}
+                >
+                  Delete
+                </ActionButton>
               </>
             ) : (
               user && (
@@ -438,6 +459,54 @@ export default function PostDetailPage() {
         </div>
       </main>
       <Footer />
+
+      {openDeletePostModal && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
+            <p className="mb-2 text-lg font-semibold">
+              ต้องการลบโพสต์นี้ใช่หรือไม่?
+            </p>
+            <p className="text-sm text-red-500 mb-4">
+              การลบโพสต์นี้จะเป็นการยกเลิกการสมัครของผู้ให้บริการทั้งหมด
+              และไม่สามารถกู้คืนได้
+            </p>
+            <div className="flex justify-center gap-4">
+              <ActionButton
+                onClick={async () => {
+                  setStatusPostLoading(true);
+                  await updatePostStatus(post._id, 'Deleted');
+                  const allApplies = await getAppliesByPostId(post._id);
+                  const rejectPromises = allApplies.map((a) =>
+                    rejectApply(a._id),
+                  );
+                  await Promise.all(rejectPromises);
+                  setStatusPostLoading(false);
+                  setOpenDeletePostModal(false);
+                  window.location.href = `/post/${post._id}`;
+                }}
+                className={`${isStatusPostLoading ? '' : 'cursor-pointer'}`}
+                disabled={isStatusPostLoading}
+              >
+                {isStatusPostLoading && (
+                  <Loader className="animate-spin" size={24} />
+                )}
+                Yes
+              </ActionButton>
+              <ActionButton
+                className={`cursor-pointer bg-gray-200 text-black border-gray-200 
+            ${isStatusPostLoading ? '' : 'cursor-pointer'}`}
+                disabled={isStatusPostLoading}
+                onClick={() => setOpenDeletePostModal(false)}
+              >
+                {isStatusPostLoading && (
+                  <Loader className="animate-spin" size={24} />
+                )}
+                No
+              </ActionButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

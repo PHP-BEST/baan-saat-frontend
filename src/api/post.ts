@@ -1,5 +1,5 @@
 import { API_ROOT, type ResponseInterface } from '@/config/api';
-import type { Post, PostTag } from '@/interfaces/Post';
+import type { Post, PostStatus, PostTag } from '@/interfaces/Post';
 import axios from 'axios';
 
 const API_BASE = `${API_ROOT}/api/posts`;
@@ -198,18 +198,11 @@ export const createPost = async (
   }
 };
 
-export const updatePostStatus = async (postId: string) => {
+export const updatePostStatus = async (postId: string, status: PostStatus) => {
   try {
-    const post = await getPostById(postId);
-    let nextStatus = 'Not working';
-    if (post?.status == 'Not working') {
-      nextStatus = 'In progress';
-    } else if (post?.status == 'In progress') {
-      nextStatus = 'Completed';
-    }
     const response = await axios.put<ResponseInterface<Post>>(
       `${API_BASE}/${postId}`,
-      { status: nextStatus },
+      { status },
       {
         headers: { 'Content-Type': 'application/json' },
       },
@@ -246,23 +239,6 @@ export const updatePost = async (
     return !!response.data.success;
   } catch (err) {
     console.error('Error updating post:', err);
-    return false;
-  }
-};
-
-export const deletePost = async (postId: string): Promise<boolean> => {
-  try {
-    const response = await axios.delete<ResponseInterface<Post>>(
-      `${API_BASE}/${postId}`,
-    );
-
-    if (response.data.success) {
-      return true;
-    } else {
-      throw new Error('Failed to delete post');
-    }
-  } catch (err) {
-    console.error('Error deleting post:', err);
     return false;
   }
 };

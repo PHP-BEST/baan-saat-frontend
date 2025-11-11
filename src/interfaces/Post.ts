@@ -12,12 +12,18 @@ export interface Post {
   location: string;
   tag: PostTag;
   others: string;
-  status: 'Not working' | 'In progress' | 'Completed' | 'Deleted';
+  status: PostStatus;
   isMatched: boolean;
   date: Date;
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type PostStatus =
+  | 'Not working'
+  | 'In progress'
+  | 'Completed'
+  | 'Deleted';
 
 export type PostTag =
   | 'houseCleaning'

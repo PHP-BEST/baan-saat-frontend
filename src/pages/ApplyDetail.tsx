@@ -14,8 +14,12 @@ import {
   rejectApply,
 } from '@/utils/function';
 import { Calendar, Loader, Phone } from 'lucide-react';
-import { getApplyById, getDetailedAppliesByPostId } from '@/api/apply';
-import { deletePost, getPostById } from '@/api/post';
+import {
+  getApplyById,
+  getDetailedAppliesByPostId,
+  updateApplyStatus,
+} from '@/api/apply';
+import { getPostById } from '@/api/post';
 import { getUserById } from '@/api/user';
 import { useUser } from '@/context/UserContext';
 import PostNotFound from '@/error/PostNotFound';
@@ -476,17 +480,13 @@ export default function ApplyDetailPage() {
           <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
               <p className="mb-2 text-lg font-semibold">
-                ต้องการ Cancel Provider ใช่หรือไม่?
-              </p>
-              <p className="text-sm text-red-500 mb-4">
-                การยกเลิกจะลบโพสต์นี้อย่างถาวร รวมถึงข้อมูลการสมัครทั้งหมด
-                และไม่สามารถกู้คืนได้
+                ต้องการยกเลิกการให้บริการของผู้ให้บริการคนนี้ใช่หรือไม่?
               </p>
               <div className="flex justify-center gap-4">
                 <ActionButton
                   onClick={async () => {
                     setStatusApplyLoading(true);
-                    await deletePost(apply.postId);
+                    await updateApplyStatus(apply._id, 'Rejected');
                     setStatusApplyLoading(false);
                     setOpenCancelApplyModal(false);
                     window.location.href = '/account/post';
