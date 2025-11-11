@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import Footer from '@/components/our-components/footer';
 import { Search } from 'lucide-react';
 import type { Post } from '@/interfaces/Post';
-import { getAllPosts } from '@/api/post';
+import { getAllPosts, getUserPosts } from '@/api/post';
 import Header from '@/components/our-components/header';
 import PostCard from '@/components/our-components/postCard';
 import { useNavigate } from 'react-router-dom';
@@ -19,20 +19,32 @@ export default function LandingPage() {
   useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
-      const allPosts = await getAllPosts();
-      const sortedPosts = allPosts
-        .sort(
-          (a, b) =>
-            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-        )
-        .slice(0, 9);
-      setPosts(sortedPosts);
-      setPosts(allPosts);
+      if (user && user.role == 'provider') {
+        const allPosts = (await getAllPosts()).filter(
+          (p) => p.customerId != user._id,
+        );
+        const sortedPosts = allPosts
+          .sort(
+            (a, b) =>
+              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+          )
+          .slice(0, 9);
+        setPosts(sortedPosts);
+      } else if (user && user.role == 'customer') {
+        const allPosts = await getUserPosts(user._id);
+        const sortedPosts = allPosts
+          .sort(
+            (a, b) =>
+              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+          )
+          .slice(0, 9);
+        setPosts(sortedPosts);
+      }
       setLoading(false);
     };
 
     fetchPosts();
-  }, []);
+  }, [user]);
 
   const handleSearch = (e: FormEvent) => {
     if (query.trim() !== '') {
@@ -47,7 +59,7 @@ export default function LandingPage() {
 
       {/* Blue Area */}
       <div
-        className={`bg-background min-h-[50vh] w-full px-10 py-10 flex flex-col justify-center items-center ${(!user || user.role != 'provider') && 'min-h-[80vh]'}`}
+        className={`bg-background min-h-[50vh] w-full px-10 py-10 flex flex-col justify-center items-center ${!user && 'min-h-[80vh]'}`}
       >
         {/* Text */}
         <div className="flex flex-col md:flex-row gap-8 md:gap-4 md:items-center md:justify-center">
@@ -94,6 +106,23 @@ export default function LandingPage() {
       {user && user.role === 'provider' && (
         <div className="bg-white min-h-[50vh] w-full flex flex-col px-10 py-10 gap-10">
           <h2 className="text-2xl font-bold">กระทู้คำขอล่าสุด</h2>
+          {loading ? (
+            <Loading />
+          ) : posts.length === 0 ? (
+            <div>No posts found</div>
+          ) : (
+            <div className="w-full max-w-screen-xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-center items-center mx-auto">
+              {posts.map((post) => (
+                <PostCard post={post} size="L" key={post._id} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {user && user.role === 'customer' && (
+        <div className="bg-white min-h-[50vh] w-full flex flex-col px-10 py-10 gap-10">
+          <h2 className="text-2xl font-bold">กระทู้ของฉัน</h2>
           {loading ? (
             <Loading />
           ) : posts.length === 0 ? (
