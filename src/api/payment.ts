@@ -34,25 +34,16 @@ export const createIntentClientSecret = async (
   providerId: string,
   amount: number,
 ) => {
-  // Add validation before making the request
-  if (!postId) {
-    console.error('Missing required parameters for payment intent creation');
-    return null;
-  }
-  if (!providerId) {
-    console.error('Missing required parameters for payment intent creation');
-    return null;
-  }
-  if (amount === undefined || amount === null) {
+  if (!postId || !providerId || amount == null) {
     console.error('Missing required parameters for payment intent creation');
     return null;
   }
 
   try {
     const response = await Axios.post(`${API_BASE}/payment-intent`, {
-      postId: postId,
-      providerId: providerId,
-      amount: amount,
+      postId,
+      providerId,
+      amount,
     });
     const { client_secret: clientSecret } = response.data;
     return clientSecret;
