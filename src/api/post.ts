@@ -165,6 +165,7 @@ export interface PostFormInterface {
   telNumber: string;
   budget: number;
   location: string;
+  isMatched: boolean;
   coverPhotoUrl?: string;
   image1Url?: string;
   image2Url?: string;
@@ -231,6 +232,26 @@ export const updatePost = async (
     const response = await axios.put<ResponseInterface<Post>>(
       `${API_BASE}/${postId}`,
       payload,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+
+    return !!response.data.success;
+  } catch (err) {
+    console.error('Error updating post:', err);
+    return false;
+  }
+};
+
+export const updatePostMatched = async (
+  postId: string,
+  isMatched: boolean,
+): Promise<boolean> => {
+  try {
+    const response = await axios.put<ResponseInterface<Post>>(
+      `${API_BASE}/${postId}`,
+      { isMatched },
       {
         headers: { 'Content-Type': 'application/json' },
       },

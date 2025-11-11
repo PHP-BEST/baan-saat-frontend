@@ -1,5 +1,5 @@
 import { getDetailedApplyById, updateApplyStatus } from '@/api/apply';
-import { updatePostStatus } from '@/api/post';
+import { updatePostMatched, updatePostStatus } from '@/api/post';
 import ActionButton from '@/components/our-components/actionButton';
 import Footer from '@/components/our-components/footer';
 import Header from '@/components/our-components/header';
@@ -128,7 +128,7 @@ export default function ChatPage() {
                 <span
                   className="text-button-action hover:underline cursor-pointer"
                   onClick={() => {
-                    navigate(`/user/${provider?._id}`);
+                    navigate(`/user/${provider?._id}/provider`);
                   }}
                 >
                   {provider?.name}
@@ -289,11 +289,15 @@ export default function ChatPage() {
               <p className="mb-2 text-lg font-semibold">
                 ต้องการยกเลิกการให้บริการของผู้ให้บริการคนนี้ใช่หรือไม่?
               </p>
+              <p className="mb-4 text-sm text-red-500">
+                การยกเลิกการให้บริการจะทำให้ผู้บริการไม่สามารถสมัครให้บริการนี้ได้อีก
+              </p>
               <div className="flex justify-center gap-4">
                 <ActionButton
                   onClick={async () => {
                     setUpdateStatusLoading(true);
                     await updateApplyStatus(apply._id, 'Rejected');
+                    await updatePostMatched(post._id, false);
                     setUpdateStatusLoading(false);
                     setOpenCancelApplyModal(false);
                     window.location.href = `/post/${post._id}`;

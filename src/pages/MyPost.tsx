@@ -18,7 +18,11 @@ export default function MyPostPage() {
     const fetchUserPosts = async () => {
       setLoading(true);
       const userPosts = await getUserPosts(user._id);
-      setPosts(userPosts);
+      const sortedPosts = userPosts.sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+      );
+      setPosts(sortedPosts);
       setLoading(false);
     };
 

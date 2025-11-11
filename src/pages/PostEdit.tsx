@@ -128,6 +128,7 @@ export default function PostEditPage() {
     image3Url: '',
     telNumber: '',
     date: undefined,
+    isMatched: false,
   });
 
   const [validationErrors, setValidationErrors] = useState<
@@ -185,6 +186,7 @@ export default function PostEditPage() {
         location: currentPost?.location || '',
         telNumber: currentPost?.telNumber || '',
         date: parsedDate,
+        isMatched: currentPost?.isMatched || false,
         coverPhotoUrl: cover,
         image1Url: support[0] ?? '',
         image2Url: support[1] ?? '',

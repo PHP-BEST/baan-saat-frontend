@@ -19,7 +19,11 @@ export default function MyApplyPage() {
     const getApplies = async () => {
       setLoading(true);
       const currentApplies = await getDetailedAppliesByProviderId(user._id);
-      setAppliesDetail(currentApplies);
+      const sortedApplies = currentApplies.sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+      );
+      setAppliesDetail(sortedApplies);
       setLoading(false);
     };
     getApplies();
@@ -91,7 +95,15 @@ export default function MyApplyPage() {
                     {apply.appliedPrice} THB
                   </td>
                   <td
-                    className={`border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap font-bold ${apply.status == 'Accepted' ? 'text-accept' : apply.status == 'Rejected' ? 'text-reject' : ''}`}
+                    className={`border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap font-bold 
+                      ${
+                        apply.status == 'Accepted'
+                          ? 'text-accept'
+                          : apply.status == 'Rejected' ||
+                              apply.status == 'Deleted'
+                            ? 'text-reject'
+                            : ''
+                      }`}
                   >
                     {apply.status}
                   </td>

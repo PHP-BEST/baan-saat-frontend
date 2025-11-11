@@ -22,11 +22,13 @@ export default function LandingPage() {
       if (user && user.role == 'provider') {
         const allPosts = await getAllAvailablePosts();
         const sortedPosts = allPosts
+          .filter((p) => p.customerId != user._id)
           .sort(
             (a, b) =>
               new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
           )
           .slice(0, 9);
+
         setPosts(sortedPosts);
       } else if (user && user.role == 'customer') {
         const allPosts = await getUserPosts(user._id);

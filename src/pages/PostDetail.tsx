@@ -6,13 +6,13 @@ import Footer from '@/components/our-components/footer';
 import ActionButton from '@/components/our-components/actionButton';
 import {
   convertTagsToLabels,
+  deleteApply,
   formatDateToDisplay,
-  rejectApply,
 } from '@/utils/function';
 import { Calendar, Loader, Phone } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import Loading from '@/components/our-components/loading';
-import { getPostById, updatePostStatus } from '@/api/post';
+import { getPostById, updatePostMatched, updatePostStatus } from '@/api/post';
 import type { User } from '@/interfaces/User';
 import { getUserById } from '@/api/user';
 import PostNotFound from '@/error/PostNotFound';
@@ -135,6 +135,11 @@ export default function PostDetailPage() {
           {/* Post Name */}
           <h1 title={post.title} className="text-3xl font-bold text-gray-900">
             {post.title}
+            {post.status == 'Deleted' && (
+              <span className="ml-4 px-3 py-1 rounded-full bg-red-500 text-xl text-white">
+                Deleted
+              </span>
+            )}
           </h1>
 
           {/* Cover Photo */}
@@ -305,7 +310,8 @@ export default function PostDetailPage() {
                               ${
                                 apply.status == 'Accepted'
                                   ? 'text-accept'
-                                  : apply.status == 'Rejected'
+                                  : apply.status == 'Rejected' ||
+                                      apply.status == 'Deleted'
                                     ? 'text-reject'
                                     : 'text-black'
                               }`}
@@ -330,7 +336,7 @@ export default function PostDetailPage() {
                 <p
                   className="text-lg font-semibold text-button-action hover:underline cursor-pointer"
                   onClick={() => {
-                    navigate(`/user/${acceptedApply?.providerId}`);
+                    navigate(`/user/${acceptedApply?.providerId}/provider`);
                   }}
                 >
                   {acceptedApply ? acceptedApply.provider.name : 'Unknown'}
@@ -374,78 +380,71 @@ export default function PostDetailPage() {
             )}
 
           <div className="flex justify-end gap-4 my-8">
-            {user &&
-            user?._id === post.customerId &&
-            post.status != 'Deleted' ? (
-              <>
-                {/* Customer View */}
-                {!hasAcceptedApply ? (
-                  <ActionButton
-                    className="cursor-pointer"
-                    onClick={() => {
-                      navigate(`/post/${post._id}/edit`);
-                    }}
-                  >
-                    Edit
-                  </ActionButton>
-                ) : (
-                  <ActionButton
-                    className="cursor-pointer"
-                    onClick={() => {
-                      navigate(`/chat/${acceptedApply?._id}`);
-                    }}
-                  >
-                    Chat
-                  </ActionButton>
-                )}
-                <ActionButton
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setOpenDeletePostModal(true);
-                  }}
-                >
-                  Delete
-                </ActionButton>
-              </>
-            ) : (
-              user && (
+            {post.status !== 'Deleted' &&
+              (user && user._id === post.customerId ? (
                 <>
-                  {/* Provider View */}
-                  {!myApply ? (
-                    !hasAcceptedApply && (
-                      <ActionButton
-                        className="cursor-pointer"
-                        onClick={() => {
-                          navigate(`/apply/${post._id}/create`);
-                        }}
-                      >
-                        Create Apply
-                      </ActionButton>
-                    )
-                  ) : !hasAcceptedApply ? (
+                  {/* Customer View */}
+                  {!hasAcceptedApply ? (
                     <ActionButton
                       className="cursor-pointer"
-                      onClick={() => {
-                        navigate(`/apply/${myApply._id}`);
-                      }}
+                      onClick={() => navigate(`/post/${post._id}/edit`)}
                     >
-                      View Apply
+                      Edit
                     </ActionButton>
                   ) : (
-                    myApply._id == acceptedApply?._id && (
-                      <ActionButton
-                        className="cursor-pointer"
-                        onClick={() => {
-                          navigate(`/chat/${acceptedApply?._id}`);
-                        }}
-                      >
-                        Chat
-                      </ActionButton>
-                    )
+                    <ActionButton
+                      className="cursor-pointer"
+                      onClick={() => navigate(`/chat/${acceptedApply?._id}`)}
+                    >
+                      Chat
+                    </ActionButton>
+                  )}
+
+                  {post.status == 'Not working' && (
+                    <ActionButton
+                      className="cursor-pointer"
+                      onClick={() => setOpenDeletePostModal(true)}
+                    >
+                      Delete
+                    </ActionButton>
                   )}
                 </>
-              )
-            )}
+              ) : (
+                user && (
+                  <>
+                    {/* Provider View */}
+                    {!myApply ? (
+                      !hasAcceptedApply && (
+                        <ActionButton
+                          className="cursor-pointer"
+                          onClick={() => navigate(`/apply/${post._id}/create`)}
+                        >
+                          Create Apply
+                        </ActionButton>
+                      )
+                    ) : !hasAcceptedApply ? (
+                      <ActionButton
+                        className="cursor-pointer"
+                        onClick={() => navigate(`/apply/${myApply._id}`)}
+                      >
+                        View Apply
+                      </ActionButton>
+                    ) : (
+                      myApply._id === acceptedApply?._id && (
+                        <ActionButton
+                          className="cursor-pointer"
+                          onClick={() =>
+                            navigate(`/chat/${acceptedApply?._id}`)
+                          }
+                        >
+                          Chat
+                        </ActionButton>
+                      )
+                    )}
+                  </>
+                )
+              ))}
+
             <ActionButton
               buttonColor="red"
               className="cursor-pointer"
@@ -475,9 +474,10 @@ export default function PostDetailPage() {
                 onClick={async () => {
                   setStatusPostLoading(true);
                   await updatePostStatus(post._id, 'Deleted');
+                  await updatePostMatched(post._id, false);
                   const allApplies = await getAppliesByPostId(post._id);
                   const rejectPromises = allApplies.map((a) =>
-                    rejectApply(a._id),
+                    deleteApply(a._id),
                   );
                   await Promise.all(rejectPromises);
                   setStatusPostLoading(false);
