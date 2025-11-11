@@ -37,7 +37,7 @@ export default function GenericAccountLayout({
 
   return (
     <>
-      <Header isHideSearchBar={user?.role != 'provider'} />
+      <Header />
       <div className="w-full min-h-screen px-12 py-8 flex gap-6 bg-gray-50 justify-center">
         {/* Sidebar */}
         <div className="flex flex-col w-1/4 min-w-[160px] max-w-[240px]">

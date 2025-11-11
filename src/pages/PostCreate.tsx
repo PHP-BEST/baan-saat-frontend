@@ -244,7 +244,7 @@ export const PostCreatePage: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      <Header isHideSearchBar={user?.role != 'provider'} />
+      <Header />
       <main className="flex-grow flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-2xl space-y-8">
           <h1 className="text-3xl font-bold text-gray-900">Create a Post</h1>

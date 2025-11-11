@@ -76,7 +76,7 @@ export default function PostDetailPage() {
   if (loading) {
     return (
       <div>
-        <Header isHideSearchBar={user?.role != 'provider'} />
+        <Header />
         <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
           <Loading />
         </div>
@@ -88,7 +88,7 @@ export default function PostDetailPage() {
   if (!post) {
     return (
       <div>
-        <Header isHideSearchBar={user?.role != 'provider'} />
+        <Header />
         <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
           <PostNotFound />
         </div>
@@ -118,7 +118,7 @@ export default function PostDetailPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      <Header isHideSearchBar={user?.role != 'provider'} />
+      <Header />
       <main className="flex-grow flex justify-center py-12 px-4">
         <div className="w-full max-w-2xl space-y-6">
           {/* Post Name */}

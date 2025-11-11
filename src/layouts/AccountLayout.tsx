@@ -37,7 +37,7 @@ const UserSidebarMenu: SidebarMenu[] = [
     name: 'My Posts',
     path: '/post',
     isDisabled: false,
-    roleToDisplay: 'customer',
+    roleToDisplay: 'both',
   },
   {
     name: 'Provider Account',

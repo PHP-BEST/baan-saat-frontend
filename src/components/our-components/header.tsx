@@ -32,7 +32,7 @@ const Header = ({ isHideSearchBar = false }: HeaderProps) => {
           alt="Baan Saat Logo"
           className="cursor-pointer"
           onClick={() => {
-            if (user) {
+            if (user && user.role === 'customer') {
               navigate('/account');
             } else {
               navigate('/');
@@ -41,9 +41,9 @@ const Header = ({ isHideSearchBar = false }: HeaderProps) => {
         />
 
         {/* Search Box */}
-        {!isHideSearchBar && (
+        {!isHideSearchBar && user?.role === 'provider' && (
           <div
-            className="bg-white w-full h-[50px] flex gap-1 items-center pl-1 pr-3 "
+            className="bg-white w-full h-[50px] flex gap-1 items-center pl-1 pr-3"
             id="Searchbar-header"
           >
             <Search
@@ -55,15 +55,12 @@ const Header = ({ isHideSearchBar = false }: HeaderProps) => {
             <input
               type="text"
               className="w-full focus:outline-none focus:border-none"
-              onChange={(e) => {
-                e.preventDefault();
-                setQuery(e.target.value);
-              }}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSearch();
-                }
+                if (e.key === 'Enter') handleSearch();
               }}
+              placeholder="Search..."
             />
           </div>
         )}
@@ -72,19 +69,15 @@ const Header = ({ isHideSearchBar = false }: HeaderProps) => {
       {/* Right Side */}
       <div className="w-fit max-w-[50%] flex gap-3 items-center">
         {user ? (
-          <>
-            {/* Avatar Image */}
-            <AvatarImage />
-          </>
+          <AvatarImage />
         ) : (
-          <>
-            <ActionButton onClick={() => navigate('/login')}>
-              Sign in
-            </ActionButton>
-          </>
+          <ActionButton onClick={() => navigate('/login')}>
+            Sign in
+          </ActionButton>
         )}
       </div>
     </header>
   );
 };
+
 export default Header;
