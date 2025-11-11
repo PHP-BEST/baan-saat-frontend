@@ -22,6 +22,27 @@ export const getAllPosts = async (): Promise<Post[]> => {
   }
 };
 
+export const getAllAvailablePosts = async (): Promise<Post[]> => {
+  try {
+    const response = await axios.get<ResponseInterface<Post[]>>(
+      `${API_BASE}/available`,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+
+    if (response.data.success) {
+      const posts: Post[] = response.data.data;
+      return posts;
+    } else {
+      return [];
+    }
+  } catch (err) {
+    console.log('Error fetching posts in getAllPosts:', err);
+    return [];
+  }
+};
+
 export const getUserPosts = async (userId: string): Promise<Post[]> => {
   try {
     const allPosts = await getAllPosts();

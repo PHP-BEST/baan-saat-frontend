@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import Footer from '@/components/our-components/footer';
 import { Search } from 'lucide-react';
 import type { Post } from '@/interfaces/Post';
-import { getAllPosts, getUserPosts } from '@/api/post';
+import { getAllAvailablePosts, getUserPosts } from '@/api/post';
 import Header from '@/components/our-components/header';
 import PostCard from '@/components/our-components/postCard';
 import { useNavigate } from 'react-router-dom';
@@ -20,9 +20,7 @@ export default function LandingPage() {
     const fetchPosts = async () => {
       setLoading(true);
       if (user && user.role == 'provider') {
-        const allPosts = (await getAllPosts()).filter(
-          (p) => p.customerId != user._id,
-        );
+        const allPosts = await getAllAvailablePosts();
         const sortedPosts = allPosts
           .sort(
             (a, b) =>

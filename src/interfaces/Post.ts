@@ -12,7 +12,7 @@ export interface Post {
   location: string;
   tag: PostTag;
   others: string;
-  status: 'Not working' | 'In progress' | 'Completed';
+  status: 'Not working' | 'In progress' | 'Completed' | 'Deleted';
   isMatched: boolean;
   date: Date;
   createdAt: Date;
