@@ -1,11 +1,12 @@
-import { getUserPosts } from '@/api/post';
-import { useState, useEffect } from 'react';
+import { updateIsOfferedPosts, filterPosts } from '@/api/post';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useUser } from '@/context/UserContext';
 import type { Post } from '@/interfaces/Post';
 import Loading from '@/components/our-components/loading';
 import PostList from '@/components/our-components/PostList';
 import ActionButton from '@/components/our-components/actionButton';
-
+import { createOffer, type OfferFormInterface } from '@/api/offer';
+import { useParams } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -17,33 +18,59 @@ import {
 } from '@/components/ui/dialog';
 
 export default function OfferModal() {
-const [open, setOpen] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
-  const handleCheckboxChange = (id: string, checked: boolean) => {
-    if (checked) {
-      setSelectedIds((prev) => [...prev, id]);
-    } else {
-      setSelectedIds((prev) => prev.filter((x) => x !== id));
-    }
-  };
-  const handleSubmit = () => {
-    setOpen(false);
-  };
-  if (!user) return;
+  const [selectedFormData, setSelectedformData] = useState<
+    OfferFormInterface[]
+  >([]);
+  const { userId } = useParams();
+  if (!user || !userId) return;
   useEffect(() => {
     const fetchUserPosts = async () => {
       setLoading(true);
-      const userPosts = await getUserPosts(user._id);
+      const userPosts = await filterPosts({
+        userId: user._id,
+        isOffered: false,
+      });
       setPosts(userPosts);
       setLoading(false);
     };
 
     fetchUserPosts();
   }, []);
+  const handleCheckboxChange = (post: Post, checked: boolean) => {
+    if (checked) {
+      setSelectedformData((prev) => [
+        ...prev,
+        {
+          customerId: post.customerId,
+          providerId: userId!,
+          postId: post._id,
+          title: post.title,
+          budget: post.budget,
+        },
+      ]);
+    } else {
+      setSelectedformData((prev) => prev.filter((x) => x.postId !== post._id));
+    }
+  };
+
+  const handleSubmit = async (e?: FormEvent<HTMLFormElement>) => {
+    if (e) e.preventDefault();
+    const postIds = selectedFormData.map((item) => item.postId);
+    const success = await createOffer(selectedFormData);
+
+    if (success) {
+      await updateIsOfferedPosts(postIds);
+      setSelectedformData([]);
+    } else {
+      alert('Failed to offer. Please try again.');
+    }
+    setOpen(false);
+  };
+
   if (loading) {
     return (
       <>
@@ -130,11 +157,13 @@ const [open, setOpen] = useState<boolean>(false);
           <div className="mb-0 max-h-[60vh] overflow-y-auto">
             <div className="min-h-[40vh]">
               {posts.length > 0 ? (
-                posts.map((post: Post, index) => {
+                posts.map((post: Post) => {
                   return (
-                    <div className="w-full grid grid-cols-[5fr_0.5fr] hover:bg-gray-200 gap-4">
+                    <div
+                      key={post._id}
+                      className="w-full grid grid-cols-[5fr_0.5fr] hover:bg-gray-200 gap-4"
+                    >
                       <PostList
-                        key={index}
                         title={post.title}
                         budget={post.budget}
                         date={post.date}
@@ -145,7 +174,7 @@ const [open, setOpen] = useState<boolean>(false);
                           className="w-4 h-4 bg-gray-400 ms-1"
                           type="checkbox"
                           onChange={(e) =>
-                            handleCheckboxChange(post._id, e.target.checked)
+                            handleCheckboxChange(post, e.target.checked)
                           }
                         />
                       </div>

@@ -6,6 +6,7 @@ const UserSidebarMenu = [
   { name: 'Account Setting', path: '/setting', isDisabled: true },
   { name: 'Privacy', path: '/privacy', isDisabled: true },
   { name: 'My Applies', path: '/apply', isDisabled: false },
+  { name: 'My Offers', path: '/offer', isDisabled: false },
   { name: 'My Posts', path: '/post', isDisabled: false },
   { name: 'Provider Account', path: '/provider-account', isDisabled: false },
 ];

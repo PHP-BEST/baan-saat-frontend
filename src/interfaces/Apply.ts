@@ -30,4 +30,9 @@ export interface ApplyDetail {
   updatedAt: Date;
 }
 
-export type ApplyStatus = 'Pending' | 'Accepted' | 'Rejected';
+export type ApplyStatus =
+  | 'Pending'
+  | 'Accepted'
+  | 'Rejected'
+  | 'Offered'
+  | 'Taken';

@@ -4,6 +4,7 @@ import AccountLayout from './layouts/AccountLayout';
 import MainLayout from './layouts/MainLayout';
 import LandingPage from './pages/Landing';
 import MyPostPage from './pages/MyPost';
+import MyOfferPage from './pages/MyOffer';
 import LoginPage from './pages/Login';
 import ProfilePage from './pages/Profile';
 import ProtectedRoute from './middleware/protectedRoute';
@@ -50,6 +51,7 @@ export const router = createBrowserRouter([
           { path: 'become-provider', element: <BecomeProvider /> },
           { path: 'post', element: <MyPostPage /> },
           { path: 'apply', element: <MyApplyPage /> },
+          { path: 'offer', element: <MyOfferPage /> },
         ],
       },
       {

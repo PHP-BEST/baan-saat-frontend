@@ -235,7 +235,7 @@ export const updateIsOfferedPosts = async (
   try {
     const response = await axios.post<ResponseInterface<string>>(
       `${API_BASE}/update-isoffered`,
-       postId ,
+      postId,
       {
         headers: { 'Content-Type': 'application/json' },
       },

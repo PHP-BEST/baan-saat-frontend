@@ -16,7 +16,7 @@ export const createOffer = async (
   try {
     const response = await axios.post<ResponseInterface<Offer>>(
       `${API_BASE}`,
-       formData ,
+      formData,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -29,17 +29,16 @@ export const createOffer = async (
     return false;
   }
 };
-export const getDetailedOffersByProviderId = async(
-    providerId: string
+export const getDetailedOffersByProviderId = async (
+  providerId: string,
 ): Promise<OfferDetail[]> => {
-    try{
-        const response = await axios.get<ResponseInterface<OfferDetail[]>>(
-            `${API_BASE}/provider/${providerId}/`
-        );
-        return response.data.data
-    }
-    catch (e){
-        console.error('Error fetching offers by provider ID: ', e);
-        throw e;
-    }
-}
+  try {
+    const response = await axios.get<ResponseInterface<OfferDetail[]>>(
+      `${API_BASE}/provider/${providerId}/`,
+    );
+    return response.data.data;
+  } catch (e) {
+    console.error('Error fetching offers by provider ID: ', e);
+    throw e;
+  }
+};
