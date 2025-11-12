@@ -40,6 +40,12 @@ const UserSidebarMenu: SidebarMenu[] = [
     roleToDisplay: 'both',
   },
   {
+    name: 'My Works',
+    path: '/work',
+    isDisabled: false,
+    roleToDisplay: 'provider',
+  },
+  {
     name: 'Provider Account',
     path: '/provider-account',
     isDisabled: false,
