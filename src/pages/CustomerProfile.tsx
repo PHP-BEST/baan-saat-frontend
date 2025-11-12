@@ -11,6 +11,7 @@ import { getPostsByUserId } from '@/api/post';
 import PostCard from '@/components/our-components/postCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import UserNotFound from '@/error/UserNotFound';
+import OfferModal from '@/components/ui/offerModal';
 
 export default function CustomerProfilePage() {
   const navigate = useNavigate();
@@ -116,6 +117,7 @@ export default function CustomerProfilePage() {
               </p>
             </div>
           </div>
+          <OfferModal />
         </div>
 
         {/* Posts */}

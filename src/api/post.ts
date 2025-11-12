@@ -105,12 +105,13 @@ export const searchPosts = async (query: string): Promise<Post[]> => {
 export interface FilterPostParams {
   userId?: string;
   title?: string;
-  tags: PostTag[];
-  other: string;
+  tags?: PostTag[];
+  other?: string;
   minBudget?: number;
   maxBudget?: number;
   startDate?: string;
   endDate?: string;
+  isOffered?: boolean;
 }
 
 export const filterPosts = async (
@@ -228,7 +229,23 @@ export const updatePost = async (
     return false;
   }
 };
-
+export const updateIsOfferedPosts = async (
+  postId: string[],
+): Promise<boolean> => {
+  try {
+    const response = await axios.post<ResponseInterface<string>>(
+      `${API_BASE}/update-isoffered`,
+       postId ,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+    return !!response.data.success;
+  } catch (err) {
+    console.error('Error updating post:', err);
+    return false;
+  }
+};
 export const deletePost = async (postId: string): Promise<boolean> => {
   try {
     const response = await axios.delete<ResponseInterface<Post>>(

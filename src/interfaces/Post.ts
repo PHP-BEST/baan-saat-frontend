@@ -13,6 +13,7 @@ export interface Post {
   image2Url?: string;
   image3Url?: string;
   date: Date;
+  isOffered: boolean;
   status: 'Not working' | 'In progress' | 'Completed';
   createdAt: Date;
   updatedAt: Date;
