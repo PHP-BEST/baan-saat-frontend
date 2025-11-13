@@ -302,7 +302,7 @@ export default function ReviewCreate() {
               disabled={submitting}
               onClick={() => {
                 setSuccessOpen(false);
-                nav(`user/${providerId}/provider?tab=reviews`);
+                nav(`/user/${providerId}/provider`);
               }}
             >
               View provider reviews
