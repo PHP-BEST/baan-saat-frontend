@@ -14,8 +14,12 @@ import {
   rejectApply,
 } from '@/utils/function';
 import { Calendar, Loader, Phone } from 'lucide-react';
-import { getApplyById, getDetailedAppliesByPostId } from '@/api/apply';
-import { deletePost, getPostById } from '@/api/post';
+import {
+  getApplyById,
+  getDetailedAppliesByPostId,
+  updateApplyStatus,
+} from '@/api/apply';
+import { getPostById, updatePostMatched } from '@/api/post';
 import { getUserById } from '@/api/user';
 import { useUser } from '@/context/UserContext';
 import PostNotFound from '@/error/PostNotFound';
@@ -147,7 +151,12 @@ export default function ApplyDetailPage() {
             {/* Post Customer Name */}
             <div className="w-full flex flex-col gap-2">
               <h2 className="text-2xl font-semibold">Posted By</h2>
-              <p className="text-lg text-gray-700">
+              <p
+                className="text-lg font-semibold text-button-action hover:underline cursor-pointer"
+                onClick={() => {
+                  navigate(`/user/${customerUser?._id}`);
+                }}
+              >
                 {customerUser ? customerUser.name : 'Unknown'}
               </p>
             </div>
@@ -219,7 +228,7 @@ export default function ApplyDetailPage() {
                 className={`${
                   applyAction == 'Accepted'
                     ? 'border rounded-full border-accept bg-accept'
-                    : applyAction == 'Rejected'
+                    : applyAction == 'Rejected' || applyAction == 'Deleted'
                       ? 'border-reject bg-reject'
                       : 'border-black bg-black'
                 } border rounded-full text-xl font-semibold text-white px-3 py-1`}
@@ -235,7 +244,7 @@ export default function ApplyDetailPage() {
                 <p
                   className="text-lg font-semibold text-button-action hover:underline cursor-pointer"
                   onClick={() => {
-                    navigate(`/user/${providerUser?._id}`);
+                    navigate(`/user/${providerUser?._id}/provider`);
                   }}
                 >
                   {providerUser ? providerUser.name : 'Unknown'}
@@ -373,6 +382,7 @@ export default function ApplyDetailPage() {
                     setStatusApplyLoading(true);
                     setApplyAction('Accepted');
                     await acceptApply(apply._id);
+                    await updatePostMatched(post._id, true);
                     const otherApplies = await getDetailedAppliesByPostId(
                       apply.postId,
                     );
@@ -476,17 +486,16 @@ export default function ApplyDetailPage() {
           <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
               <p className="mb-2 text-lg font-semibold">
-                ต้องการ Cancel Provider ใช่หรือไม่?
+                ต้องการยกเลิกการให้บริการของผู้ให้บริการคนนี้ใช่หรือไม่?
               </p>
-              <p className="text-sm text-red-500 mb-4">
-                การยกเลิกจะลบโพสต์นี้อย่างถาวร รวมถึงข้อมูลการสมัครทั้งหมด
-                และไม่สามารถกู้คืนได้
+              <p className="mb-4 text-sm text-red-500">
+                การยกเลิกการให้บริการจะทำให้ผู้บริการไม่สามารถสมัครให้บริการนี้ได้อีก
               </p>
               <div className="flex justify-center gap-4">
                 <ActionButton
                   onClick={async () => {
                     setStatusApplyLoading(true);
-                    await deletePost(apply.postId);
+                    await updateApplyStatus(apply._id, 'Rejected');
                     setStatusApplyLoading(false);
                     setOpenCancelApplyModal(false);
                     window.location.href = '/account/post';

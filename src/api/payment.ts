@@ -8,9 +8,13 @@ export const getConnectClientSecret = async () => {
     const response = await Axios.post(`${API_BASE}/account-session`);
     const { client_secret: clientSecret } = response.data;
     return clientSecret;
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
+  } catch (error: unknown) {
+    let errorMessage = 'Unknown error occurred';
+    if (Axios.isAxiosError(error)) {
+      errorMessage = error.response?.data?.error || error.message;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
     console.error('An error occurred: ', errorMessage);
     return null;
   }
@@ -21,9 +25,13 @@ export const getPaymentIntentSecret = async (postId: string) => {
     const response = await Axios.get(`${API_BASE}/payment-intent/${postId}`);
     const { client_secret: clientSecret } = response.data;
     return clientSecret;
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
+  } catch (error: unknown) {
+    let errorMessage = 'Unknown error occurred';
+    if (Axios.isAxiosError(error)) {
+      errorMessage = error.response?.data?.error || error.message;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
     console.error('An error occurred: ', errorMessage);
     return null;
   }
@@ -47,9 +55,13 @@ export const createIntentClientSecret = async (
     });
     const { client_secret: clientSecret } = response.data;
     return clientSecret;
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
+  } catch (error: unknown) {
+    let errorMessage = 'Unknown error occurred';
+    if (Axios.isAxiosError(error)) {
+      errorMessage = error.response?.data?.error || error.message;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
     console.error('An error occurred: ', errorMessage);
     return null;
   }
@@ -60,9 +72,13 @@ export const getPaymentStatusByPostId = async (postId: string) => {
     const response = await Axios.put(`${API_BASE}/status/${postId}`);
     const { status } = response.data;
     return status;
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
+  } catch (error: unknown) {
+    let errorMessage = 'Unknown error occurred';
+    if (Axios.isAxiosError(error)) {
+      errorMessage = error.response?.data?.error || error.message;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
     console.error('An error occurred: ', errorMessage);
     return null;
   }

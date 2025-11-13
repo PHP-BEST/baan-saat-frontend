@@ -1,4 +1,4 @@
-import { updateIsOfferedPosts, filterPosts } from '@/api/post';
+import { updateManyPostMatched, filterPosts } from '@/api/post';
 import { useState, useEffect, type FormEvent } from 'react';
 import { useUser } from '@/context/UserContext';
 import type { Post } from '@/interfaces/Post';
@@ -20,6 +20,7 @@ import {
 export default function OfferModal() {
   const [open, setOpen] = useState<boolean>(false);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [hasOffer, setHasOffer] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
   const [selectedFormData, setSelectedformData] = useState<
@@ -32,16 +33,18 @@ export default function OfferModal() {
       setLoading(true);
       const userPosts = await filterPosts({
         userId: user._id,
-        isOffered: false,
+        isMatched: false,
       });
+      console.log(userPosts);
       setPosts(userPosts);
       setLoading(false);
     };
 
     fetchUserPosts();
-  }, []);
+  }, [open]);
   const handleCheckboxChange = (post: Post, checked: boolean) => {
     if (checked) {
+      setHasOffer(true);
       setSelectedformData((prev) => [
         ...prev,
         {
@@ -53,6 +56,7 @@ export default function OfferModal() {
         },
       ]);
     } else {
+      if (selectedFormData.length === 1) setHasOffer(false);
       setSelectedformData((prev) => prev.filter((x) => x.postId !== post._id));
     }
   };
@@ -63,7 +67,7 @@ export default function OfferModal() {
     const success = await createOffer(selectedFormData);
 
     if (success) {
-      await updateIsOfferedPosts(postIds);
+      await updateManyPostMatched(postIds);
       setSelectedformData([]);
     } else {
       alert('Failed to offer. Please try again.');
@@ -197,6 +201,7 @@ export default function OfferModal() {
                 buttonColor="blue"
                 fontSize={16}
                 onClick={() => handleSubmit()}
+                disabled={!hasOffer}
               >
                 Submit
               </ActionButton>

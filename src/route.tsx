@@ -28,6 +28,7 @@ import Balances from './pages/payments/Balances';
 import OnboardPage from './pages/payments/Onboard';
 import ApplyDetailPage from './pages/ApplyDetail';
 import ChatPage from './pages/Chat';
+import ProviderProfilePage from './pages/ProviderProfilePage';
 
 export const router = createBrowserRouter([
   {
@@ -100,6 +101,10 @@ export const router = createBrowserRouter([
       {
         path: 'user/:userId',
         element: <CustomerProfilePage />,
+      },
+      {
+        path: 'user/:userId/provider',
+        element: <ProviderProfilePage />,
       },
       {
         path: 'user/:userId/post',

@@ -1,5 +1,5 @@
 import { API_ROOT, type ResponseInterface } from '@/config/api';
-import type { Post, PostTag } from '@/interfaces/Post';
+import type { Post, PostStatus, PostTag } from '@/interfaces/Post';
 import axios from 'axios';
 
 const API_BASE = `${API_ROOT}/api/posts`;
@@ -9,6 +9,27 @@ export const getAllPosts = async (): Promise<Post[]> => {
     const response = await axios.get<ResponseInterface<Post[]>>(`${API_BASE}`, {
       headers: { 'Content-Type': 'application/json' },
     });
+
+    if (response.data.success) {
+      const posts: Post[] = response.data.data;
+      return posts;
+    } else {
+      return [];
+    }
+  } catch (err) {
+    console.log('Error fetching posts in getAllPosts:', err);
+    return [];
+  }
+};
+
+export const getAllAvailablePosts = async (): Promise<Post[]> => {
+  try {
+    const response = await axios.get<ResponseInterface<Post[]>>(
+      `${API_BASE}/available`,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
 
     if (response.data.success) {
       const posts: Post[] = response.data.data;
@@ -111,7 +132,7 @@ export interface FilterPostParams {
   maxBudget?: number;
   startDate?: string;
   endDate?: string;
-  isOffered?: boolean;
+  isMatched?: boolean;
 }
 
 export const filterPosts = async (
@@ -145,6 +166,7 @@ export interface PostFormInterface {
   telNumber: string;
   budget: number;
   location: string;
+  isMatched: boolean;
   coverPhotoUrl?: string;
   image1Url?: string;
   image2Url?: string;
@@ -178,18 +200,11 @@ export const createPost = async (
   }
 };
 
-export const updatePostStatus = async (postId: string) => {
+export const updatePostStatus = async (postId: string, status: PostStatus) => {
   try {
-    const post = await getPostById(postId);
-    let nextStatus = 'Not working';
-    if (post?.status == 'Not working') {
-      nextStatus = 'In progress';
-    } else if (post?.status == 'In progress') {
-      nextStatus = 'Completed';
-    }
     const response = await axios.put<ResponseInterface<Post>>(
       `${API_BASE}/${postId}`,
-      { status: nextStatus },
+      { status },
       {
         headers: { 'Content-Type': 'application/json' },
       },
@@ -229,13 +244,14 @@ export const updatePost = async (
     return false;
   }
 };
-export const updateIsOfferedPosts = async (
-  postId: string[],
+export const updateManyPostMatched = async (
+  postsId: string[],
 ): Promise<boolean> => {
+  console.log(postsId);
   try {
     const response = await axios.post<ResponseInterface<string>>(
-      `${API_BASE}/update-isoffered`,
-      postId,
+      `${API_BASE}/update-poststatus`,
+      { postsId },
       {
         headers: { 'Content-Type': 'application/json' },
       },
@@ -246,19 +262,22 @@ export const updateIsOfferedPosts = async (
     return false;
   }
 };
-export const deletePost = async (postId: string): Promise<boolean> => {
+export const updatePostMatched = async (
+  postId: string,
+  isMatched: boolean,
+): Promise<boolean> => {
   try {
-    const response = await axios.delete<ResponseInterface<Post>>(
+    const response = await axios.put<ResponseInterface<Post>>(
       `${API_BASE}/${postId}`,
+      { isMatched },
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
     );
 
-    if (response.data.success) {
-      return true;
-    } else {
-      throw new Error('Failed to delete post');
-    }
+    return !!response.data.success;
   } catch (err) {
-    console.error('Error deleting post:', err);
+    console.error('Error updating post:', err);
     return false;
   }
 };

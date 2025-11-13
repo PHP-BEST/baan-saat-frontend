@@ -88,3 +88,7 @@ export const acceptApply = async (applyId: string) => {
 export const rejectApply = async (applyId: string) => {
   await updateApplyStatus(applyId, 'Rejected');
 };
+
+export const deleteApply = async (applyId: string) => {
+  await updateApplyStatus(applyId, 'Deleted');
+};

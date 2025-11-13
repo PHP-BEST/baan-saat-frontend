@@ -4,20 +4,26 @@ export interface Post {
   title: string;
   description?: string;
   budget: number;
-  telNumber: string;
-  location: string;
-  tag: PostTag;
-  other: string;
   coverPhotoUrl?: string;
   image1Url?: string;
   image2Url?: string;
   image3Url?: string;
+  telNumber: string;
+  location: string;
+  tag: PostTag;
+  others: string;
+  status: PostStatus;
+  isMatched: boolean;
   date: Date;
-  isOffered: boolean;
-  status: 'Not working' | 'In progress' | 'Completed';
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type PostStatus =
+  | 'Not working'
+  | 'In progress'
+  | 'Completed'
+  | 'Deleted';
 
 export type PostTag =
   | 'houseCleaning'

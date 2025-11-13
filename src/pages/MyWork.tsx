@@ -6,7 +6,7 @@ import { formatDateToDisplay } from '@/utils/function';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function MyApplyPage() {
+export default function MyWorkPage() {
   const { user } = useUser();
   const navigate = useNavigate();
 
@@ -19,11 +19,21 @@ export default function MyApplyPage() {
     const getApplies = async () => {
       setLoading(true);
       const currentApplies = await getDetailedAppliesByProviderId(user._id);
-      const sortedApplies = currentApplies.sort(
+
+      const workStatusesToShow = ['Not working', 'In progress', 'Completed'];
+
+      const filteredWork = currentApplies.filter(
+        (apply) =>
+          apply.status === 'Accepted' &&
+          workStatusesToShow.includes(apply.post.status),
+      );
+
+      const sortedWork = filteredWork.sort(
         (a, b) =>
           new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
       );
-      setAppliesDetail(sortedApplies);
+
+      setAppliesDetail(sortedWork);
       setLoading(false);
     };
     getApplies();
@@ -32,7 +42,7 @@ export default function MyApplyPage() {
   if (loading) {
     return (
       <>
-        <h1 className="text-2xl font-bold mb-2">My Applies</h1>
+        <h1 className="text-2xl font-bold mb-2">My Work</h1>
         <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
           <Loading />
         </div>
@@ -43,10 +53,10 @@ export default function MyApplyPage() {
   if (appliesDetail.length === 0) {
     return (
       <>
-        <h1 className="text-2xl font-bold mb-2">My Applies</h1>
+        <h1 className="text-2xl font-bold mb-2">My Work</h1>
         <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
           <p className="text-xl text-center font-semibold">
-            You haven&apos;t created any applies yet...
+            You don&apos;t have any active or completed work yet...
           </p>
         </div>
       </>
@@ -55,7 +65,7 @@ export default function MyApplyPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold mb-2">My Applies</h1>
+      <h1 className="text-2xl font-bold mb-2">My Work</h1>
       <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
         {/* Table */}
         <div className="w-full max-h-[100vh] overflow-auto">
@@ -97,15 +107,16 @@ export default function MyApplyPage() {
                   <td
                     className={`border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap font-bold 
                       ${
-                        apply.status == 'Accepted'
+                        apply.post.status === 'Completed'
                           ? 'text-accept'
-                          : apply.status == 'Rejected' ||
-                              apply.status == 'Deleted'
-                            ? 'text-reject'
-                            : ''
+                          : apply.post.status === 'In progress'
+                            ? 'text-blue-500'
+                            : apply.post.status === 'Not working'
+                              ? 'text-gray-500'
+                              : ''
                       }`}
                   >
-                    {apply.status}
+                    {apply.post.status}
                   </td>
                 </tr>
               ))}

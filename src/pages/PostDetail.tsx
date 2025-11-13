@@ -4,15 +4,23 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import ActionButton from '@/components/our-components/actionButton';
-import { convertTagsToLabels, formatDateToDisplay } from '@/utils/function';
-import { Calendar, Phone } from 'lucide-react';
+import {
+  convertTagsToLabels,
+  deleteApply,
+  formatDateToDisplay,
+} from '@/utils/function';
+import { Calendar, Loader, Phone } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import Loading from '@/components/our-components/loading';
-import { getPostById } from '@/api/post';
+import { getPostById, updatePostMatched, updatePostStatus } from '@/api/post';
 import type { User } from '@/interfaces/User';
 import { getUserById } from '@/api/user';
 import PostNotFound from '@/error/PostNotFound';
-import { checkMyApply, getDetailedAppliesByPostId } from '@/api/apply';
+import {
+  checkMyApply,
+  getAppliesByPostId,
+  getDetailedAppliesByPostId,
+} from '@/api/apply';
 import type { Apply, ApplyDetail } from '@/interfaces/Apply';
 import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
@@ -29,6 +37,9 @@ export default function PostDetailPage() {
   const [acceptedApply, setAcceptedApply] = useState<ApplyDetail | null>();
   const [hasAcceptedApply, setHasAcceptedApply] = useState(false);
   const [openIdx, setOpenIdx] = useState<number | null>(null);
+
+  const [isStatusPostLoading, setStatusPostLoading] = useState(false);
+  const [openDeletePostModal, setOpenDeletePostModal] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -124,6 +135,11 @@ export default function PostDetailPage() {
           {/* Post Name */}
           <h1 title={post.title} className="text-3xl font-bold text-gray-900">
             {post.title}
+            {post.status == 'Deleted' && (
+              <span className="ml-4 px-3 py-1 rounded-full bg-red-500 text-xl text-white">
+                Deleted
+              </span>
+            )}
           </h1>
 
           {/* Cover Photo */}
@@ -294,7 +310,8 @@ export default function PostDetailPage() {
                               ${
                                 apply.status == 'Accepted'
                                   ? 'text-accept'
-                                  : apply.status == 'Rejected'
+                                  : apply.status == 'Rejected' ||
+                                      apply.status == 'Deleted'
                                     ? 'text-reject'
                                     : 'text-black'
                               }`}
@@ -319,7 +336,7 @@ export default function PostDetailPage() {
                 <p
                   className="text-lg font-semibold text-button-action hover:underline cursor-pointer"
                   onClick={() => {
-                    navigate(`/user/${acceptedApply?.providerId}`);
+                    navigate(`/user/${acceptedApply?.providerId}/provider`);
                   }}
                 >
                   {acceptedApply ? acceptedApply.provider.name : 'Unknown'}
@@ -363,68 +380,71 @@ export default function PostDetailPage() {
             )}
 
           <div className="flex justify-end gap-4 my-8">
-            {user && user?._id === post.customerId ? (
-              <>
-                {/* Customer View */}
-                {!hasAcceptedApply ? (
-                  <ActionButton
-                    className="cursor-pointer"
-                    onClick={() => {
-                      navigate(`/post/${post._id}/edit`);
-                    }}
-                  >
-                    Edit
-                  </ActionButton>
-                ) : (
-                  <ActionButton
-                    className="cursor-pointer"
-                    onClick={() => {
-                      navigate(`/chat/${acceptedApply?._id}`);
-                    }}
-                  >
-                    Chat
-                  </ActionButton>
-                )}
-              </>
-            ) : (
-              user && (
+            {post.status !== 'Deleted' &&
+              (user && user._id === post.customerId ? (
                 <>
-                  {/* Provider View */}
-                  {!myApply ? (
-                    !hasAcceptedApply && (
-                      <ActionButton
-                        className="cursor-pointer"
-                        onClick={() => {
-                          navigate(`/apply/${post._id}/create`);
-                        }}
-                      >
-                        Create Apply
-                      </ActionButton>
-                    )
-                  ) : !hasAcceptedApply ? (
+                  {/* Customer View */}
+                  {!hasAcceptedApply ? (
                     <ActionButton
                       className="cursor-pointer"
-                      onClick={() => {
-                        navigate(`/apply/${myApply._id}`);
-                      }}
+                      onClick={() => navigate(`/post/${post._id}/edit`)}
                     >
-                      View Apply
+                      Edit
                     </ActionButton>
                   ) : (
-                    myApply._id == acceptedApply?._id && (
-                      <ActionButton
-                        className="cursor-pointer"
-                        onClick={() => {
-                          navigate(`/chat/${acceptedApply?._id}`);
-                        }}
-                      >
-                        Chat
-                      </ActionButton>
-                    )
+                    <ActionButton
+                      className="cursor-pointer"
+                      onClick={() => navigate(`/chat/${acceptedApply?._id}`)}
+                    >
+                      Chat
+                    </ActionButton>
+                  )}
+
+                  {post.status == 'Not working' && (
+                    <ActionButton
+                      className="cursor-pointer"
+                      onClick={() => setOpenDeletePostModal(true)}
+                    >
+                      Delete
+                    </ActionButton>
                   )}
                 </>
-              )
-            )}
+              ) : (
+                user && (
+                  <>
+                    {/* Provider View */}
+                    {!myApply ? (
+                      !hasAcceptedApply && (
+                        <ActionButton
+                          className="cursor-pointer"
+                          onClick={() => navigate(`/apply/${post._id}/create`)}
+                        >
+                          Create Apply
+                        </ActionButton>
+                      )
+                    ) : !hasAcceptedApply ? (
+                      <ActionButton
+                        className="cursor-pointer"
+                        onClick={() => navigate(`/apply/${myApply._id}`)}
+                      >
+                        View Apply
+                      </ActionButton>
+                    ) : (
+                      myApply._id === acceptedApply?._id && (
+                        <ActionButton
+                          className="cursor-pointer"
+                          onClick={() =>
+                            navigate(`/chat/${acceptedApply?._id}`)
+                          }
+                        >
+                          Chat
+                        </ActionButton>
+                      )
+                    )}
+                  </>
+                )
+              ))}
+
             <ActionButton
               buttonColor="red"
               className="cursor-pointer"
@@ -438,6 +458,55 @@ export default function PostDetailPage() {
         </div>
       </main>
       <Footer />
+
+      {openDeletePostModal && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
+            <p className="mb-2 text-lg font-semibold">
+              ต้องการลบโพสต์นี้ใช่หรือไม่?
+            </p>
+            <p className="text-sm text-red-500 mb-4">
+              การลบโพสต์นี้จะเป็นการยกเลิกการสมัครของผู้ให้บริการทั้งหมด
+              และไม่สามารถกู้คืนได้
+            </p>
+            <div className="flex justify-center gap-4">
+              <ActionButton
+                onClick={async () => {
+                  setStatusPostLoading(true);
+                  await updatePostStatus(post._id, 'Deleted');
+                  await updatePostMatched(post._id, false);
+                  const allApplies = await getAppliesByPostId(post._id);
+                  const rejectPromises = allApplies.map((a) =>
+                    deleteApply(a._id),
+                  );
+                  await Promise.all(rejectPromises);
+                  setStatusPostLoading(false);
+                  setOpenDeletePostModal(false);
+                  window.location.href = `/post/${post._id}`;
+                }}
+                className={`${isStatusPostLoading ? '' : 'cursor-pointer'}`}
+                disabled={isStatusPostLoading}
+              >
+                {isStatusPostLoading && (
+                  <Loader className="animate-spin" size={24} />
+                )}
+                Yes
+              </ActionButton>
+              <ActionButton
+                className={`cursor-pointer bg-gray-200 text-black border-gray-200 
+            ${isStatusPostLoading ? '' : 'cursor-pointer'}`}
+                disabled={isStatusPostLoading}
+                onClick={() => setOpenDeletePostModal(false)}
+              >
+                {isStatusPostLoading && (
+                  <Loader className="animate-spin" size={24} />
+                )}
+                No
+              </ActionButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

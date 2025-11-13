@@ -1,14 +1,62 @@
 import GenericAccountLayout from './GenericAccountLayout';
 
-const UserSidebarMenu = [
-  { name: 'Profile', path: '/', isDisabled: false },
-  { name: 'Become a Provider', path: '/become-provider', isDisabled: false },
-  { name: 'Account Setting', path: '/setting', isDisabled: true },
-  { name: 'Privacy', path: '/privacy', isDisabled: true },
-  { name: 'My Applies', path: '/apply', isDisabled: false },
-  { name: 'My Offers', path: '/offer', isDisabled: false },
-  { name: 'My Posts', path: '/post', isDisabled: false },
-  { name: 'Provider Account', path: '/provider-account', isDisabled: false },
+export interface SidebarMenu {
+  name: string;
+  path: string;
+  isDisabled: boolean;
+  roleToDisplay: 'customer' | 'provider' | 'both';
+}
+
+const UserSidebarMenu: SidebarMenu[] = [
+  { name: 'Profile', path: '/', isDisabled: false, roleToDisplay: 'both' },
+  {
+    name: 'Become a Provider',
+    path: '/become-provider',
+    isDisabled: false,
+    roleToDisplay: 'customer',
+  },
+  {
+    name: 'Account Setting',
+    path: '/setting',
+    isDisabled: true,
+    roleToDisplay: 'both',
+  },
+  {
+    name: 'Privacy',
+    path: '/privacy',
+    isDisabled: true,
+    roleToDisplay: 'both',
+  },
+  {
+    name: 'My Applies',
+    path: '/apply',
+    isDisabled: false,
+    roleToDisplay: 'provider',
+  },
+  {
+    name: 'My Offers',
+    path: '/offer',
+    isDisabled: false,
+    roleToDisplay: 'provider',
+  },
+  {
+    name: 'My Posts',
+    path: '/post',
+    isDisabled: false,
+    roleToDisplay: 'both',
+  },
+  {
+    name: 'My Works',
+    path: '/work',
+    isDisabled: false,
+    roleToDisplay: 'provider',
+  },
+  {
+    name: 'Provider Account',
+    path: '/provider-account',
+    isDisabled: false,
+    roleToDisplay: 'provider',
+  },
 ];
 
 export default function AccountLayout() {
