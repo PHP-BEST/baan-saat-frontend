@@ -27,6 +27,8 @@ import Balances from './pages/payments/Balances';
 import OnboardPage from './pages/payments/Onboard';
 import ApplyDetailPage from './pages/ApplyDetail';
 import ChatPage from './pages/Chat';
+import ProviderProfilePage from './pages/ProviderProfilePage';
+import ReviewCreate from './pages/ReviewCreate';
 
 export const router = createBrowserRouter([
   {
@@ -100,6 +102,10 @@ export const router = createBrowserRouter([
         element: <CustomerProfilePage />,
       },
       {
+        path: 'user/:userId/provider',
+        element: <ProviderProfilePage />,
+      },
+      {
         path: 'user/:userId/post',
         element: <CustomerProfilePostPage />,
       },
@@ -136,6 +142,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ChatPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/reviews/new/:postId/:providerId',
+        element: (
+          <ProtectedRoute>
+            <ReviewCreate />
           </ProtectedRoute>
         ),
       },
