@@ -17,6 +17,8 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { DialogDescription } from '@radix-ui/react-dialog';
 import PaymentIntent from '@/components/payments/PaymentIntent';
 import PaymentButton from '@/components/payments/PaymentButton';
+import { useQuery } from '@tanstack/react-query';
+import { getPaymentStatusByPostId } from '@/api/payment';
 export default function ChatPage() {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -33,6 +35,14 @@ export default function ChatPage() {
   const [openPayModal, setOpenPayModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isUpdateStatusLoading, setUpdateStatusLoading] = useState(false);
+  const { data: payStatus } = useQuery({
+    queryKey: ['payment-status', apply?.postId],
+    enabled: !!apply,
+    queryFn: () => getPaymentStatusByPostId(apply!.postId),
+  });
+  const paid = payStatus === 'succeeded';
+  const alreadyReviewed = false;
+  const canReview = paid && !alreadyReviewed;
 
   useEffect(() => {
     const fetchApply = async () => {
@@ -170,39 +180,51 @@ export default function ChatPage() {
             </Dialog>
 
             <div className="flex gap-4 mt-6 items-center">
-              {user._id === apply.customerId &&
-                (post.status === 'Not working' ? (
-                  <ActionButton
-                    buttonColor="red"
-                    onClick={() => setOpenCancelApplyModal(true)}
-                  >
-                    Cancel Apply
-                  </ActionButton>
-                ) : post.status == 'Completed' ? (
-                  // <ActionButton onClick={() => setOpenPayModal(true)}>Pay</ActionButton>
-                  <PaymentButton
-                    postId={apply.postId}
-                    openModal={setOpenPayModal}
-                  />
-                ) : (
-                  <></>
-                ))}
+              {String(user._id) === String(apply.customerId) && (
+                <>
+                  {canReview ? (
+                    <ActionButton
+                      buttonColor="green"
+                      onClick={() =>
+                        navigate(
+                          `/reviews/new/${apply.postId}/${apply.providerId}`,
+                        )
+                      }
+                    >
+                      Write a review
+                    </ActionButton>
+                  ) : (
+                    // show Pay when not yet paid and job is completed
+                    post.status === 'Completed' && (
+                      <PaymentButton
+                        postId={apply.postId}
+                        openModal={setOpenPayModal}
+                      />
+                    )
+                  )}
 
-              {user._id === apply.providerId && post.status != 'Completed' && (
-                <ActionButton
-                  buttonColor="green"
-                  onClick={() => setOpenUpdatePostStatusModal(true)}
-                >
-                  Update Status
-                </ActionButton>
+                  {post.status === 'Not working' && (
+                    <ActionButton
+                      buttonColor="red"
+                      onClick={() => setOpenCancelApplyModal(true)}
+                    >
+                      Cancel Apply
+                    </ActionButton>
+                  )}
+                </>
               )}
-              <ActionButton
-                onClick={() => {
-                  navigate(-1);
-                }}
-              >
-                Back
-              </ActionButton>
+
+              {String(user._id) === String(apply.providerId) &&
+                post.status !== 'Completed' && (
+                  <ActionButton
+                    buttonColor="green"
+                    onClick={() => setOpenUpdatePostStatusModal(true)}
+                  >
+                    Update Status
+                  </ActionButton>
+                )}
+
+              <ActionButton onClick={() => navigate(-1)}>Back</ActionButton>
             </div>
           </div>
 
