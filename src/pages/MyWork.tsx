@@ -72,13 +72,13 @@ export default function MyWorkPage() {
           <table className="table-fixed w-full border-collapse border border-gray-200">
             <thead className="sticky top-0 bg-table-row-header">
               <tr>
-                <th className="border border-gray-200 p-2 w-2/5">Post Title</th>
+                <th className="border border-gray-200 p-2 w-1/5">Post Title</th>
                 <th className="border border-gray-200 p-2 w-1/5">Customer</th>
                 <th className="border border-gray-200 p-2 w-1/5">
                   Applied Date
                 </th>
                 <th className="border border-gray-200 p-2 w-1/5">
-                  Applied Price
+                  Completed Date
                 </th>
                 <th className="border border-gray-200 p-2 w-1/5">Status</th>
               </tr>
@@ -102,7 +102,9 @@ export default function MyWorkPage() {
                     {formatDateToDisplay(apply.date)}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {apply.appliedPrice} THB
+                    {apply.post.status === 'Completed'
+                      ? formatDateToDisplay(new Date(apply.post.updatedAt))
+                      : '-'}
                   </td>
                   <td
                     className={`border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap font-bold 
