@@ -5,7 +5,11 @@ import type { Post } from '@/interfaces/Post';
 import Loading from '@/components/our-components/loading';
 import PostList from '@/components/our-components/PostList';
 import ActionButton from '@/components/our-components/actionButton';
-import { createOffer, type OfferFormInterface } from '@/api/offer';
+import {
+  createOffer,
+  getOffersByCustomerId,
+  type OfferFormInterface,
+} from '@/api/offer';
 import { useParams } from 'react-router-dom';
 import {
   Dialog,
@@ -36,7 +40,12 @@ export default function OfferModal() {
         userId: user._id,
         isMatched: false,
       });
-      setPosts(userPosts);
+      const customerOffers = await getOffersByCustomerId(user._id);
+      const offerPostIds = new Set(customerOffers.map((o) => o.postId));
+      const filteredPosts = userPosts.filter(
+        (post) => !offerPostIds.has(post._id),
+      );
+      setPosts(filteredPosts);
       setLoading(false);
     };
 
@@ -203,7 +212,7 @@ export default function OfferModal() {
                 onClick={() => handleSubmit()}
                 disabled={!hasOffer}
               >
-                Submit
+                Offer
               </ActionButton>
             </div>
           </DialogFooter>

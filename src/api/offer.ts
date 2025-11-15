@@ -29,6 +29,17 @@ export const createOffer = async (
     return false;
   }
 };
+export const getOfferById = async (offerId: string): Promise<Offer> => {
+  try {
+    const response = await axios.get<ResponseInterface<Offer>>(
+      `${API_BASE}/${offerId}`,
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching offer by ID:', error);
+    throw error;
+  }
+};
 export const getOffersByPostId = async (postId: string): Promise<Offer[]> => {
   try {
     const response = await axios.get<ResponseInterface<OfferDetail[]>>(
@@ -54,7 +65,19 @@ export const getDetailedOffersByProviderId = async (
     throw e;
   }
 };
-
+export const getOffersByCustomerId = async (
+  customerId: string,
+): Promise<Offer[]> => {
+  try {
+    const response = await axios.get<ResponseInterface<Offer[]>>(
+      `${API_BASE}/customer/${customerId}`,
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching offers by customer ID:', error);
+    throw error;
+  }
+};
 export const getDetailedOfferedByPostId = async (
   postId: string,
 ): Promise<OfferDetail[]> => {
@@ -96,7 +119,7 @@ export const updateOfferStatus = async (
     );
     return response.data.success;
   } catch (error) {
-    console.error('Error updating apply:', error);
+    console.error('Error updating offer:', error);
     return false;
   }
 };

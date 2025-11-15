@@ -33,4 +33,5 @@ export type OfferedStatus =
   | 'Accepted'
   | 'Rejected'
   | 'Taken'
+  | 'Cancel'
   | 'Deleted';

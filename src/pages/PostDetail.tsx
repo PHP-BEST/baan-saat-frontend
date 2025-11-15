@@ -6,13 +6,9 @@ import Footer from '@/components/our-components/footer';
 import ActionButton from '@/components/our-components/actionButton';
 import {
   convertTagsToLabels,
-  rejectApply,
   deleteApply,
   formatDateToDisplay,
-  acceptOffer,
-  rejectOffer,
   deleteOffer,
-  takenOffer,
 } from '@/utils/function';
 import { Calendar, Loader, Phone } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
@@ -103,26 +99,7 @@ export default function PostDetailPage() {
 
     fetchPost();
   }, [postId]);
-  const handleAcceptOffer = async () => {
-    if (!myOffer || !postId) return;
-    await acceptOffer(myOffer._id);
-    await updatePostMatched(postId, true);
-    const otherOffer = await getDetailedOfferedByPostId(myOffer.postId);
-    const otherApplies = await getDetailedAppliesByPostId(myOffer.postId);
-    const rejectOfferPromises = otherOffer
-      .filter((o) => o._id !== myOffer._id && o.status != 'Rejected')
-      .map((o) => takenOffer(o._id));
-    const rejectAppliesPromise = otherApplies
-      .filter((a) => a.status !== 'Rejected')
-      .map((a) => rejectApply(a._id));
-    await Promise.all([...rejectOfferPromises, ...rejectAppliesPromise]);
-    window.location.reload();
-  };
-  const handleRejectOffer = async () => {
-    if (!myOffer) return;
-    await rejectOffer(myOffer._id);
-    window.location.reload();
-  };
+
   useEffect(() => {
     if (openIdx !== null) {
       const prev = document.body.style.overflow;
@@ -180,20 +157,12 @@ export default function PostDetailPage() {
       if (myOffer) {
         if (myOffer.status === 'Pending') {
           return (
-            <div className="flex gap-2">
-              <ActionButton
-                className="cursor-pointer "
-                onClick={() => handleAcceptOffer()}
-              >
-                Accept Offer
-              </ActionButton>
-              <ActionButton
-                className="cursor-pointer"
-                onClick={() => handleRejectOffer()}
-              >
-                Reject Offer
-              </ActionButton>
-            </div>
+            <ActionButton
+              className="cursor-pointer"
+              onClick={() => navigate(`/offer/${myOffer._id}`)}
+            >
+              View Offer
+            </ActionButton>
           );
         } else if (!myApply) {
           return (
@@ -411,7 +380,7 @@ export default function PostDetailPage() {
                         Price (THB)
                       </th>
                       <th className="border border-gray-200 p-2 w-1/5">
-                        offered Date
+                        Offered Date
                       </th>
                       <th className="border border-gray-200 p-2 w-2/5">
                         Status
@@ -423,7 +392,8 @@ export default function PostDetailPage() {
                       return (
                         <tr
                           key={`provider-apply-${idx}`}
-                          className={`bg-table-row-content text-center`}
+                          className={`bg-table-row-content cursor-pointer hover:bg-gray-100 text-center`}
+                          onClick={() => navigate(`/offer/${offer._id}`)}
                         >
                           <td className="border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap">
                             {offer.provider.name}
@@ -432,7 +402,7 @@ export default function PostDetailPage() {
                             {offer.post?.budget}
                           </td>
                           <td className="border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap">
-                            {formatDateToDisplay(offer.createdAt)}
+                            {formatDateToDisplay(offer.date)}
                           </td>
                           <td
                             className={`border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap 
@@ -442,7 +412,10 @@ export default function PostDetailPage() {
                                   : offer.status == 'Rejected' ||
                                       offer.status == 'Deleted'
                                     ? 'text-reject'
-                                    : 'text-black'
+                                    : offer.status == 'Taken' ||
+                                        offer.status == 'Cancel'
+                                      ? 'text-yellow-500'
+                                      : 'text-black'
                               }`}
                           >
                             {offer.status === 'Taken' ? 'Cancel' : offer.status}

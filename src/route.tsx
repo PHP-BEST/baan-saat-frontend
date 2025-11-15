@@ -30,6 +30,7 @@ import ApplyDetailPage from './pages/ApplyDetail';
 import ChatPage from './pages/Chat';
 import ProviderProfilePage from './pages/ProviderProfilePage';
 import MyWorkPage from './pages/MyWork';
+import OfferDetailPage from './pages/offerDetail';
 
 export const router = createBrowserRouter([
   {
@@ -137,6 +138,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ApplyDetailPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'offer/:offerId',
+        element: (
+          <ProtectedRoute>
+            <OfferDetailPage />
           </ProtectedRoute>
         ),
       },
