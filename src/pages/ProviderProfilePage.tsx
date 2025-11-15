@@ -236,9 +236,9 @@ export default function ProviderProfilePage() {
         <div className="mt-0">
           <h2 className="text-2xl font-bold mb-4">Reviews</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
             {/* Summarized review panel*/}
-            <div className="rounded-2xl bg-white p-5">
+            <div className="rounded-2xl bg-white p-5 w-full max-w-lg">
               <div className="flex items-center justify-between">
                 <AverageStars value={stats.avg} />
                 <span className="text-md font-bold">{stats.total} reviews</span>
