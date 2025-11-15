@@ -9,6 +9,8 @@ import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import axios from '@/config/axios-config';
 import { Link } from 'react-router-dom';
+import Error from '@/error/Error';
+import Loading from '@/components/our-components/loading';
 import {
   Dialog,
   DialogContent,
@@ -38,13 +40,16 @@ export default function ReviewCreate() {
     name?: string;
     avatarUrl?: string;
   } | null>(null);
-  const [post, setPost] = useState<{ _id: string; title?: string } | null>(
-    null,
-  );
+  const [post, setPost] = useState<{
+    _id: string;
+    title?: string;
+    customerId?: string;
+  } | null>(null);
   const [successOpen, setSuccessOpen] = useState(false);
   const [alreadyReviewed, setAlreadyReviewed] = useState(false);
   const [checkingReview, setCheckingReview] = useState(true);
   const isLocked = alreadyReviewed || checkingReview;
+  const [forbidden, setForbidden] = useState(false);
 
   const canSubmit = useMemo(
     () =>
@@ -72,16 +77,28 @@ export default function ReviewCreate() {
   useEffect(() => {
     (async () => {
       try {
-        if (providerId) {
-          const r = await axios.get(`/api/users/${providerId}`);
-          setProvider(r.data?.data ?? r.data);
-        }
-        if (postId) {
-          const r2 = await axios.get(`/api/posts/${postId}`);
-          setPost(r2.data?.data ?? r2.data);
+        if (!postId || !providerId || !user?._id) {
+          setForbidden(true);
+          setCheckingReview(false);
+          return;
         }
 
-        if (!providerId || !postId || !user?._id) {
+        const [providerRes, postRes] = await Promise.all([
+          axios.get(`/api/users/${providerId}`),
+          axios.get(`/api/posts/${postId}`),
+        ]);
+
+        const providerData = providerRes.data?.data ?? providerRes.data;
+        const postData = postRes.data?.data ?? postRes.data;
+
+        setProvider(providerData);
+        setPost(postData);
+
+        if (
+          !postData?.customerId ||
+          String(postData.customerId) !== String(user._id)
+        ) {
+          setForbidden(true);
           setCheckingReview(false);
           return;
         }
@@ -103,10 +120,33 @@ export default function ReviewCreate() {
 
         setCheckingReview(false);
       } catch {
+        setForbidden(true);
         setCheckingReview(false);
       }
     })();
-  }, [providerId, postId, user?._id]);
+  }, [postId, providerId, user?._id]);
+
+  const isParamsInvalid = !postId || !providerId;
+
+  if (isParamsInvalid) {
+    return <Error />;
+  }
+
+  if (checkingReview) {
+    return (
+      <div>
+        <Header />
+        <div className="px-16 py-10 w-full min-h-screen flex flex-col gap-10 bg-white">
+          <Loading />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (forbidden) {
+    return <Error />;
+  }
 
   async function onSubmit() {
     if (!canSubmit) return;
