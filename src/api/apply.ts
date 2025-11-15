@@ -124,7 +124,19 @@ export const getDetailedAppliesByProviderId = async (
     throw error;
   }
 };
-
+export const getDetailedAppliesByCustomerId = async (
+  customerId: string,
+): Promise<ApplyDetail[]> => {
+  try {
+    const response = await axios.get<ResponseInterface<ApplyDetail[]>>(
+      `${API_BASE}/customer/${customerId}/detail`,
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching applys by provider ID:', error);
+    throw error;
+  }
+};
 export const getAppliesByPostId = async (postId: string): Promise<Apply[]> => {
   try {
     const response = await axios.get<ResponseInterface<ApplyDetail[]>>(

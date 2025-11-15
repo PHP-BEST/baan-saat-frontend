@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/context/UserContext';
 import Loading from '@/components/our-components/loading';
 import { getDetailedOffersByProviderId } from '@/api/offer';
@@ -10,7 +11,7 @@ export default function MyOfferPage() {
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
   if (!user) return;
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchOffers = async () => {
       setLoading(true);
@@ -52,7 +53,7 @@ export default function MyOfferPage() {
                 <th className="border border-gray-200 p-2 w-1/5">
                   Offered Price
                 </th>
-                <th className="border border-gray-200 p-2 w-1/5">Status</th>
+                <th className="border border-gray-200 p-2 w-1/5">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -60,9 +61,9 @@ export default function MyOfferPage() {
                 <tr
                   key={idx}
                   className="bg-table-row-content text-center cursor-pointer hover:bg-gray-100"
-                  //   onClick={() => {
-                  //     navigate(`/apply/${apply._id}`);
-                  //   }}
+                  onClick={() => {
+                    navigate(`/post/${offer.postId}`);
+                  }}
                 >
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
                     {offer.post.title}
@@ -71,10 +72,10 @@ export default function MyOfferPage() {
                     {offer.customer.name}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {formatDateToDisplay(offer.date)}
+                    {formatDateToDisplay(offer.createdAt)}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {offer.offeredPrice} THB
+                    {offer.post.budget} THB
                   </td>
                   <td
                     className={`border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap font-bold ${offer.status == 'Accepted' ? 'text-accept' : offer.status == 'Rejected' ? 'text-reject' : ''}`}

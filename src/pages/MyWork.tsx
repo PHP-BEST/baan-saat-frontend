@@ -1,7 +1,9 @@
 import { getDetailedAppliesByProviderId } from '@/api/apply';
+import { getDetailedOffersByProviderId } from '@/api/offer';
 import Loading from '@/components/our-components/loading';
 import { useUser } from '@/context/UserContext';
 import type { ApplyDetail } from '@/interfaces/Apply';
+import type { OfferDetail } from '@/interfaces/Offer';
 import { formatDateToDisplay } from '@/utils/function';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -12,14 +14,16 @@ export default function MyWorkPage() {
 
   if (!user) return;
 
-  const [appliesDetail, setAppliesDetail] = useState<ApplyDetail[]>([]);
+  const [worksDetail, setWorksDetail] = useState<(ApplyDetail | OfferDetail)[]>(
+    [],
+  );
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const getApplies = async () => {
       setLoading(true);
       const currentApplies = await getDetailedAppliesByProviderId(user._id);
-
+      const currentOffers = await getDetailedOffersByProviderId(user._id);
       const workStatusesToShow = ['Not working', 'In progress', 'Completed'];
 
       const filteredWork = currentApplies.filter(
@@ -27,17 +31,26 @@ export default function MyWorkPage() {
           apply.status === 'Accepted' &&
           workStatusesToShow.includes(apply.post.status),
       );
-
-      const sortedWork = filteredWork.sort(
+      const filteredWork2 = currentOffers.filter(
+        (offer) =>
+          offer.status === 'Accepted' &&
+          workStatusesToShow.includes(offer.post.status),
+      );
+      const sortedWork = [...filteredWork, ...filteredWork2].sort(
         (a, b) =>
           new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
       );
-
-      setAppliesDetail(sortedWork);
+      setWorksDetail(sortedWork);
       setLoading(false);
     };
     getApplies();
   }, []);
+
+  const isApplyType = (
+    item: ApplyDetail | OfferDetail,
+  ): item is ApplyDetail => {
+    return (item as ApplyDetail).appliedPrice !== undefined;
+  };
 
   if (loading) {
     return (
@@ -50,7 +63,7 @@ export default function MyWorkPage() {
     );
   }
 
-  if (appliesDetail.length === 0) {
+  if (worksDetail.length === 0) {
     return (
       <>
         <h1 className="text-2xl font-bold mb-2">My Work</h1>
@@ -75,48 +88,48 @@ export default function MyWorkPage() {
                 <th className="border border-gray-200 p-2 w-2/5">Post Title</th>
                 <th className="border border-gray-200 p-2 w-1/5">Customer</th>
                 <th className="border border-gray-200 p-2 w-1/5">
-                  Applied Date
+                  Comfirm Date
                 </th>
                 <th className="border border-gray-200 p-2 w-1/5">
-                  Applied Price
+                  Comfirm Price
                 </th>
                 <th className="border border-gray-200 p-2 w-1/5">Status</th>
               </tr>
             </thead>
             <tbody>
-              {appliesDetail.map((apply, idx) => (
+              {worksDetail.map((work, idx) => (
                 <tr
                   key={`customer-request-${idx}`}
                   className="bg-table-row-content text-center cursor-pointer hover:bg-gray-100"
                   onClick={() => {
-                    navigate(`/apply/${apply._id}`);
+                    navigate(`/apply/${work._id}`);
                   }}
                 >
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {apply.post.title}
+                    {work.post.title}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {apply.customer.name}
+                    {work.customer.name}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {formatDateToDisplay(apply.date)}
+                    {formatDateToDisplay(work.date)}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {apply.appliedPrice} THB
+                    {isApplyType(work) ? work.appliedPrice : work.price} THB
                   </td>
                   <td
                     className={`border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap font-bold 
                       ${
-                        apply.post.status === 'Completed'
+                        work.post.status === 'Completed'
                           ? 'text-accept'
-                          : apply.post.status === 'In progress'
+                          : work.post.status === 'In progress'
                             ? 'text-blue-500'
-                            : apply.post.status === 'Not working'
+                            : work.post.status === 'Not working'
                               ? 'text-gray-500'
                               : ''
                       }`}
                   >
-                    {apply.post.status}
+                    {work.post.status}
                   </td>
                 </tr>
               ))}

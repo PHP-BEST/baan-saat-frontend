@@ -12,6 +12,7 @@ import {
   convertTagsToLabels,
   formatDateToDisplay,
   rejectApply,
+  takenOffer,
 } from '@/utils/function';
 import { Calendar, Loader, Phone } from 'lucide-react';
 import {
@@ -25,6 +26,7 @@ import { useUser } from '@/context/UserContext';
 import PostNotFound from '@/error/PostNotFound';
 import ApplyNotFound from '@/error/ApplyNotFound';
 import { createIntentClientSecret } from '@/api/payment';
+import { getDetailedOfferedByPostId } from '@/api/offer';
 
 export default function ApplyDetailPage() {
   const navigate = useNavigate();
@@ -386,12 +388,21 @@ export default function ApplyDetailPage() {
                     const otherApplies = await getDetailedAppliesByPostId(
                       apply.postId,
                     );
-                    const rejectPromises = otherApplies
+                    const rejectAppliesPromises = otherApplies
                       .filter(
                         (a) => a._id !== apply._id && a.status !== 'Rejected',
                       )
                       .map((a) => rejectApply(a._id));
-                    await Promise.all(rejectPromises);
+                    const otherOffers = await getDetailedOfferedByPostId(
+                      apply.postId,
+                    );
+                    const takenOfferPromises = otherOffers
+                      .filter((o) => o.status != 'Rejected')
+                      .map((o) => takenOffer(o._id));
+                    await Promise.all([
+                      ...rejectAppliesPromises,
+                      ...takenOfferPromises,
+                    ]);
                     setStatusApplyLoading(false);
                     setOpenAcceptApplyModal(false);
                     try {

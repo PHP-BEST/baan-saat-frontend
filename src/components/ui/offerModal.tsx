@@ -29,6 +29,7 @@ export default function OfferModal() {
   const { userId } = useParams();
   if (!user || !userId) return;
   useEffect(() => {
+    if (!open) return;
     const fetchUserPosts = async () => {
       setLoading(true);
       const userPosts = await filterPosts({
@@ -51,7 +52,7 @@ export default function OfferModal() {
           providerId: userId!,
           postId: post._id,
           title: post.title,
-          budget: post.budget,
+          price: post.budget,
         },
       ]);
     } else {
@@ -81,7 +82,7 @@ export default function OfferModal() {
           <Dialog>
             <DialogTrigger asChild>
               <button className="bg-[#777BB3] text-white text-xs px-4 py-1 rounded-3xl hover:bg-[#464a85] active:bg-[#191b40]">
-                Select For Your Request
+                Select For Your Post
               </button>
             </DialogTrigger>
             <DialogContent
@@ -92,7 +93,7 @@ export default function OfferModal() {
                 <DialogTitle className="border-b border-gray-400 mt-0">
                   <div className="text-gray-600 flex justify-between items-center h-10">
                     <div className="px-3 py-1 text-sm">
-                      Select For Your Request
+                      Select For Your Post
                     </div>
                     <DialogClose asChild>
                       <div
@@ -128,7 +129,7 @@ export default function OfferModal() {
       <Dialog open={open} onOpenChange={(val) => setOpen(val)}>
         <DialogTrigger asChild>
           <button className="bg-[#777BB3] text-white text-xs px-4 py-1 rounded-3xl hover:bg-[#464a85] active:bg-[#191b40] cursor-pointer">
-            Select For Your Request
+            Select For Your Post
           </button>
         </DialogTrigger>
         <DialogContent
@@ -138,7 +139,7 @@ export default function OfferModal() {
           <DialogHeader>
             <DialogTitle className="border-b border-gray-400 mt-0">
               <div className="text-gray-600 flex justify-between items-center h-10">
-                <div className="px-3 py-1 text-sm">Select For Your Request</div>
+                <div className="px-3 py-1 text-sm">Select For Your Post</div>
                 <DialogClose asChild>
                   <div
                     role="button"
@@ -187,7 +188,7 @@ export default function OfferModal() {
               ) : (
                 <div className="flex justify-center items-center h-full">
                   <p className="text-gray-500 text-sm">
-                    {"Sorry, we couldn't find the request"}
+                    {"Sorry, we couldn't find Your Post that can be offered"}
                   </p>
                 </div>
               )}

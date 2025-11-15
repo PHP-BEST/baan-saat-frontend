@@ -29,6 +29,7 @@ import OnboardPage from './pages/payments/Onboard';
 import ApplyDetailPage from './pages/ApplyDetail';
 import ChatPage from './pages/Chat';
 import ProviderProfilePage from './pages/ProviderProfilePage';
+import MyWorkPage from './pages/MyWork';
 
 export const router = createBrowserRouter([
   {
@@ -53,6 +54,7 @@ export const router = createBrowserRouter([
           { path: 'post', element: <MyPostPage /> },
           { path: 'apply', element: <MyApplyPage /> },
           { path: 'offer', element: <MyOfferPage /> },
+          { path: 'work', element: <MyWorkPage /> },
         ],
       },
       {
