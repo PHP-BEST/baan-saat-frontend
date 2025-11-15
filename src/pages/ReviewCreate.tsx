@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useMemo, useState, useEffect } from 'react';
 import { Star, Smile, CheckCircle } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
-import { createReview } from '@/api/review';
+import { createReview, getProviderReviews } from '@/api/review';
 import ActionButton from '@/components/our-components/actionButton';
 import { Loader } from 'lucide-react';
 import Header from '@/components/our-components/header';
@@ -42,6 +42,9 @@ export default function ReviewCreate() {
     null,
   );
   const [successOpen, setSuccessOpen] = useState(false);
+  const [alreadyReviewed, setAlreadyReviewed] = useState(false);
+  const [checkingReview, setCheckingReview] = useState(true);
+  const isLocked = alreadyReviewed || checkingReview;
 
   const canSubmit = useMemo(
     () =>
@@ -50,8 +53,18 @@ export default function ReviewCreate() {
       !!user?._id &&
       rating >= 1 &&
       rating <= 5 &&
-      !submitting,
-    [postId, providerId, user?._id, rating, submitting],
+      !submitting &&
+      !alreadyReviewed &&
+      !checkingReview,
+    [
+      postId,
+      providerId,
+      user?._id,
+      rating,
+      submitting,
+      alreadyReviewed,
+      checkingReview,
+    ],
   );
 
   const goHome = () => nav('/');
@@ -67,25 +80,63 @@ export default function ReviewCreate() {
           const r2 = await axios.get(`/api/posts/${postId}`);
           setPost(r2.data?.data ?? r2.data);
         }
+
+        if (!providerId || !postId || !user?._id) {
+          setCheckingReview(false);
+          return;
+        }
+
+        const resReviews = await getProviderReviews(providerId);
+        const reviews = resReviews.data.data;
+
+        const myReview = reviews.find(
+          (rev) => rev.postId === postId && rev.customerId === user._id,
+        );
+
+        if (myReview) {
+          setAlreadyReviewed(true);
+          setRating(myReview.rating);
+          setDesc(myReview.description ?? '');
+        } else {
+          setAlreadyReviewed(false);
+        }
+
+        setCheckingReview(false);
       } catch {
-        /* ignore for header */
+        setCheckingReview(false);
       }
     })();
-  }, [providerId, postId]);
+  }, [providerId, postId, user?._id]);
 
   async function onSubmit() {
     if (!canSubmit) return;
     setSubmitting(true);
     setErr(null);
-    await createReview({
-      postId: postId!,
-      providerId: providerId!,
-      customerId: user!._id,
-      rating,
-      description: desc.trim() || undefined,
-    });
-    setSuccessOpen(true);
-    setSubmitting(false);
+
+    try {
+      await createReview({
+        postId: postId!,
+        providerId: providerId!,
+        customerId: user!._id,
+        rating,
+        description: desc.trim() || undefined,
+      });
+
+      setSuccessOpen(true);
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e)) {
+        type ErrorBody = { message?: string };
+
+        const msg =
+          (e.response?.data as ErrorBody | undefined)?.message ??
+          'Failed to submit review. Please try again.';
+        setErr(msg);
+      } else {
+        setErr('Failed to submit review. Please try again.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -94,7 +145,8 @@ export default function ReviewCreate() {
       <div className="mx-auto w-full max-w-3xl p-4 sm:p-6">
         <h1 className="text-3xl font-bold">Write a review</h1>
         <p className="mt-1 text-sm">
-          Rate your experience for this provider and leave an optional comment.
+          Rate your experience with this provider anonymously, and leave an
+          optional comment.
         </p>
 
         {/* Provider + Post header */}
@@ -106,6 +158,10 @@ export default function ReviewCreate() {
                 src={provider.avatarUrl}
                 alt={provider?.name ?? 'Provider'}
                 className="h-full w-full object-cover"
+                referrerPolicy="no-referrer"
+                crossOrigin="anonymous"
+                loading="lazy"
+                decoding="async"
               />
             ) : (
               <span className="text-lg font-semibold text-gray-600">
@@ -174,19 +230,37 @@ export default function ReviewCreate() {
                     role="radio"
                     aria-checked={rating === n}
                     aria-label={`${n} star${n > 1 ? 's' : ''}`}
-                    className="rounded p-1 outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-                    onMouseEnter={() => setHover(n)}
-                    onMouseLeave={() => setHover(0)}
-                    onFocus={() => setHover(n)}
-                    onBlur={() => setHover(0)}
-                    onClick={() => setRating(n)}
+                    disabled={isLocked}
+                    className={`rounded p-1 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
+                      isLocked ? 'cursor-not-allowed opacity-60' : ''
+                    }`}
+                    onMouseEnter={() => {
+                      if (!isLocked) setHover(n);
+                    }}
+                    onMouseLeave={() => {
+                      if (!isLocked) setHover(0);
+                    }}
+                    onFocus={() => {
+                      if (!isLocked) setHover(n);
+                    }}
+                    onBlur={() => {
+                      if (!isLocked) setHover(0);
+                    }}
+                    onClick={() => {
+                      if (!isLocked) setRating(n);
+                    }}
                   >
                     <Star
-                      className={`h-9 w-9 ${isFilled ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground/40'}`}
+                      className={`h-9 w-9 ${
+                        isFilled
+                          ? 'text-yellow-500 fill-yellow-500'
+                          : 'text-muted-foreground/40'
+                      }`}
                     />
                   </button>
                 );
               })}
+
               <span className="ml-2 text-lg">
                 {rating ? `${rating}/5` : 'Select a rating'}
               </span>
@@ -208,14 +282,18 @@ export default function ReviewCreate() {
             >
               <textarea
                 value={desc}
-                onChange={(e) => setDesc(e.target.value)}
+                onChange={(e) => {
+                  if (!isLocked) setDesc(e.target.value);
+                }}
+                disabled={isLocked}
                 rows={5}
                 placeholder="Tell us about your experience ..."
-                className="
-              block w-full resize-y
-              border-0 bg-transparent p-3 text-lg
-              outline-none focus:outline-none focus:ring-0
-            "
+                className={`
+    block w-full resize-y
+    border-0 p-3 text-lg
+    outline-none focus:outline-none focus:ring-0
+    ${isLocked ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white'}
+  `}
               />
             </div>
 
@@ -225,8 +303,14 @@ export default function ReviewCreate() {
           </div>
 
           {err && (
-            <div className="mt-4 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="mt-4 rounded-md bg-red-100 bg-destructive/10 p-3 text-sm text-destructive">
               {err}
+            </div>
+          )}
+          {alreadyReviewed && (
+            <div className="mt-4 rounded-md border border-amber-400 bg-amber-50 p-3 text-sm text-amber-800">
+              You have already reviewed this post. You can only submit one
+              review per post.
             </div>
           )}
 
