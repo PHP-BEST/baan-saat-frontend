@@ -329,11 +329,11 @@ export default function ReviewCreate() {
                 rows={5}
                 placeholder="Tell us about your experience ..."
                 className={`
-    block w-full resize-y
-    border-0 p-3 text-lg
-    outline-none focus:outline-none focus:ring-0
-    ${isLocked ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white'}
-  `}
+                  block w-full resize-y
+                  border-0 p-3 text-lg
+                  outline-none focus:outline-none focus:ring-0
+                  ${isLocked ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white'}
+                `}
               />
             </div>
 

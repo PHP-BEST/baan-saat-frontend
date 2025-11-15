@@ -194,7 +194,6 @@ export default function ChatPage() {
                       Write a review
                     </ActionButton>
                   ) : (
-                    // show Pay when not yet paid and job is completed
                     post.status === 'Completed' && (
                       <PaymentButton
                         postId={apply.postId}
