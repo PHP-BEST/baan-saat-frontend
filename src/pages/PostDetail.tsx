@@ -21,7 +21,9 @@ import {
   getAppliesByPostId,
   getDetailedAppliesByPostId,
 } from '@/api/apply';
+import { getDetailedOfferedByPostId } from '@/api/offer';
 import type { Apply, ApplyDetail } from '@/interfaces/Apply';
+import type { OfferDetail } from '@/interfaces/Offer';
 import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
@@ -34,6 +36,7 @@ export default function PostDetailPage() {
   const [customerUser, setCustomerUser] = useState<User | null>(null);
   const [myApply, setMyApply] = useState<Apply | null>(null);
   const [providerApplies, setProviderApplies] = useState<ApplyDetail[]>([]);
+  const [providerOffered, setProviderOffered] = useState<OfferDetail[]>([]);
   const [acceptedApply, setAcceptedApply] = useState<ApplyDetail | null>();
   const [hasAcceptedApply, setHasAcceptedApply] = useState(false);
   const [openIdx, setOpenIdx] = useState<number | null>(null);
@@ -67,6 +70,8 @@ export default function PostDetailPage() {
         } else {
           setAcceptedApply(null);
         }
+        const currentOffer = await getDetailedOfferedByPostId(post._id);
+        setProviderOffered(currentOffer);
       }
       setLoading(false);
     };
@@ -267,7 +272,85 @@ export default function PostDetailPage() {
               </p>
             </div>
           </div>
-
+          {/* Application from Providers */}
+          {user?._id === post.customerId ? (
+            <div className="w-full flex flex-col gap-2">
+              <h2 className="text-2xl font-semibold">Offered To</h2>
+              {providerOffered && providerOffered.length > 0 ? (
+                <table className="table-fixed w-full border-collapse border border-gray-200 max-h-[20vh] overflow-auto">
+                  <thead className="sticky top-0 bg-table-row-header">
+                    <tr>
+                      <th className="border border-gray-200 p-2 w-1/5">Name</th>
+                      <th className="border border-gray-200 p-2 w-1/5">
+                        Price (THB)
+                      </th>
+                      <th className="border border-gray-200 p-2 w-1/5">
+                        offered Date
+                      </th>
+                      <th className="border border-gray-200 p-2 w-2/5">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {providerOffered.map((offer: OfferDetail, idx) => {
+                      return (
+                        <tr
+                          key={`provider-apply-${idx}`}
+                          className={`bg-table-row-content text-center`}
+                        >
+                          <td className="border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap">
+                            {offer.provider.name}
+                          </td>
+                          <td className="border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap">
+                            {offer.post?.budget}
+                          </td>
+                          <td className="border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap">
+                            {formatDateToDisplay(offer.createdAt)}
+                          </td>
+                          <td
+                            className={`border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap 
+                              ${
+                                offer.status == 'Accepted'
+                                  ? 'text-accept'
+                                  : offer.status == 'Rejected' ||
+                                      offer.status == 'Deleted'
+                                    ? 'text-reject'
+                                    : 'text-black'
+                              }`}
+                          >
+                            {offer.status}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="text-lg text-gray-700">
+                  No providers apply this post...
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="w-full flex flex-col gap-2">
+              <h2 className="text-2xl font-semibold">Provider</h2>
+              {hasAcceptedApply ? (
+                <p
+                  className="text-lg font-semibold text-button-action hover:underline cursor-pointer"
+                  onClick={() => {
+                    navigate(`/user/${acceptedApply?.providerId}/provider`);
+                  }}
+                >
+                  {acceptedApply ? acceptedApply.provider.name : 'Unknown'}
+                </p>
+              ) : (
+                <p className="text-lg text-gray-700">
+                  No providers match this post...
+                </p>
+              )}
+            </div>
+          )}
           {/* Application from Providers */}
           {user?._id === post.customerId ? (
             <div className="w-full flex flex-col gap-2">

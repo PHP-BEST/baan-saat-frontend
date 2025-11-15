@@ -42,3 +42,17 @@ export const getDetailedOffersByProviderId = async (
     throw e;
   }
 };
+
+export const getDetailedOfferedByPostId = async (
+  postId: string,
+): Promise<OfferDetail[]> => {
+  try {
+    const response = await axios.get<ResponseInterface<OfferDetail[]>>(
+      `${API_BASE}/post/${postId}/detail`,
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching applys by post ID:', error);
+    throw error;
+  }
+};

@@ -8,7 +8,6 @@ export interface Offer {
   providerId: string;
   date: Date;
   status: OfferedStatus;
-  offeredPrice: number;
   description?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -22,8 +21,6 @@ export interface OfferDetail {
   customerId: string;
   provider: User;
   providerId: string;
-  date: Date;
-  offeredPrice: number;
   status: OfferedStatus;
   createdAt: Date;
   updatedAt: Date;

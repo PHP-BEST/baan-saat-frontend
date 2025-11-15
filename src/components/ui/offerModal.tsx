@@ -35,7 +35,6 @@ export default function OfferModal() {
         userId: user._id,
         isMatched: false,
       });
-      console.log(userPosts);
       setPosts(userPosts);
       setLoading(false);
     };

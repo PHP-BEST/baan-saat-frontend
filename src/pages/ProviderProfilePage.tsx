@@ -8,6 +8,7 @@ import { getUserById } from '@/api/user';
 import Loading from '@/components/our-components/loading';
 import { ChevronLeft } from 'lucide-react';
 import UserNotFound from '@/error/UserNotFound';
+import OfferModal from '@/components/ui/offerModal';
 
 export default function ProviderProfilePage() {
   const navigate = useNavigate();
@@ -115,6 +116,7 @@ export default function ProviderProfilePage() {
                   : '-'}
               </p>
             </div>
+            <OfferModal />
           </div>
         </div>
       </div>
