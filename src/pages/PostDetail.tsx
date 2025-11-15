@@ -6,8 +6,13 @@ import Footer from '@/components/our-components/footer';
 import ActionButton from '@/components/our-components/actionButton';
 import {
   convertTagsToLabels,
+  rejectApply,
   deleteApply,
   formatDateToDisplay,
+  acceptOffer,
+  rejectOffer,
+  deleteOffer,
+  takenOffer,
 } from '@/utils/function';
 import { Calendar, Loader, Phone } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
@@ -21,9 +26,13 @@ import {
   getAppliesByPostId,
   getDetailedAppliesByPostId,
 } from '@/api/apply';
-import { getDetailedOfferedByPostId } from '@/api/offer';
+import {
+  checkMyOffer,
+  getDetailedOfferedByPostId,
+  getOffersByPostId,
+} from '@/api/offer';
 import type { Apply, ApplyDetail } from '@/interfaces/Apply';
-import type { OfferDetail } from '@/interfaces/Offer';
+import type { Offer, OfferDetail } from '@/interfaces/Offer';
 import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
@@ -35,15 +44,16 @@ export default function PostDetailPage() {
   const [loading, setLoading] = useState(false);
   const [customerUser, setCustomerUser] = useState<User | null>(null);
   const [myApply, setMyApply] = useState<Apply | null>(null);
+  const [myOffer, setMyOffer] = useState<Offer | null>(null);
   const [providerApplies, setProviderApplies] = useState<ApplyDetail[]>([]);
   const [providerOffered, setProviderOffered] = useState<OfferDetail[]>([]);
   const [acceptedApply, setAcceptedApply] = useState<ApplyDetail | null>();
+  const [acceptedOffer, setAcceptedOffer] = useState<OfferDetail | null>();
   const [hasAcceptedApply, setHasAcceptedApply] = useState(false);
+  const [hasAcceptedOffer, setHasAcceptedOffer] = useState(false);
   const [openIdx, setOpenIdx] = useState<number | null>(null);
-
   const [isStatusPostLoading, setStatusPostLoading] = useState(false);
   const [openDeletePostModal, setOpenDeletePostModal] = useState(false);
-
   useEffect(() => {
     const fetchPost = async () => {
       setLoading(true);
@@ -55,9 +65,14 @@ export default function PostDetailPage() {
         setCustomerUser(currentCustomerUser);
         if (!user) {
           setMyApply(null);
+          setMyOffer(null);
         } else {
-          const currentMyApply = await checkMyApply(post._id, user._id);
-          setMyApply(currentMyApply);
+          const currentMyOffer = await checkMyOffer(post._id, user._id);
+          setMyOffer(currentMyOffer);
+          if (!currentMyOffer) {
+            const currentMyApply = await checkMyApply(post._id, user._id);
+            setMyApply(currentMyApply);
+          }
         }
         const currentApplies = await getDetailedAppliesByPostId(post._id);
         setProviderApplies(currentApplies);
@@ -70,15 +85,44 @@ export default function PostDetailPage() {
         } else {
           setAcceptedApply(null);
         }
-        const currentOffer = await getDetailedOfferedByPostId(post._id);
-        setProviderOffered(currentOffer);
+
+        const currentOffers = await getDetailedOfferedByPostId(post._id);
+        setProviderOffered(currentOffers);
+        const acceptedOffers = currentOffers.filter(
+          (offer: OfferDetail) => offer.status === 'Accepted',
+        );
+        setHasAcceptedOffer(acceptedOffers.length != 0);
+        if (acceptedOffers.length != 0) {
+          setAcceptedOffer(acceptedOffers[0]);
+        } else {
+          setAcceptedOffer(null);
+        }
       }
       setLoading(false);
     };
 
     fetchPost();
   }, [postId]);
-
+  const handleAcceptOffer = async () => {
+    if (!myOffer || !postId) return;
+    await acceptOffer(myOffer._id);
+    await updatePostMatched(postId, true);
+    const otherOffer = await getDetailedOfferedByPostId(myOffer.postId);
+    const otherApplies = await getDetailedAppliesByPostId(myOffer.postId);
+    const rejectOfferPromises = otherOffer
+      .filter((o) => o._id !== myOffer._id && o.status != 'Rejected')
+      .map((o) => takenOffer(o._id));
+    const rejectAppliesPromise = otherApplies
+      .filter((a) => a.status !== 'Rejected')
+      .map((a) => rejectApply(a._id));
+    await Promise.all([...rejectOfferPromises, ...rejectAppliesPromise]);
+    window.location.reload();
+  };
+  const handleRejectOffer = async () => {
+    if (!myOffer) return;
+    await rejectOffer(myOffer._id);
+    window.location.reload();
+  };
   useEffect(() => {
     if (openIdx !== null) {
       const prev = document.body.style.overflow;
@@ -131,6 +175,88 @@ export default function PostDetailPage() {
   )
     .filter((u): u is string => !!u && u.trim() !== '')
     .filter((u, i, arr) => arr.indexOf(u) === i);
+  const renderActionButton = () => {
+    if (!hasAcceptedApply && !hasAcceptedOffer) {
+      if (myOffer) {
+        if (myOffer.status === 'Pending') {
+          return (
+            <div className="flex gap-2">
+              <ActionButton
+                className="cursor-pointer "
+                onClick={() => handleAcceptOffer()}
+              >
+                Accept Offer
+              </ActionButton>
+              <ActionButton
+                className="cursor-pointer"
+                onClick={() => handleRejectOffer()}
+              >
+                Reject Offer
+              </ActionButton>
+            </div>
+          );
+        } else if (!myApply) {
+          return (
+            <ActionButton
+              className="cursor-pointer"
+              onClick={() => navigate(`/apply/${post._id}/create`)}
+            >
+              Create Apply
+            </ActionButton>
+          );
+        } else {
+          return (
+            <ActionButton
+              className="cursor-pointer"
+              onClick={() => navigate(`/apply/${myApply._id}`)}
+            >
+              View Apply
+            </ActionButton>
+          );
+        }
+      } else if (!myApply) {
+        return (
+          <ActionButton
+            className="cursor-pointer"
+            onClick={() => navigate(`/apply/${post._id}/create`)}
+          >
+            Create Apply
+          </ActionButton>
+        );
+      } else {
+        return (
+          <ActionButton
+            className="cursor-pointer"
+            onClick={() => navigate(`/apply/${myApply._id}`)}
+          >
+            View Apply
+          </ActionButton>
+        );
+      }
+    } else {
+      if (myOffer?._id && myOffer?._id === acceptedOffer?._id) {
+        return (
+          <ActionButton
+            className="cursor-pointer"
+            onClick={() => navigate(`/chat/${acceptedOffer._id}`)}
+          >
+            Chat
+          </ActionButton>
+        );
+      } else if (myApply?._id && myApply?._id === acceptedApply?._id) {
+        return (
+          <ActionButton
+            className="cursor-pointer"
+            onClick={() => navigate(`/chat/${acceptedApply._id}`)}
+          >
+            Chat
+          </ActionButton>
+        );
+      }
+    }
+
+    return null;
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -272,8 +398,8 @@ export default function PostDetailPage() {
               </p>
             </div>
           </div>
-          {/* Application from Providers */}
-          {user?._id === post.customerId ? (
+          {/* offer to Providers */}
+          {user?._id === post.customerId && (
             <div className="w-full flex flex-col gap-2">
               <h2 className="text-2xl font-semibold">Offered To</h2>
               {providerOffered && providerOffered.length > 0 ? (
@@ -319,7 +445,7 @@ export default function PostDetailPage() {
                                     : 'text-black'
                               }`}
                           >
-                            {offer.status}
+                            {offer.status === 'Taken' ? 'Cancel' : offer.status}
                           </td>
                         </tr>
                       );
@@ -328,25 +454,7 @@ export default function PostDetailPage() {
                 </table>
               ) : (
                 <p className="text-lg text-gray-700">
-                  No providers apply this post...
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="w-full flex flex-col gap-2">
-              <h2 className="text-2xl font-semibold">Provider</h2>
-              {hasAcceptedApply ? (
-                <p
-                  className="text-lg font-semibold text-button-action hover:underline cursor-pointer"
-                  onClick={() => {
-                    navigate(`/user/${acceptedApply?.providerId}/provider`);
-                  }}
-                >
-                  {acceptedApply ? acceptedApply.provider.name : 'Unknown'}
-                </p>
-              ) : (
-                <p className="text-lg text-gray-700">
-                  No providers match this post...
+                  You have not offered to anyone...
                 </p>
               )}
             </div>
@@ -496,34 +604,7 @@ export default function PostDetailPage() {
                 user && (
                   <>
                     {/* Provider View */}
-                    {!myApply ? (
-                      !hasAcceptedApply && (
-                        <ActionButton
-                          className="cursor-pointer"
-                          onClick={() => navigate(`/apply/${post._id}/create`)}
-                        >
-                          Create Apply
-                        </ActionButton>
-                      )
-                    ) : !hasAcceptedApply ? (
-                      <ActionButton
-                        className="cursor-pointer"
-                        onClick={() => navigate(`/apply/${myApply._id}`)}
-                      >
-                        View Apply
-                      </ActionButton>
-                    ) : (
-                      myApply._id === acceptedApply?._id && (
-                        <ActionButton
-                          className="cursor-pointer"
-                          onClick={() =>
-                            navigate(`/chat/${acceptedApply?._id}`)
-                          }
-                        >
-                          Chat
-                        </ActionButton>
-                      )
-                    )}
+                    <div>{renderActionButton()}</div>
                   </>
                 )
               ))}
@@ -559,10 +640,17 @@ export default function PostDetailPage() {
                   await updatePostStatus(post._id, 'Deleted');
                   await updatePostMatched(post._id, false);
                   const allApplies = await getAppliesByPostId(post._id);
-                  const rejectPromises = allApplies.map((a) =>
+                  const rejectAppliesPromises = allApplies.map((a) =>
                     deleteApply(a._id),
                   );
-                  await Promise.all(rejectPromises);
+                  const allOffers = await getOffersByPostId(post._id);
+                  const rejectOffersPromises = allOffers.map((o) =>
+                    deleteOffer(o._id),
+                  );
+                  await Promise.all([
+                    ...rejectAppliesPromises,
+                    ...rejectOffersPromises,
+                  ]);
                   setStatusPostLoading(false);
                   setOpenDeletePostModal(false);
                   window.location.href = `/post/${post._id}`;
