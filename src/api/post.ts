@@ -244,24 +244,6 @@ export const updatePost = async (
     return false;
   }
 };
-export const updateManyPostMatched = async (
-  postsId: string[],
-): Promise<boolean> => {
-  console.log(postsId);
-  try {
-    const response = await axios.post<ResponseInterface<string>>(
-      `${API_BASE}/update-poststatus`,
-      { postsId },
-      {
-        headers: { 'Content-Type': 'application/json' },
-      },
-    );
-    return !!response.data.success;
-  } catch (err) {
-    console.error('Error updating post:', err);
-    return false;
-  }
-};
 export const updatePostMatched = async (
   postId: string,
   isMatched: boolean,
