@@ -22,6 +22,7 @@ import { useUser } from '@/context/UserContext';
 import PostNotFound from '@/error/PostNotFound';
 import OfferNotFound from '@/error/OfferNotFound';
 import { createIntentClientSecret } from '@/api/payment';
+import { getDetailedAppliesByPostId } from '@/api/apply';
 import {
   getOfferById,
   getDetailedOfferedByPostId,
