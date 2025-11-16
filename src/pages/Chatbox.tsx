@@ -14,7 +14,8 @@ export interface Message {
   url: string;
   createdAt?: string;
   room: string;
-  // 💡 Added fields to track message status
+
+  // 💡 Add these two optional fields
   tempId?: string;
   status?: 'pending' | 'sent' | 'failed';
 }
@@ -104,15 +105,14 @@ export function Chatbox({ id: receiveId }: ChatProps) {
     };
   }, [receiveId[1], user, receiveId[0]]);
 
-  // Load messages from API
   useEffect(() => {
     if (data) {
-      // 💡 Mark all loaded messages as 'sent'
+      // Mark all loaded messages as 'sent'
       const loadedMessages = (data as Message[]).map((msg) => ({
         ...msg,
         status: 'sent',
       }));
-      setMessages(loadedMessages);
+      setMessages(loadedMessages as Message[]);
     }
   }, [data]);
 
