@@ -14,6 +14,9 @@ export interface Message {
   url: string;
   createdAt?: string;
   room: string;
+  // 💡 Added fields to track message status
+  tempId?: string;
+  status?: 'pending' | 'sent' | 'failed';
 }
 
 interface ChatProps {
@@ -21,6 +24,7 @@ interface ChatProps {
 }
 
 export function Chatbox({ id: receiveId }: ChatProps) {
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const { user } = useUser();
   const [input, setInput] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -34,8 +38,33 @@ export function Chatbox({ id: receiveId }: ChatProps) {
     queryFn: () => fetchMessages(receiveId[1]),
   });
 
+  // 💡 Updated useMutation with onSuccess and onError for status tracking
   const mutation = useMutation({
-    mutationFn: (message: Message) => sentMessage(message),
+    mutationFn: (message: Message) => sentMessage(message) as Promise<Message>,
+
+    // This runs if the API call is successful
+    onSuccess: (savedMessage: Message, sentMessage: Message) => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.tempId === sentMessage.tempId
+            ? { ...savedMessage, status: 'sent' }
+            : msg,
+        ),
+      );
+    },
+
+    // This runs if the API call fails
+    onError: (error: Error, sentMessage: Message) => {
+      console.error('Failed to send message:', error);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.tempId === sentMessage.tempId
+            ? // Find the failed message by its tempId and update its status
+              { ...msg, status: 'failed' }
+            : msg,
+        ),
+      );
+    },
   });
 
   // Handle incoming messages via socket
@@ -50,7 +79,8 @@ export function Chatbox({ id: receiveId }: ChatProps) {
               msg.createdAt === message.createdAt,
           )
         ) {
-          return [...prev, message];
+          // 💡 Mark incoming messages as 'sent'
+          return [...prev, { ...message, status: 'sent' }];
         }
         return prev;
       });
@@ -76,7 +106,14 @@ export function Chatbox({ id: receiveId }: ChatProps) {
 
   // Load messages from API
   useEffect(() => {
-    if (data) setMessages(data as Message[]);
+    if (data) {
+      // 💡 Mark all loaded messages as 'sent'
+      const loadedMessages = (data as Message[]).map((msg) => ({
+        ...msg,
+        status: 'sent',
+      }));
+      setMessages(loadedMessages);
+    }
   }, [data]);
 
   // Auto-scroll
@@ -102,13 +139,14 @@ export function Chatbox({ id: receiveId }: ChatProps) {
         });
 
         const data = await uploadRes.json();
-
-        // ⚡ Fix: use fileUrlList from backend response
         fileUrl = data.fileUrlList?.[0] || '';
         setIsUploading(false);
       }
 
-      // 2️⃣ Construct message
+      // 💡 1. Generate a temporary ID
+      const tempId = Date.now().toString();
+
+      // 💡 2. Construct message with new fields
       const message: Message = {
         room: roomId,
         receiver: receiveId[0],
@@ -116,12 +154,14 @@ export function Chatbox({ id: receiveId }: ChatProps) {
         text: input.trim(),
         url: fileUrl,
         createdAt: new Date().toISOString(),
+        tempId: tempId, // Add temp ID
+        status: 'pending', // Set initial status
       };
 
-      // 3️⃣ Update UI instantly
+      // 3️⃣ Update UI instantly (Optimistic Update)
       setMessages((prev) => [...prev, message]);
 
-      // 4️⃣ Save to DB
+      // 4️⃣ Save to DB (this will trigger onSuccess or onError)
       mutation.mutate(message);
 
       // 5️⃣ Emit via socket
@@ -133,6 +173,8 @@ export function Chatbox({ id: receiveId }: ChatProps) {
     } catch (err) {
       console.error('Error sending message with file:', err);
       setIsUploading(false);
+      // Note: You could also find the message in state and mark it as 'failed' here
+      // if the file upload itself fails.
     }
   };
 
@@ -176,14 +218,15 @@ export function Chatbox({ id: receiveId }: ChatProps) {
           if (showDateHeader) lastDate = messageDate;
 
           return (
-            <div key={index}>
+            <div key={msg.tempId || index}>
+              {' '}
+              {/* 💡 Use tempId as key */}
               {/* Date header */}
               {showDateHeader && (
                 <div className="text-center text-gray-400 text-sm my-2">
                   {msg.createdAt && formatDateHeader(msg.createdAt)}
                 </div>
               )}
-
               {/* Message bubble */}
               <div
                 className={`mb-3 flex ${
@@ -200,29 +243,21 @@ export function Chatbox({ id: receiveId }: ChatProps) {
                   {/* File preview */}
                   {msg.url && (
                     <>
-                      {msg.url.match(/\.(jpg|jpeg|png|gif)$/i) && (
+                      {msg.url.match(/\.(jpeg|png)$/i) && (
                         <img
                           src={msg.url}
                           alt="sent file"
-                          className="rounded-lg mb-1 max-h-60 object-contain"
+                          className="rounded-lg mb-1 max-h-60 object-contain cursor-pointer transition hover:opacity-80"
+                          // This is for the fullscreen modal
+                          onClick={() => setFullscreenImage(msg.url)}
                         />
                       )}
-                      {msg.url.match(/\.(mp4|webm|mov)$/i) && (
+                      {msg.url.match(/\.(mp4)$/i) && (
                         <video
                           src={msg.url}
                           controls
                           className="rounded-lg mb-1 max-h-60"
                         />
-                      )}
-                      {msg.url.match(/\.pdf$/i) && (
-                        <a
-                          href={msg.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline text-sm text-blue-100 hover:text-blue-300"
-                        >
-                          View PDF
-                        </a>
                       )}
                     </>
                   )}
@@ -230,14 +265,30 @@ export function Chatbox({ id: receiveId }: ChatProps) {
                   {/* Text */}
                   {msg.text && <p className="break-words">{msg.text}</p>}
 
-                  {/* Time */}
+                  {/* 💡 Time & Status */}
                   <div
-                    className={`text-[0.7rem] mt-1 ${
+                    className={`text-[0.7rem] mt-1 flex items-center ${
                       isMine
-                        ? 'text-blue-100 text-right'
-                        : 'text-gray-500 text-left'
+                        ? 'text-blue-100 justify-end'
+                        : 'text-gray-500 justify-start'
                     }`}
                   >
+                    {/* START: Add Status Icons */}
+                    {isMine && msg.status === 'pending' && (
+                      <span className="mr-1" title="Sending...">
+                        🕒
+                      </span>
+                    )}
+                    {isMine && msg.status === 'failed' && (
+                      <span
+                        className="mr-1 text-red-300"
+                        title="Failed to send"
+                      >
+                        ❗
+                      </span>
+                    )}
+                    {/* END: Add Status Icons */}
+
                     {time}
                   </div>
                 </div>
@@ -272,7 +323,8 @@ export function Chatbox({ id: receiveId }: ChatProps) {
       <div className="p-3 bg-gray-50 border-t flex items-center gap-2">
         <input
           type="file"
-          accept="image/*,video/*"
+          // 💡 Restricted file types
+          accept="image/jpeg,image/png,video/mp4"
           id="fileUpload"
           className="hidden"
           onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
@@ -306,6 +358,27 @@ export function Chatbox({ id: receiveId }: ChatProps) {
           Send
         </button>
       </div>
+
+      {/* This is the fullscreen image modal */}
+      {fullscreenImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 p-4"
+          onClick={() => setFullscreenImage(null)}
+        >
+          <button
+            onClick={() => setFullscreenImage(null)}
+            className="absolute top-4 right-6 text-white text-4xl font-bold z-60"
+          >
+            &times;
+          </button>
+          <img
+            src={fullscreenImage}
+            alt="Fullscreen view"
+            className="max-w-[90vw] max-h-[90vh] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }
