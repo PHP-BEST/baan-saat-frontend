@@ -233,7 +233,11 @@ export default function PostDetailPage() {
       <main className="flex-grow flex justify-center py-12 px-4">
         <div className="w-full max-w-2xl space-y-6">
           {/* Post Name */}
-          <h1 title={post.title} className="text-3xl font-bold text-gray-900">
+          <h1
+            title={post.title}
+            className="text-3xl font-bold text-gray-900cursor-pointer hover:text-gray-500 active:text-gray-300"
+            onClick={() => navigate(`/post/${post._id}`)}
+          >
             {post.title}
             {post.status == 'Deleted' && (
               <span className="ml-4 px-3 py-1 rounded-full bg-red-500 text-xl text-white">
@@ -414,7 +418,7 @@ export default function PostDetailPage() {
                                     ? 'text-reject'
                                     : offer.status == 'Taken' ||
                                         offer.status == 'Cancel'
-                                      ? 'text-yellow-500'
+                                      ? 'text-yellow-600'
                                       : 'text-black'
                               }`}
                           >

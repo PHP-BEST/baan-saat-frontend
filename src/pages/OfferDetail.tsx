@@ -16,7 +16,6 @@ import {
   takenOffer,
 } from '@/utils/function';
 import { Calendar, Loader, Phone } from 'lucide-react';
-import { getDetailedAppliesByPostId } from '@/api/apply';
 import { getPostById, updatePostMatched } from '@/api/post';
 import { getUserById } from '@/api/user';
 import { useUser } from '@/context/UserContext';
@@ -57,7 +56,6 @@ export default function OfferDetailPage() {
         }
         setOffer(offerData);
         setOfferAction(offerData.status);
-
         const postData = await getPostById(offerData.postId);
         if (!postData) {
           return;
@@ -124,7 +122,11 @@ export default function OfferDetailPage() {
           {/* Post Information */}
           <div className="flex flex-col gap-4">
             {/* Post Title */}
-            <h1 title={post.title} className="text-3xl font-bold text-gray-900">
+            <h1
+              title={post.title}
+              className="text-3xl font-bold text-gray-900 cursor-pointer hover:text-gray-500 active:text-gray-300"
+              onClick={() => navigate(`/post/${post._id}`)}
+            >
               {post.title}
             </h1>
 
@@ -494,7 +496,7 @@ export default function OfferDetailPage() {
                     await updateOfferStatus(offer._id, 'Cancel');
                     setStatusOfferLoading(false);
                     setOpenCancelOfferModal(false);
-                    window.location.href = '/account/post';
+                    window.location.href = `/post/${post._id}`;
                   }}
                   className={`${isStatusOfferLoading ? '' : 'cursor-pointer'}`}
                   disabled={isStatusOfferLoading}

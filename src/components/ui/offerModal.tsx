@@ -1,4 +1,4 @@
-import { updateManyPostMatched, filterPosts } from '@/api/post';
+import { filterPosts } from '@/api/post';
 import { useState, useEffect, type FormEvent } from 'react';
 import { useUser } from '@/context/UserContext';
 import type { Post } from '@/interfaces/Post';
@@ -7,7 +7,7 @@ import PostList from '@/components/our-components/PostList';
 import ActionButton from '@/components/our-components/actionButton';
 import {
   createOffer,
-  getOffersByCustomerId,
+  getOffersByProviderId,
   type OfferFormInterface,
 } from '@/api/offer';
 import { useParams } from 'react-router-dom';
@@ -40,8 +40,8 @@ export default function OfferModal() {
         userId: user._id,
         isMatched: false,
       });
-      const customerOffers = await getOffersByCustomerId(user._id);
-      const offerPostIds = new Set(customerOffers.map((o) => o.postId));
+      const providerOffers = await getOffersByProviderId(userId);
+      const offerPostIds = new Set(providerOffers.map((o) => o.postId));
       const filteredPosts = userPosts.filter(
         (post) => !offerPostIds.has(post._id),
       );
@@ -58,7 +58,7 @@ export default function OfferModal() {
         ...prev,
         {
           customerId: post.customerId,
-          providerId: userId!,
+          providerId: userId,
           postId: post._id,
           title: post.title,
           price: post.budget,
@@ -72,16 +72,16 @@ export default function OfferModal() {
 
   const handleSubmit = async (e?: FormEvent<HTMLFormElement>) => {
     if (e) e.preventDefault();
-    const postIds = selectedFormData.map((item) => item.postId);
     const success = await createOffer(selectedFormData);
 
     if (success) {
-      await updateManyPostMatched(postIds);
       setSelectedformData([]);
+      setHasOffer(false);
     } else {
       alert('Failed to offer. Please try again.');
     }
     setOpen(false);
+    window.location.href = `/account/post`;
   };
 
   if (loading) {

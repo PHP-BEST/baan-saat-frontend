@@ -102,7 +102,11 @@ export default function MyWorkPage() {
                   key={`customer-request-${idx}`}
                   className="bg-table-row-content text-center cursor-pointer hover:bg-gray-100"
                   onClick={() => {
-                    navigate(`/apply/${work._id}`);
+                    navigate(
+                      isApplyType(work)
+                        ? `/apply/${work._id}`
+                        : `/offer/${work._id}`,
+                    );
                   }}
                 >
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">

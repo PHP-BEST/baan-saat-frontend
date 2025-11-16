@@ -52,19 +52,6 @@ export const getOffersByPostId = async (postId: string): Promise<Offer[]> => {
   }
 };
 
-export const getDetailedOffersByProviderId = async (
-  providerId: string,
-): Promise<OfferDetail[]> => {
-  try {
-    const response = await axios.get<ResponseInterface<OfferDetail[]>>(
-      `${API_BASE}/provider/${providerId}/detail`,
-    );
-    return response.data.data;
-  } catch (e) {
-    console.error('Error fetching offers by provider ID: ', e);
-    throw e;
-  }
-};
 export const getOffersByCustomerId = async (
   customerId: string,
 ): Promise<Offer[]> => {
@@ -76,6 +63,32 @@ export const getOffersByCustomerId = async (
   } catch (error) {
     console.error('Error fetching offers by customer ID:', error);
     throw error;
+  }
+};
+export const getOffersByProviderId = async (
+  providerId: string,
+): Promise<Offer[]> => {
+  try {
+    const response = await axios.get<ResponseInterface<Offer[]>>(
+      `${API_BASE}/provider/${providerId}`,
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching offers by customer ID:', error);
+    throw error;
+  }
+};
+export const getDetailedOffersByProviderId = async (
+  providerId: string,
+): Promise<OfferDetail[]> => {
+  try {
+    const response = await axios.get<ResponseInterface<OfferDetail[]>>(
+      `${API_BASE}/provider/${providerId}/detail`,
+    );
+    return response.data.data;
+  } catch (e) {
+    console.error('Error fetching offers by provider ID: ', e);
+    throw e;
   }
 };
 export const getDetailedOfferedByPostId = async (

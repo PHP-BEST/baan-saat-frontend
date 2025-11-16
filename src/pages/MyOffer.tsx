@@ -16,7 +16,11 @@ export default function MyOfferPage() {
     const fetchOffers = async () => {
       setLoading(true);
       const userOffers = await getDetailedOffersByProviderId(user._id);
-      setOffersDetail(userOffers);
+      const sortedOffers = userOffers.sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+      );
+      setOffersDetail(sortedOffers);
       setLoading(false);
     };
     fetchOffers();
@@ -53,7 +57,7 @@ export default function MyOfferPage() {
                 <th className="border border-gray-200 p-2 w-1/5">
                   Offered Price
                 </th>
-                <th className="border border-gray-200 p-2 w-1/5">Action</th>
+                <th className="border border-gray-200 p-2 w-1/5">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -62,7 +66,7 @@ export default function MyOfferPage() {
                   key={idx}
                   className="bg-table-row-content text-center cursor-pointer hover:bg-gray-100"
                   onClick={() => {
-                    navigate(`/post/${offer.postId}`);
+                    navigate(`/offer/${offer._id}`);
                   }}
                 >
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
@@ -78,7 +82,18 @@ export default function MyOfferPage() {
                     {offer.post.budget} THB
                   </td>
                   <td
-                    className={`border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap font-bold ${offer.status == 'Accepted' ? 'text-accept' : offer.status == 'Rejected' ? 'text-reject' : ''}`}
+                    className={`border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap font-bold 
+                      ${
+                        offer.status == 'Accepted'
+                          ? 'text-accept'
+                          : offer.status == 'Rejected' ||
+                              offer.status == 'Deleted'
+                            ? 'text-reject'
+                            : offer.status == 'Taken' ||
+                                offer.status == 'Cancel'
+                              ? 'text-yellow-600'
+                              : 'text-black'
+                      }`}
                   >
                     {offer.status}
                   </td>

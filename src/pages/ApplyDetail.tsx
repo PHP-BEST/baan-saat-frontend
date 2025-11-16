@@ -397,7 +397,12 @@ export default function ApplyDetailPage() {
                       apply.postId,
                     );
                     const takenOfferPromises = otherOffers
-                      .filter((o) => o.status != 'Rejected')
+                      .filter(
+                        (o) =>
+                          o.status != 'Rejected' &&
+                          o.status !== 'Taken' &&
+                          o.status !== 'Cancel',
+                      )
                       .map((o) => takenOffer(o._id));
                     await Promise.all([
                       ...rejectAppliesPromises,
