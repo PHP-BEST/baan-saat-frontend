@@ -24,6 +24,7 @@ export default function MyOfferPage() {
       setLoading(false);
     };
     fetchOffers();
+    console.log(offersDetail);
   }, []);
   if (loading) {
     return (
@@ -38,6 +39,17 @@ export default function MyOfferPage() {
           <Loading />
         </div>
       </>
+    );
+  }
+  if (offersDetail.length === 0) {
+    return (
+      <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
+        <div className="w-full h-full max-h-screen">
+          <p className="text-xl text-center font-semibold">
+            You have no any offers yet...
+          </p>
+        </div>
+      </div>
     );
   }
   return (
@@ -70,16 +82,16 @@ export default function MyOfferPage() {
                   }}
                 >
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {offer.post.title}
+                    {offer.post?.title ? offer.post.title : 'Unknow'}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {offer.customer.name}
+                    {offer.customer?.name ? offer.customer.name : 'Unknown'}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
                     {formatDateToDisplay(offer.createdAt)}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {offer.post.budget} THB
+                    {offer.post?.budget ? offer.post.budget : 'Unknown'} THB
                   </td>
                   <td
                     className={`border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap font-bold 
