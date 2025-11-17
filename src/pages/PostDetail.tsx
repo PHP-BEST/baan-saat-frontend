@@ -562,12 +562,21 @@ export default function PostDetailPage() {
                 <>
                   {/* Customer View */}
                   {!hasAcceptedApply ? (
-                    <ActionButton
-                      className="cursor-pointer"
-                      onClick={() => navigate(`/post/${post._id}/edit`)}
-                    >
-                      Edit
-                    </ActionButton>
+                    !hasAcceptedOffer ? (
+                      <ActionButton
+                        className="cursor-pointer"
+                        onClick={() => navigate(`/post/${post._id}/edit`)}
+                      >
+                        Edit
+                      </ActionButton>
+                    ) : (
+                      <ActionButton
+                        className="cursor-pointer"
+                        onClick={() => navigate(`/chat/${acceptedOffer?._id}`)}
+                      >
+                        Chat
+                      </ActionButton>
+                    )
                   ) : (
                     <ActionButton
                       className="cursor-pointer"
