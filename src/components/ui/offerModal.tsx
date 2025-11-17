@@ -41,6 +41,7 @@ export default function OfferModal() {
         userId: user._id,
         isMatched: false,
       });
+      console.log(userPosts);
       const providerOffers = await getOffersByProviderId(userId);
       const applyProvider = await getDetailedAppliesByProviderId(userId);
       const offerPostIds = new Set(providerOffers.map((o) => o.postId));

@@ -80,6 +80,10 @@ export default function CustomerProfilePage() {
                     src={customerUser.avatarUrl}
                     alt="Avatar Image"
                     className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                    crossOrigin="anonymous"
+                    loading="lazy"
+                    decoding="async"
                   />
                 ) : (
                   <div className="w-full h-full" />

@@ -16,8 +16,10 @@ import PostCard from '@/components/our-components/postCard';
 import Loading from '@/components/our-components/loading';
 import ActionButton from '@/components/our-components/actionButton';
 import { filterValidator } from '@/utils/filterValidator';
+import { useUser } from '@/context/UserContext';
 
 export default function SearchPage() {
+  const { user } = useUser();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -26,7 +28,7 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
 
   // Tabs
-  const [activeTab, setActiveTab] = useState<'Provider' | 'Post'>('Post');
+  const [activeTab, setActiveTab] = useState<'Provider' | 'Post'>('Provider');
 
   // Search box
   const [query, setQuery] = useState(searchParams.get('query') || '');
@@ -206,16 +208,18 @@ export default function SearchPage() {
           >
             Providers
           </button>
-          <button
-            onClick={() => setActiveTab('Post')}
-            className={`text-lg font-semibold pb-1 border-b-4 ${
-              activeTab === 'Post'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500'
-            }`}
-          >
-            Posts
-          </button>
+          {user?.role === 'provider' && (
+            <button
+              onClick={() => setActiveTab('Post')}
+              className={`text-lg font-semibold pb-1 border-b-4 ${
+                activeTab === 'Post'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500'
+              }`}
+            >
+              Posts
+            </button>
+          )}
         </div>
 
         {/* Search Box */}
@@ -400,7 +404,7 @@ export default function SearchPage() {
                 <div
                   key={provider._id}
                   className="bg-white rounded-xl shadow-md p-5 flex flex-col items-center text-center hover:shadow-lg transition"
-                  onClick={() => navigate(`/user/${provider._id}`)}
+                  onClick={() => navigate(`/user/${provider._id}/provider`)}
                 >
                   <img
                     src={provider.avatarUrl || '/default-avatar.png'}

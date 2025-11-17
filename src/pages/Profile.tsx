@@ -218,6 +218,10 @@ export default function ProfilePage() {
                 src={tempAvatarUrl || user.avatarUrl}
                 alt="Profile Avatar"
                 className="w-full h-full object-cover rounded-full"
+                referrerPolicy="no-referrer"
+                crossOrigin="anonymous"
+                loading="lazy"
+                decoding="async"
               />
               {/* Hover overlay */}
               <div className="absolute inset-0 bg-black bg-opacity-70 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

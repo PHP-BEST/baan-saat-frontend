@@ -29,6 +29,7 @@ import OnboardPage from './pages/payments/Onboard';
 import ApplyDetailPage from './pages/ApplyDetail';
 import ChatPage from './pages/Chat';
 import ProviderProfilePage from './pages/ProviderProfilePage';
+import ReviewCreate from './pages/ReviewCreate';
 import MyWorkPage from './pages/MyWork';
 import OfferDetailPage from './pages/OfferDetail';
 
@@ -154,6 +155,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ChatPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/reviews/new/:postId/:providerId',
+        element: (
+          <ProtectedRoute>
+            <ReviewCreate />
           </ProtectedRoute>
         ),
       },

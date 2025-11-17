@@ -37,7 +37,7 @@ const Header = ({ isHideSearchBar = false }: HeaderProps) => {
         />
 
         {/* Search Box */}
-        {!isHideSearchBar && user?.role === 'provider' && (
+        {!isHideSearchBar && (
           <div
             className="bg-white w-full h-[50px] flex gap-1 items-center pl-1 pr-3"
             id="Searchbar-header"
