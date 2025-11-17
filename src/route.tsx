@@ -30,7 +30,7 @@ import ApplyDetailPage from './pages/ApplyDetail';
 import ChatPage from './pages/Chat';
 import ProviderProfilePage from './pages/ProviderProfilePage';
 import MyWorkPage from './pages/MyWork';
-import OfferDetailPage from './pages/offerDetail';
+import OfferDetailPage from './pages/OfferDetail';
 
 export const router = createBrowserRouter([
   {
