@@ -240,8 +240,8 @@ export default function PostDetailPage() {
           >
             {post.title}
             {post.status == 'Deleted' && (
-              <span className="ml-4 px-3 py-1 rounded-full bg-red-500 text-xl text-white">
-                Deleted
+              <span className="ml-4 text-xl text-red-500">
+                {`(This post has been deleted)`}
               </span>
             )}
           </h1>

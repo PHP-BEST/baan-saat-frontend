@@ -52,7 +52,9 @@ export default function PostCard({ post, size = 'M' }: PostCardProps) {
 
         {/* Deleted badge */}
         {post.status === 'Deleted' && (
-          <span className="absolute bottom-2 right-2 px-3 py-1 rounded-full bg-red-500 text-xs text-white">
+          <span
+            className={`absolute bottom-2 right-2 ${size == 'L' ? 'text-lg' : 'text-sm'} text-red-500 font-semibold`}
+          >
             Deleted
           </span>
         )}
