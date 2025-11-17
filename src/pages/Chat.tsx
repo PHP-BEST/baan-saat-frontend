@@ -47,21 +47,22 @@ export default function ChatPage() {
       if (!workId || !user) return;
       try {
         setLoading(true);
-        const applyData = await getDetailedApplyById(workId);
-        if (!applyData) {
-          const offerData = await getDetailedOfferedById(workId);
-          if (!offerData) {
-            return;
-          } else {
-            setOffer(offerData);
-            setPost(offerData.post);
-          }
-        } else {
-          setApply(applyData);
-          setPost(applyData.post);
-        }
-        setCustomer(applyData.customer);
-        setProvider(applyData.provider);
+        const results = await Promise.allSettled([
+          getDetailedApplyById(workId),
+          getDetailedOfferedById(workId),
+        ]);
+        const applyData =
+          results[0].status === 'fulfilled' ? results[0].value : null;
+        const offerData =
+          results[1].status === 'fulfilled' ? results[1].value : null;
+        const work = applyData ?? offerData;
+        if (!work) return;
+
+        if (applyData) setApply(applyData);
+        else setOffer(offerData);
+        setPost(work.post);
+        setCustomer(work.customer);
+        setProvider(work.provider);
       } catch (err) {
         console.error('Error fetching work:', err);
       } finally {
