@@ -17,6 +17,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { DialogDescription } from '@radix-ui/react-dialog';
 import PaymentIntent from '@/components/payments/PaymentIntent';
 import PaymentButton from '@/components/payments/PaymentButton';
+import { Chatbox } from './Chatbox';
 export default function ChatPage() {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -33,6 +34,9 @@ export default function ChatPage() {
   const [openPayModal, setOpenPayModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isUpdateStatusLoading, setUpdateStatusLoading] = useState(false);
+
+  const receiverid =
+    customer?._id === user?._id ? provider?._id : customer?._id;
 
   useEffect(() => {
     const fetchApply = async () => {
@@ -197,36 +201,16 @@ export default function ChatPage() {
           </div>
 
           {/* Chat Section: Just the mock page */}
-          <div className="w-full lg:w-[60%] flex flex-col justify-between">
-            <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-gray-800">
-                Chat Room: Mock Version
-              </h3>
+          {/* Chat Section */}
+          <div className="w-full lg:w-[60%] flex flex-col h-full max-h-[80vh] bg-white rounded-tr-2xl overflow-hidden border-l border-gray-200">
+            {/* Chat Header */}
+            <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between ">
+              <h3 className="text-xl font-semibold text-gray-800">Chat Room</h3>
             </div>
 
-            <div className="flex-grow overflow-y-auto px-6 py-4 bg-gray-50">
-              <div className="flex flex-col gap-4">
-                <div className="self-start bg-gray-200 text-gray-800 px-4 py-2 rounded-2xl max-w-sm">
-                  Hi! I’ll arrive at 2 PM for the cleaning.
-                </div>
-                <div className="self-end bg-green-600 text-white px-4 py-2 rounded-2xl max-w-sm">
-                  Sure! I’ll be home by then.
-                </div>
-                <div className="self-start bg-gray-200 text-gray-800 px-4 py-2 rounded-2xl max-w-sm">
-                  Perfect, see you soon!
-                </div>
-              </div>
-            </div>
-
-            <div className="border-t border-gray-200 p-4 bg-white flex gap-3 items-center">
-              <input
-                type="text"
-                placeholder="Type your message..."
-                className="flex-grow px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-button-action"
-              />
-              <ActionButton buttonColor="green" onClick={() => {}}>
-                Send
-              </ActionButton>
+            {/* Chat Content */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+              <Chatbox id={[receiverid || '', post._id]} />
             </div>
           </div>
         </div>
