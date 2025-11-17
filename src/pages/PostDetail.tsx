@@ -14,6 +14,8 @@ import { getUserById } from '@/api/user';
 import PostNotFound from '@/error/PostNotFound';
 import { checkMyApply, getDetailedAppliesByPostId } from '@/api/apply';
 import type { Apply, ApplyDetail } from '@/interfaces/Apply';
+import { X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 export default function PostDetailPage() {
   const navigate = useNavigate();
@@ -26,6 +28,7 @@ export default function PostDetailPage() {
   const [providerApplies, setProviderApplies] = useState<ApplyDetail[]>([]);
   const [acceptedApply, setAcceptedApply] = useState<ApplyDetail | null>();
   const [hasAcceptedApply, setHasAcceptedApply] = useState(false);
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -60,6 +63,16 @@ export default function PostDetailPage() {
     fetchPost();
   }, [postId]);
 
+  useEffect(() => {
+    if (openIdx !== null) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [openIdx]);
+
   if (loading) {
     return (
       <div>
@@ -84,6 +97,25 @@ export default function PostDetailPage() {
     );
   }
 
+  const supportingImages = [
+    post.image1Url,
+    post.image2Url,
+    post.image3Url,
+  ].filter(
+    (u): u is string => !!u && u.trim() !== '' && u !== post.coverPhotoUrl,
+  );
+
+  const hasCover =
+    typeof post.coverPhotoUrl === 'string' && post.coverPhotoUrl.trim() !== '';
+
+  const galleryImages = (
+    hasCover
+      ? [post.coverPhotoUrl!, ...supportingImages]
+      : [...supportingImages]
+  )
+    .filter((u): u is string => !!u && u.trim() !== '')
+    .filter((u, i, arr) => arr.indexOf(u) === i);
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <Header />
@@ -94,15 +126,58 @@ export default function PostDetailPage() {
             {post.title}
           </h1>
 
-          {/* Post Cover Image */}
-          {post.coverPhotoUrl ? (
-            <img
-              src={post.coverPhotoUrl}
-              alt={post.title}
-              className="w-full h-64 object-cover"
-            />
-          ) : (
-            <div className="w-full h-64 bg-gray-200 flex items-center justify-center"></div>
+          {/* Cover Photo */}
+          <div className="relative">
+            {post.coverPhotoUrl ? (
+              <button
+                type="button"
+                onClick={() => setOpenIdx(0)}
+                className="block w-full rounded-2xl overflow-hidden focus:outline-none hover:opacity-85"
+                aria-label="View Cover Photo"
+                title="View Cover Photo"
+              >
+                <img
+                  src={post.coverPhotoUrl}
+                  alt={post.title}
+                  className="w-full h-64 object-cover cursor-pointer"
+                />
+              </button>
+            ) : (
+              <div className="w-full h-64 bg-gray-200 flex items-center justify-center rounded-2xl" />
+            )}
+          </div>
+
+          {/* Supporting Photos */}
+          {supportingImages.length > 0 && (
+            <section className="mt-3" id="supporting-photos">
+              <ul className="flex flex-wrap gap-2 md:gap-3">
+                {supportingImages.map((src, i) => (
+                  <li key={src}>
+                    <button
+                      type="button"
+                      className="block overflow-hidden rounded-lg border border-gray-200 hover:opacity-85"
+                      onClick={() => setOpenIdx(hasCover ? i + 1 : i)}
+                      title="View photo"
+                    >
+                      <div className="w-28 h-20 md:w-36 md:h-28 bg-gray-100 cursor-pointer">
+                        <img
+                          src={src}
+                          alt={`${post.title} — supporting photo`}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (
+                              e.currentTarget as HTMLImageElement
+                            ).style.visibility = 'hidden';
+                          }}
+                        />
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
 
           {/* Post Description */}
@@ -258,6 +333,35 @@ export default function PostDetailPage() {
           )}
 
           {/* Buttons */}
+          {openIdx !== null &&
+            createPortal(
+              <div
+                role="dialog"
+                aria-modal="true"
+                className="fixed inset-0 z-[1000] bg-black/80 flex items-center justify-center"
+                onClick={() => setOpenIdx(null)}
+              >
+                <div
+                  className="relative max-h-[65vh] max-w-[65vw]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <img
+                    src={galleryImages[openIdx]}
+                    alt={`${post.title} — supporting photo`}
+                    className="block max-w-[65vw] max-h-[65vh] rounded-lg shadow-xl"
+                  />
+                  <button
+                    aria-label="Close"
+                    className="absolute -top-3 -right-3 grid place-items-center w-9 h-9 rounded-full bg-white text-black shadow-lg"
+                    onClick={() => setOpenIdx(null)}
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>,
+              document.body,
+            )}
+
           <div className="flex justify-end gap-4 my-8">
             {user && user?._id === post.customerId ? (
               <>

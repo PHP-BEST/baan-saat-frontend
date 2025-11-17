@@ -20,6 +20,7 @@ import { getUserById } from '@/api/user';
 import { useUser } from '@/context/UserContext';
 import PostNotFound from '@/error/PostNotFound';
 import ApplyNotFound from '@/error/ApplyNotFound';
+import { createIntentClientSecret } from '@/api/payment';
 
 export default function ApplyDetailPage() {
   const navigate = useNavigate();
@@ -383,6 +384,25 @@ export default function ApplyDetailPage() {
                     await Promise.all(rejectPromises);
                     setStatusApplyLoading(false);
                     setOpenAcceptApplyModal(false);
+                    try {
+                      const clientSecret = await createIntentClientSecret(
+                        apply.postId,
+                        apply.providerId,
+                        apply.appliedPrice * 100,
+                      );
+
+                      if (!clientSecret) {
+                        console.error('Failed to create payment intent');
+                        // Optionally show an error message to user
+                      } else {
+                        console.log(
+                          'Payment intent created successfully:',
+                          clientSecret,
+                        );
+                      }
+                    } catch (error) {
+                      console.error('Error in accept apply process:', error);
+                    }
                     window.location.reload();
                   }}
                   className={`${isStatusApplyLoading ? '' : 'cursor-pointer'}`}

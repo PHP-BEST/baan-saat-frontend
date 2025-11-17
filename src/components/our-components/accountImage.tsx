@@ -29,6 +29,10 @@ const AvatarImage = ({ width = 52 }: AccountImageProps) => {
           src={user.avatarUrl}
           alt="Avatar Image"
           className="w-full h-full object-cover"
+          referrerPolicy="no-referrer"
+          crossOrigin="anonymous"
+          loading="lazy"
+          decoding="async"
         />
       ) : (
         <div className="w-full h-full" />

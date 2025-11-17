@@ -73,6 +73,7 @@ export const updateUser = async (
     return false;
   }
 };
+
 export const searchProviders = async (query: string) => {
   try {
     let response = null;
@@ -91,5 +92,18 @@ export const searchProviders = async (query: string) => {
   } catch (error) {
     console.error('Error searching providers:', error);
     return [];
+  }
+};
+
+export const promoteUser = async () => {
+  try {
+    const response = await Axios.post(`${API_BASE}/promotion`);
+    if (response.status === 200) {
+      return response.data;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error promoting user role:', error);
+    return null;
   }
 };
