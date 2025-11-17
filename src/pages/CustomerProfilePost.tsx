@@ -21,9 +21,11 @@ import {
 import { filterValidator } from '@/utils/filterValidator';
 import ActionButton from '@/components/our-components/actionButton';
 import UserNotFound from '@/error/UserNotFound';
+import { useUser } from '@/context/UserContext';
 
 export default function CustomerProfilePostPage() {
   const { userId } = useParams<{ userId: string }>();
+  const { user } = useUser();
   const [customerUser, setCustomerUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
@@ -44,10 +46,19 @@ export default function CustomerProfilePostPage() {
     const getCustomerUser = async () => {
       setLoading(true);
       if (!userId) return;
-      const user = await getUserById(userId);
-      setCustomerUser(user);
-      if (user) {
-        const posts = await getPostsByUserId(userId);
+      const customerUser = await getUserById(userId);
+      setCustomerUser(customerUser);
+      if (customerUser) {
+        let posts = await getPostsByUserId(userId);
+        if (userId != user?._id) {
+          posts = posts.filter(
+            (p) => p.isMatched == false && p.status != 'Deleted',
+          );
+        }
+        posts = posts.sort(
+          (a, b) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+        );
         setFilteredPosts(posts);
       }
       setLoading(false);
@@ -110,6 +121,11 @@ export default function CustomerProfilePostPage() {
     };
 
     let posts = await filterPosts(params);
+    if (userId != user?._id) {
+      posts = posts.filter(
+        (p) => p.isMatched == false && p.status != 'Deleted',
+      );
+    }
     posts = posts.sort(
       (a, b) =>
         new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
@@ -140,7 +156,9 @@ export default function CustomerProfilePostPage() {
         </button>
 
         {/* Header */}
-        <p className="text-3xl font-bold">Posts by {customerUser.name}</p>
+        <p className="text-3xl font-bold">
+          {userId != user?._id && 'Available'} Posts by {customerUser.name}
+        </p>
 
         {/* Result Counter */}
         <div className="flex justify-between items-center w-full">

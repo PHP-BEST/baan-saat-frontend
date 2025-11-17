@@ -1,61 +1,60 @@
-import { getDetailedAppliesByProviderId } from '@/api/apply';
-import Loading from '@/components/our-components/loading';
-import { useUser } from '@/context/UserContext';
-import type { ApplyDetail } from '@/interfaces/Apply';
-import { formatDateToDisplay } from '@/utils/function';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@/context/UserContext';
+import Loading from '@/components/our-components/loading';
+import { getDetailedOffersByProviderId } from '@/api/offer';
+import type { OfferDetail } from '@/interfaces/Offer';
+import { formatDateToDisplay } from '@/utils/function';
 
-export default function MyApplyPage() {
-  const { user } = useUser();
-  const navigate = useNavigate();
-
-  if (!user) return;
-
-  const [appliesDetail, setAppliesDetail] = useState<ApplyDetail[]>([]);
+export default function MyOfferPage() {
+  const [offersDetail, setOffersDetail] = useState<OfferDetail[]>([]);
   const [loading, setLoading] = useState(false);
-
+  const { user } = useUser();
+  if (!user) return;
+  const navigate = useNavigate();
   useEffect(() => {
-    const getApplies = async () => {
+    const fetchOffers = async () => {
       setLoading(true);
-      const currentApplies = await getDetailedAppliesByProviderId(user._id);
-      const sortedApplies = currentApplies.sort(
+      const userOffers = await getDetailedOffersByProviderId(user._id);
+      const sortedOffers = userOffers.sort(
         (a, b) =>
           new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
       );
-      setAppliesDetail(sortedApplies);
+      setOffersDetail(sortedOffers);
       setLoading(false);
     };
-    getApplies();
+    fetchOffers();
+    console.log(offersDetail);
   }, []);
-
   if (loading) {
     return (
       <>
-        <h1 className="text-2xl font-bold mb-2">My Applies</h1>
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold mb-2">My Offers</h1>
+        </div>
+
+        {/* Loading Text */}
         <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
           <Loading />
         </div>
       </>
     );
   }
-
-  if (appliesDetail.length === 0) {
+  if (offersDetail.length === 0) {
     return (
-      <>
-        <h1 className="text-2xl font-bold mb-2">My Applies</h1>
-        <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
+      <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
+        <div className="w-full h-full max-h-screen">
           <p className="text-xl text-center font-semibold">
-            You haven&apos;t created any applies yet...
+            You have no any offers yet...
           </p>
         </div>
-      </>
+      </div>
     );
   }
-
   return (
     <>
-      <h1 className="text-2xl font-bold mb-2">My Applies</h1>
+      <h1 className="text-2xl font-bold mb-2">My Offers</h1>
       <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
         {/* Table */}
         <div className="w-full max-h-[100vh] overflow-auto">
@@ -65,47 +64,50 @@ export default function MyApplyPage() {
                 <th className="border border-gray-200 p-2 w-2/5">Post Title</th>
                 <th className="border border-gray-200 p-2 w-1/5">Customer</th>
                 <th className="border border-gray-200 p-2 w-1/5">
-                  Applied Date
+                  Offered Date
                 </th>
                 <th className="border border-gray-200 p-2 w-1/5">
-                  Applied Price
+                  Offered Price
                 </th>
                 <th className="border border-gray-200 p-2 w-1/5">Status</th>
               </tr>
             </thead>
             <tbody>
-              {appliesDetail.map((apply, idx) => (
+              {offersDetail.map((offer, idx) => (
                 <tr
-                  key={`customer-request-${idx}`}
+                  key={idx}
                   className="bg-table-row-content text-center cursor-pointer hover:bg-gray-100"
                   onClick={() => {
-                    navigate(`/apply/${apply._id}`);
+                    navigate(`/offer/${offer._id}`);
                   }}
                 >
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {apply.post?.title ? apply.post.title : 'Unknown'}
+                    {offer.post?.title ? offer.post.title : 'Unknow'}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {apply.customer?.name ? apply.customer.name : 'Unknown'}
+                    {offer.customer?.name ? offer.customer.name : 'Unknown'}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {formatDateToDisplay(apply.date)}
+                    {formatDateToDisplay(offer.createdAt)}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {apply.appliedPrice} THB
+                    {offer.post?.budget ? offer.post.budget : 'Unknown'} THB
                   </td>
                   <td
                     className={`border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap font-bold 
                       ${
-                        apply.status == 'Accepted'
+                        offer.status == 'Accepted'
                           ? 'text-accept'
-                          : apply.status == 'Rejected' ||
-                              apply.status == 'Deleted'
+                          : offer.status == 'Rejected' ||
+                              offer.status == 'Deleted'
                             ? 'text-reject'
-                            : ''
+                            : offer.status == 'Taken' ||
+                                offer.status == 'Cancel'
+                              ? 'text-yellow-600'
+                              : 'text-black'
                       }`}
                   >
-                    {apply.status}
+                    {offer.status}
                   </td>
                 </tr>
               ))}

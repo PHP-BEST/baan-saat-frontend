@@ -267,13 +267,15 @@ export default function ProfilePage() {
               cursorPositions={cursorPositions}
               setCursorPositions={setCursorPositions}
             />
-            <ProfileField
-              label="Description"
-              field="description"
-              {...commonFieldProperties}
-              cursorPositions={cursorPositions}
-              setCursorPositions={setCursorPositions}
-            />
+            {user.role == 'provider' && (
+              <ProfileField
+                label="Description"
+                field="description"
+                {...commonFieldProperties}
+                cursorPositions={cursorPositions}
+                setCursorPositions={setCursorPositions}
+              />
+            )}
           </div>
         </div>
 

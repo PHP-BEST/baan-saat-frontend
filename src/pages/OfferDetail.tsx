@@ -4,79 +4,77 @@ import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import type { Post } from '@/interfaces/Post';
 import type { User } from '@/interfaces/User';
-import type { Apply, ApplyStatus } from '@/interfaces/Apply';
+import type { Offer, OfferedStatus } from '@/interfaces/Offer';
 import ActionButton from '@/components/our-components/actionButton';
 import Loading from '@/components/our-components/loading';
 import {
-  acceptApply,
+  acceptOffer,
   convertTagsToLabels,
   formatDateToDisplay,
+  rejectOffer,
   rejectApply,
   takenOffer,
 } from '@/utils/function';
 import { Calendar, Loader, Phone } from 'lucide-react';
-import {
-  getApplyById,
-  getDetailedAppliesByPostId,
-  updateApplyStatus,
-} from '@/api/apply';
 import { getPostById, updatePostMatched } from '@/api/post';
 import { getUserById } from '@/api/user';
 import { useUser } from '@/context/UserContext';
 import PostNotFound from '@/error/PostNotFound';
-import ApplyNotFound from '@/error/ApplyNotFound';
+import OfferNotFound from '@/error/OfferNotFound';
 import { createIntentClientSecret } from '@/api/payment';
-import { getDetailedOfferedByPostId } from '@/api/offer';
+import { getDetailedAppliesByPostId } from '@/api/apply';
+import {
+  getOfferById,
+  getDetailedOfferedByPostId,
+  updateOfferStatus,
+} from '@/api/offer';
 
-export default function ApplyDetailPage() {
+export default function OfferDetailPage() {
   const navigate = useNavigate();
   const { user } = useUser();
-  const { applyId } = useParams();
+  const { offerId } = useParams();
 
-  const [apply, setApply] = useState<Apply | null>(null);
+  const [offer, setOffer] = useState<Offer | null>(null);
   const [post, setPost] = useState<Post | null>(null);
   const [customerUser, setCustomerUser] = useState<User | null>(null);
   const [providerUser, setProviderUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
-  const [isStatusApplyLoading, setStatusApplyLoading] = useState(false);
-  const [applyAction, setApplyAction] = useState<ApplyStatus>('Pending');
-  const [openCancelApplyModal, setOpenCancelApplyModal] = useState(false);
-  const [openAcceptApplyModal, setOpenAcceptApplyModal] = useState(false);
-  const [openRejectApplyModal, setOpenRejectApplyModal] = useState(false);
+  const [isStatusOfferLoading, setStatusOfferLoading] = useState(false);
+  const [offerAction, setOfferAction] = useState<OfferedStatus>('Pending');
+  const [openCancelOfferModal, setOpenCancelOfferModal] = useState(false);
+  const [openAcceptOfferModal, setOpenAcceptOfferModal] = useState(false);
+  const [openRejectOfferModal, setOpenRejectOfferModal] = useState(false);
 
   useEffect(() => {
-    const fetchApply = async () => {
-      if (!applyId || !user) return;
+    const fetchOffer = async () => {
+      if (!offerId || !user) return;
 
       try {
         setLoading(true);
-        const applyData = await getApplyById(applyId);
-        if (!applyData) {
+        const offerData = await getOfferById(offerId);
+        if (!offerData) {
           return;
         }
-        setApply(applyData);
-        setApplyAction(applyData.status);
-
-        const postData = await getPostById(applyData.postId);
+        setOffer(offerData);
+        setOfferAction(offerData.status);
+        const postData = await getPostById(offerData.postId);
         if (!postData) {
           return;
         }
         setPost(postData);
 
-        const customer = await getUserById(applyData.customerId);
+        const customer = await getUserById(offerData.customerId);
         setCustomerUser(customer);
-        const provider = await getUserById(applyData.providerId);
+        const provider = await getUserById(offerData.providerId);
         setProviderUser(provider);
       } catch (err) {
-        console.error('Error fetching apply details:', err);
+        console.error('Error fetching offer details:', err);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchApply();
-  }, [applyId, user]);
-
+    fetchOffer();
+  }, [offerId, user]);
   if (!user) {
     return null;
   }
@@ -93,12 +91,12 @@ export default function ApplyDetailPage() {
     );
   }
 
-  if (!apply) {
+  if (!offer) {
     return (
       <div>
         <Header />
         <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
-          <ApplyNotFound />
+          <OfferNotFound />
         </div>
         <Footer />
       </div>
@@ -125,7 +123,11 @@ export default function ApplyDetailPage() {
           {/* Post Information */}
           <div className="flex flex-col gap-4">
             {/* Post Title */}
-            <h1 title={post.title} className="text-3xl font-bold text-gray-900">
+            <h1
+              title={post.title}
+              className="text-3xl font-bold text-gray-900 cursor-pointer hover:text-gray-500 active:text-gray-300"
+              onClick={() => navigate(`/post/${post._id}`)}
+            >
               {post.title}
             </h1>
 
@@ -219,27 +221,27 @@ export default function ApplyDetailPage() {
 
           <hr className="my-6" />
 
-          {/* Apply Section */}
+          {/* Offer Section */}
           <div className="flex flex-col gap-4">
-            {/* Apply Title with Status */}
+            {/* Offer Title with Status */}
             <div className="flex justify-between items-center">
               <h1 className="text-3xl font-bold text-gray-900">
-                {user._id == apply.customerId ? `Provider Apply` : 'My Apply'}
+                {user._id == offer.customerId ? `Offered To` : 'My Offer'}
               </h1>
               <p
                 className={`${
-                  applyAction == 'Accepted'
+                  offerAction == 'Accepted'
                     ? 'border rounded-full border-accept bg-accept'
-                    : applyAction == 'Rejected' || applyAction == 'Deleted'
+                    : offerAction == 'Rejected' || offerAction == 'Deleted'
                       ? 'border-reject bg-reject'
                       : 'border-black bg-black'
                 } border rounded-full text-xl font-semibold text-white px-3 py-1`}
               >
-                {applyAction}
+                {offerAction}
               </p>
             </div>
 
-            {/* Apply Provider Name */}
+            {/* Offer Provider Name */}
             {user._id != providerUser?._id && (
               <div className="w-full flex flex-col gap-2">
                 <h2 className="text-2xl font-semibold">Name</h2>
@@ -254,30 +256,22 @@ export default function ApplyDetailPage() {
               </div>
             )}
 
-            {/* Apply Date */}
+            {/* Offer Date */}
             <div className="w-full flex flex-col gap-2">
               <h2 className="text-2xl font-semibold">Date to Perform</h2>
               <div className="flex gap-2 items-center">
                 <Calendar width={16} />
                 <p className="text-lg text-gray-900">
-                  {formatDateToDisplay(apply.date)}
+                  {formatDateToDisplay(post.date)}
                 </p>
               </div>
             </div>
 
-            {/* Apply Applied Price */}
+            {/* Offer Price */}
             <div className="w-full flex flex-col gap-2">
-              <h2 className="text-2xl font-semibold">Applied Price</h2>
+              <h2 className="text-2xl font-semibold">Price</h2>
               <p className="text-lg text-gray-900">
-                ฿ {apply.appliedPrice.toLocaleString()}
-              </p>
-            </div>
-
-            {/* Apply Description */}
-            <div className="w-full flex flex-col gap-2">
-              <h2 className="text-2xl font-semibold">Description</h2>
-              <p className="text-lg text-gray-900 whitespace-pre-wrap">
-                {apply.description || 'No description provided.'}
+                ฿ {offer.price.toLocaleString()}
               </p>
             </div>
 
@@ -285,25 +279,42 @@ export default function ApplyDetailPage() {
             <div className="w-full flex flex-col gap-2">
               <h2 className="text-2xl font-semibold">Submitted On</h2>
               <p className="text-lg text-gray-900">
-                {formatDateToDisplay(apply.createdAt)}
+                {formatDateToDisplay(offer.createdAt)}
               </p>
             </div>
 
             {/* Action Buttons */}
             <div className="flex justify-center mt-6 gap-4">
-              {user._id !== apply.customerId ? (
-                apply.status == 'Pending' ? (
+              {user._id !== offer.customerId ? (
+                offer.status == 'Pending' ? (
+                  <>
+                    <ActionButton
+                      buttonColor="green"
+                      onClick={() => {
+                        setOpenAcceptOfferModal(true);
+                      }}
+                      className="cursor-pointer"
+                    >
+                      Accept
+                    </ActionButton>
+                    <ActionButton
+                      buttonColor="red"
+                      onClick={() => {
+                        setOpenRejectOfferModal(true);
+                      }}
+                      className={`${isStatusOfferLoading ? '' : 'cursor-pointer'}`}
+                      disabled={isStatusOfferLoading}
+                    >
+                      {isStatusOfferLoading && (
+                        <Loader className="animate-spin" size={24} />
+                      )}
+                      Reject
+                    </ActionButton>
+                  </>
+                ) : offer.status == 'Accepted' ? (
                   <ActionButton
                     buttonColor="blue"
-                    onClick={() => navigate(`/apply/${applyId}/edit`)}
-                    className="cursor-pointer"
-                  >
-                    Edit
-                  </ActionButton>
-                ) : apply.status == 'Accepted' ? (
-                  <ActionButton
-                    buttonColor="blue"
-                    onClick={() => navigate(`/chat/${applyId}/`)}
+                    onClick={() => navigate(`/chat/${offerId}/`)}
                     className="cursor-pointer"
                   >
                     Chat
@@ -311,55 +322,31 @@ export default function ApplyDetailPage() {
                 ) : (
                   <></>
                 )
-              ) : applyAction === 'Pending' ? (
-                <>
-                  <ActionButton
-                    buttonColor="green"
-                    onClick={() => {
-                      setOpenAcceptApplyModal(true);
-                    }}
-                    className="cursor-pointer"
-                  >
-                    Accept
-                  </ActionButton>
-
-                  <ActionButton
-                    buttonColor="red"
-                    onClick={() => {
-                      setOpenRejectApplyModal(true);
-                    }}
-                    className={`${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
-                    disabled={isStatusApplyLoading}
-                  >
-                    {isStatusApplyLoading && (
-                      <Loader className="animate-spin" size={24} />
-                    )}
-                    Reject
-                  </ActionButton>
-                </>
-              ) : applyAction === 'Accepted' ? (
+              ) : offer.status == 'Pending' || offer.status == 'Accepted' ? (
                 <ActionButton
                   buttonColor="red"
                   onClick={() => {
-                    setOpenCancelApplyModal(true);
+                    setOpenCancelOfferModal(true);
                   }}
-                  disabled={isStatusApplyLoading}
+                  disabled={isStatusOfferLoading}
                 >
-                  {isStatusApplyLoading && (
+                  {isStatusOfferLoading && (
                     <Loader className="animate-spin" size={24} />
                   )}
                   Cancel
                 </ActionButton>
-              ) : null}
+              ) : (
+                <></>
+              )}
 
               <ActionButton
                 onClick={() => {
                   navigate(-1);
                 }}
-                className={`${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
-                disabled={isStatusApplyLoading}
+                className={`${isStatusOfferLoading ? '' : 'cursor-pointer'}`}
+                disabled={isStatusOfferLoading}
               >
-                {isStatusApplyLoading && (
+                {isStatusOfferLoading && (
                   <Loader className="animate-spin" size={24} />
                 )}
                 Back
@@ -368,53 +355,51 @@ export default function ApplyDetailPage() {
           </div>
         </div>
 
-        {openAcceptApplyModal && (
+        {openAcceptOfferModal && (
           <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
               <p className="mb-2 text-lg font-semibold">
-                ต้องการ Accept Apply ใช่หรือไม่?
+                ต้องการ Accept Offer ใช่หรือไม่?
               </p>
               <p className="text-sm text-red-500 mb-4">
-                เมื่อกดยืนยัน ระบบจะทำการอนุมัติผู้สมัครนี้
-                และปฏิเสธผู้สมัครคนอื่นโดยอัตโนมัติ ไม่สามารถย้อนกลับได้
+                เมื่อกดยืนยัน ระบบจะทำการอนุมัติข้อเสนอนี้ ไม่สามารถย้อนกลับได้
               </p>
               <div className="flex justify-center gap-4">
                 <ActionButton
                   onClick={async () => {
-                    setStatusApplyLoading(true);
-                    setApplyAction('Accepted');
-                    await acceptApply(apply._id);
+                    setStatusOfferLoading(true);
+                    setOfferAction('Accepted');
+                    await acceptOffer(offer._id);
                     await updatePostMatched(post._id, true);
                     const otherApplies = await getDetailedAppliesByPostId(
-                      apply.postId,
+                      offer.postId,
                     );
                     const rejectAppliesPromises = otherApplies
-                      .filter(
-                        (a) => a._id !== apply._id && a.status !== 'Rejected',
-                      )
+                      .filter((a) => a.status !== 'Rejected')
                       .map((a) => rejectApply(a._id));
                     const otherOffers = await getDetailedOfferedByPostId(
-                      apply.postId,
+                      offer.postId,
                     );
                     const takenOfferPromises = otherOffers
                       .filter(
                         (o) =>
-                          o.status != 'Rejected' &&
+                          o._id !== offer._id &&
+                          o.status !== 'Cancel' &&
                           o.status !== 'Taken' &&
-                          o.status !== 'Cancel',
+                          o.status != 'Rejected',
                       )
                       .map((o) => takenOffer(o._id));
                     await Promise.all([
                       ...rejectAppliesPromises,
                       ...takenOfferPromises,
                     ]);
-                    setStatusApplyLoading(false);
-                    setOpenAcceptApplyModal(false);
+                    setStatusOfferLoading(false);
+                    setOpenAcceptOfferModal(false);
                     try {
                       const clientSecret = await createIntentClientSecret(
-                        apply.postId,
-                        apply.providerId,
-                        apply.appliedPrice * 100,
+                        offer.postId,
+                        offer.providerId,
+                        offer.price * 100,
                       );
 
                       if (!clientSecret) {
@@ -427,25 +412,25 @@ export default function ApplyDetailPage() {
                         );
                       }
                     } catch (error) {
-                      console.error('Error in accept apply process:', error);
+                      console.error('Error in accept offer process:', error);
                     }
                     window.location.reload();
                   }}
-                  className={`${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
-                  disabled={isStatusApplyLoading}
+                  className={`${isStatusOfferLoading ? '' : 'cursor-pointer'}`}
+                  disabled={isStatusOfferLoading}
                 >
-                  {isStatusApplyLoading && (
+                  {isStatusOfferLoading && (
                     <Loader className="animate-spin" size={24} />
                   )}
                   Yes
                 </ActionButton>
                 <ActionButton
-                  onClick={() => setOpenAcceptApplyModal(false)}
+                  onClick={() => setOpenAcceptOfferModal(false)}
                   className={`cursor-pointer bg-gray-200 text-black border-gray-200 
-            ${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
-                  disabled={isStatusApplyLoading}
+            ${isStatusOfferLoading ? '' : 'cursor-pointer'}`}
+                  disabled={isStatusOfferLoading}
                 >
-                  {isStatusApplyLoading && (
+                  {isStatusOfferLoading && (
                     <Loader className="animate-spin" size={24} />
                   )}
                   No
@@ -455,40 +440,40 @@ export default function ApplyDetailPage() {
           </div>
         )}
 
-        {openRejectApplyModal && (
+        {openRejectOfferModal && (
           <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
               <p className="mb-2 text-lg font-semibold">
-                ต้องการ Reject Apply ใช่หรือไม่?
+                ต้องการ Reject Offer ใช่หรือไม่?
               </p>
               <p className="text-sm text-red-500 mb-4">
-                เมื่อกดยืนยัน ผู้สมัครนี้จะถูกปฏิเสธ และไม่สามารถกู้คืนได้
+                เมื่อกดยืนยัน ข้อเสนอนี้จะถูกปฏิเสธ และไม่สามารถกู้คืนได้
               </p>
               <div className="flex justify-center gap-4">
                 <ActionButton
                   onClick={async () => {
-                    setStatusApplyLoading(true);
-                    setApplyAction('Rejected');
-                    await rejectApply(apply._id);
-                    setStatusApplyLoading(false);
-                    setOpenRejectApplyModal(false);
+                    setStatusOfferLoading(true);
+                    setOfferAction('Rejected');
+                    await rejectOffer(offer._id);
+                    setStatusOfferLoading(false);
+                    setOpenRejectOfferModal(false);
                     window.location.reload();
                   }}
-                  className={`${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
-                  disabled={isStatusApplyLoading}
+                  className={`${isStatusOfferLoading ? '' : 'cursor-pointer'}`}
+                  disabled={isStatusOfferLoading}
                 >
-                  {isStatusApplyLoading && (
+                  {isStatusOfferLoading && (
                     <Loader className="animate-spin" size={24} />
                   )}
                   Yes
                 </ActionButton>
                 <ActionButton
                   className={`cursor-pointer bg-gray-200 text-black border-gray-200 
-            ${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
-                  disabled={isStatusApplyLoading}
-                  onClick={() => setOpenRejectApplyModal(false)}
+            ${isStatusOfferLoading ? '' : 'cursor-pointer'}`}
+                  disabled={isStatusOfferLoading}
+                  onClick={() => setOpenRejectOfferModal(false)}
                 >
-                  {isStatusApplyLoading && (
+                  {isStatusOfferLoading && (
                     <Loader className="animate-spin" size={24} />
                   )}
                   No
@@ -498,39 +483,39 @@ export default function ApplyDetailPage() {
           </div>
         )}
 
-        {openCancelApplyModal && (
+        {openCancelOfferModal && (
           <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
               <p className="mb-2 text-lg font-semibold">
-                ต้องการยกเลิกการให้บริการของผู้ให้บริการคนนี้ใช่หรือไม่?
+                ต้องการ Cancel การเสนอให้ผู้ให้บริการคนนี้ใช่หรือไม่?
               </p>
               <p className="mb-4 text-sm text-red-500">
-                การยกเลิกการให้บริการจะทำให้ผู้บริการไม่สามารถสมัครให้บริการนี้ได้อีก
+                การ Cancel จะทำให้ไม่สามารถเสนองาน post นี้ให้ผู้ให้บริการได้อีก
               </p>
               <div className="flex justify-center gap-4">
                 <ActionButton
                   onClick={async () => {
-                    setStatusApplyLoading(true);
-                    await updateApplyStatus(apply._id, 'Rejected');
-                    setStatusApplyLoading(false);
-                    setOpenCancelApplyModal(false);
-                    window.location.href = '/account/post';
+                    setStatusOfferLoading(true);
+                    await updateOfferStatus(offer._id, 'Cancel');
+                    setStatusOfferLoading(false);
+                    setOpenCancelOfferModal(false);
+                    window.location.href = `/post/${post._id}`;
                   }}
-                  className={`${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
-                  disabled={isStatusApplyLoading}
+                  className={`${isStatusOfferLoading ? '' : 'cursor-pointer'}`}
+                  disabled={isStatusOfferLoading}
                 >
-                  {isStatusApplyLoading && (
+                  {isStatusOfferLoading && (
                     <Loader className="animate-spin" size={24} />
                   )}
                   Yes
                 </ActionButton>
                 <ActionButton
                   className={`cursor-pointer bg-gray-200 text-black border-gray-200 
-            ${isStatusApplyLoading ? '' : 'cursor-pointer'}`}
-                  disabled={isStatusApplyLoading}
-                  onClick={() => setOpenCancelApplyModal(false)}
+            ${isStatusOfferLoading ? '' : 'cursor-pointer'}`}
+                  disabled={isStatusOfferLoading}
+                  onClick={() => setOpenCancelOfferModal(false)}
                 >
-                  {isStatusApplyLoading && (
+                  {isStatusOfferLoading && (
                     <Loader className="animate-spin" size={24} />
                   )}
                   No

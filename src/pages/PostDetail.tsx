@@ -4,16 +4,31 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Header from '@/components/our-components/header';
 import Footer from '@/components/our-components/footer';
 import ActionButton from '@/components/our-components/actionButton';
-import { convertTagsToLabels, formatDateToDisplay } from '@/utils/function';
-import { Calendar, Phone } from 'lucide-react';
+import {
+  convertTagsToLabels,
+  deleteApply,
+  formatDateToDisplay,
+  deleteOffer,
+} from '@/utils/function';
+import { Calendar, Loader, Phone } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import Loading from '@/components/our-components/loading';
-import { getPostById } from '@/api/post';
+import { getPostById, updatePostMatched, updatePostStatus } from '@/api/post';
 import type { User } from '@/interfaces/User';
 import { getUserById } from '@/api/user';
 import PostNotFound from '@/error/PostNotFound';
-import { checkMyApply, getDetailedAppliesByPostId } from '@/api/apply';
+import {
+  checkMyApply,
+  getAppliesByPostId,
+  getDetailedAppliesByPostId,
+} from '@/api/apply';
+import {
+  checkMyOffer,
+  getDetailedOfferedByPostId,
+  getOffersByPostId,
+} from '@/api/offer';
 import type { Apply, ApplyDetail } from '@/interfaces/Apply';
+import type { Offer, OfferDetail } from '@/interfaces/Offer';
 import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
@@ -25,11 +40,16 @@ export default function PostDetailPage() {
   const [loading, setLoading] = useState(false);
   const [customerUser, setCustomerUser] = useState<User | null>(null);
   const [myApply, setMyApply] = useState<Apply | null>(null);
+  const [myOffer, setMyOffer] = useState<Offer | null>(null);
   const [providerApplies, setProviderApplies] = useState<ApplyDetail[]>([]);
+  const [providerOffered, setProviderOffered] = useState<OfferDetail[]>([]);
   const [acceptedApply, setAcceptedApply] = useState<ApplyDetail | null>();
+  const [acceptedOffer, setAcceptedOffer] = useState<OfferDetail | null>();
   const [hasAcceptedApply, setHasAcceptedApply] = useState(false);
+  const [hasAcceptedOffer, setHasAcceptedOffer] = useState(false);
   const [openIdx, setOpenIdx] = useState<number | null>(null);
-
+  const [isStatusPostLoading, setStatusPostLoading] = useState(false);
+  const [openDeletePostModal, setOpenDeletePostModal] = useState(false);
   useEffect(() => {
     const fetchPost = async () => {
       setLoading(true);
@@ -41,9 +61,14 @@ export default function PostDetailPage() {
         setCustomerUser(currentCustomerUser);
         if (!user) {
           setMyApply(null);
+          setMyOffer(null);
         } else {
-          const currentMyApply = await checkMyApply(post._id, user._id);
-          setMyApply(currentMyApply);
+          const currentMyOffer = await checkMyOffer(post._id, user._id);
+          setMyOffer(currentMyOffer);
+          if (!currentMyOffer) {
+            const currentMyApply = await checkMyApply(post._id, user._id);
+            setMyApply(currentMyApply);
+          }
         }
         const currentApplies = await getDetailedAppliesByPostId(post._id);
         setProviderApplies(currentApplies);
@@ -55,6 +80,18 @@ export default function PostDetailPage() {
           setAcceptedApply(acceptedApplies[0]);
         } else {
           setAcceptedApply(null);
+        }
+
+        const currentOffers = await getDetailedOfferedByPostId(post._id);
+        setProviderOffered(currentOffers);
+        const acceptedOffers = currentOffers.filter(
+          (offer: OfferDetail) => offer.status === 'Accepted',
+        );
+        setHasAcceptedOffer(acceptedOffers.length != 0);
+        if (acceptedOffers.length != 0) {
+          setAcceptedOffer(acceptedOffers[0]);
+        } else {
+          setAcceptedOffer(null);
         }
       }
       setLoading(false);
@@ -115,6 +152,80 @@ export default function PostDetailPage() {
   )
     .filter((u): u is string => !!u && u.trim() !== '')
     .filter((u, i, arr) => arr.indexOf(u) === i);
+  const renderActionButton = () => {
+    if (!hasAcceptedApply && !hasAcceptedOffer) {
+      if (myOffer) {
+        if (myOffer.status === 'Pending') {
+          return (
+            <ActionButton
+              className="cursor-pointer"
+              onClick={() => navigate(`/offer/${myOffer._id}`)}
+            >
+              View Offer
+            </ActionButton>
+          );
+        } else if (!myApply) {
+          return (
+            <ActionButton
+              className="cursor-pointer"
+              onClick={() => navigate(`/apply/${post._id}/create`)}
+            >
+              Create Apply
+            </ActionButton>
+          );
+        } else {
+          return (
+            <ActionButton
+              className="cursor-pointer"
+              onClick={() => navigate(`/apply/${myApply._id}`)}
+            >
+              View Apply
+            </ActionButton>
+          );
+        }
+      } else if (!myApply) {
+        return (
+          <ActionButton
+            className="cursor-pointer"
+            onClick={() => navigate(`/apply/${post._id}/create`)}
+          >
+            Create Apply
+          </ActionButton>
+        );
+      } else {
+        return (
+          <ActionButton
+            className="cursor-pointer"
+            onClick={() => navigate(`/apply/${myApply._id}`)}
+          >
+            View Apply
+          </ActionButton>
+        );
+      }
+    } else {
+      if (myOffer?._id && myOffer?._id === acceptedOffer?._id) {
+        return (
+          <ActionButton
+            className="cursor-pointer"
+            onClick={() => navigate(`/chat/${acceptedOffer._id}`)}
+          >
+            Chat
+          </ActionButton>
+        );
+      } else if (myApply?._id && myApply?._id === acceptedApply?._id) {
+        return (
+          <ActionButton
+            className="cursor-pointer"
+            onClick={() => navigate(`/chat/${acceptedApply._id}`)}
+          >
+            Chat
+          </ActionButton>
+        );
+      }
+    }
+
+    return null;
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -122,8 +233,17 @@ export default function PostDetailPage() {
       <main className="flex-grow flex justify-center py-12 px-4">
         <div className="w-full max-w-2xl space-y-6">
           {/* Post Name */}
-          <h1 title={post.title} className="text-3xl font-bold text-gray-900">
+          <h1
+            title={post.title}
+            className="text-3xl font-bold text-gray-900cursor-pointer hover:text-gray-500 active:text-gray-300"
+            onClick={() => navigate(`/post/${post._id}`)}
+          >
             {post.title}
+            {post.status == 'Deleted' && (
+              <span className="ml-4 px-3 py-1 rounded-full bg-red-500 text-xl text-white">
+                Deleted
+              </span>
+            )}
           </h1>
 
           {/* Cover Photo */}
@@ -251,7 +371,71 @@ export default function PostDetailPage() {
               </p>
             </div>
           </div>
-
+          {/* offer to Providers */}
+          {user?._id === post.customerId && (
+            <div className="w-full flex flex-col gap-2">
+              <h2 className="text-2xl font-semibold">Offered To</h2>
+              {providerOffered && providerOffered.length > 0 ? (
+                <table className="table-fixed w-full border-collapse border border-gray-200 max-h-[20vh] overflow-auto">
+                  <thead className="sticky top-0 bg-table-row-header">
+                    <tr>
+                      <th className="border border-gray-200 p-2 w-1/5">Name</th>
+                      <th className="border border-gray-200 p-2 w-1/5">
+                        Price (THB)
+                      </th>
+                      <th className="border border-gray-200 p-2 w-1/5">
+                        Offered Date
+                      </th>
+                      <th className="border border-gray-200 p-2 w-2/5">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {providerOffered.map((offer: OfferDetail, idx) => {
+                      return (
+                        <tr
+                          key={`provider-apply-${idx}`}
+                          className={`bg-table-row-content cursor-pointer hover:bg-gray-100 text-center`}
+                          onClick={() => navigate(`/offer/${offer._id}`)}
+                        >
+                          <td className="border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap">
+                            {offer.provider.name}
+                          </td>
+                          <td className="border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap">
+                            {offer.post?.budget}
+                          </td>
+                          <td className="border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap">
+                            {formatDateToDisplay(offer.date)}
+                          </td>
+                          <td
+                            className={`border border-gray-200 p-2 text-center text-ellipsis overflow-hidden whitespace-nowrap 
+                              ${
+                                offer.status == 'Accepted'
+                                  ? 'text-accept'
+                                  : offer.status == 'Rejected' ||
+                                      offer.status == 'Deleted'
+                                    ? 'text-reject'
+                                    : offer.status == 'Taken' ||
+                                        offer.status == 'Cancel'
+                                      ? 'text-yellow-600'
+                                      : 'text-black'
+                              }`}
+                          >
+                            {offer.status === 'Taken' ? 'Cancel' : offer.status}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="text-lg text-gray-700">
+                  You have not offered to anyone...
+                </p>
+              )}
+            </div>
+          )}
           {/* Application from Providers */}
           {user?._id === post.customerId ? (
             <div className="w-full flex flex-col gap-2">
@@ -294,7 +478,8 @@ export default function PostDetailPage() {
                               ${
                                 apply.status == 'Accepted'
                                   ? 'text-accept'
-                                  : apply.status == 'Rejected'
+                                  : apply.status == 'Rejected' ||
+                                      apply.status == 'Deleted'
                                     ? 'text-reject'
                                     : 'text-black'
                               }`}
@@ -319,10 +504,19 @@ export default function PostDetailPage() {
                 <p
                   className="text-lg font-semibold text-button-action hover:underline cursor-pointer"
                   onClick={() => {
-                    navigate(`/user/${acceptedApply?.providerId}`);
+                    navigate(`/user/${acceptedApply?.providerId}/provider`);
                   }}
                 >
                   {acceptedApply ? acceptedApply.provider.name : 'Unknown'}
+                </p>
+              ) : hasAcceptedOffer ? (
+                <p
+                  className="text-lg font-semibold text-button-action hover:underline cursor-pointer"
+                  onClick={() => {
+                    navigate(`/user/${acceptedOffer?.providerId}/provider`);
+                  }}
+                >
+                  {acceptedOffer ? acceptedOffer.provider.name : 'Unknown'}
                 </p>
               ) : (
                 <p className="text-lg text-gray-700">
@@ -363,68 +557,53 @@ export default function PostDetailPage() {
             )}
 
           <div className="flex justify-end gap-4 my-8">
-            {user && user?._id === post.customerId ? (
-              <>
-                {/* Customer View */}
-                {!hasAcceptedApply ? (
-                  <ActionButton
-                    className="cursor-pointer"
-                    onClick={() => {
-                      navigate(`/post/${post._id}/edit`);
-                    }}
-                  >
-                    Edit
-                  </ActionButton>
-                ) : (
-                  <ActionButton
-                    className="cursor-pointer"
-                    onClick={() => {
-                      navigate(`/chat/${acceptedApply?._id}`);
-                    }}
-                  >
-                    Chat
-                  </ActionButton>
-                )}
-              </>
-            ) : (
-              user && (
+            {post.status !== 'Deleted' &&
+              (user && user._id === post.customerId ? (
                 <>
-                  {/* Provider View */}
-                  {!myApply ? (
-                    !hasAcceptedApply && (
+                  {/* Customer View */}
+                  {!hasAcceptedApply ? (
+                    !hasAcceptedOffer ? (
                       <ActionButton
                         className="cursor-pointer"
-                        onClick={() => {
-                          navigate(`/apply/${post._id}/create`);
-                        }}
+                        onClick={() => navigate(`/post/${post._id}/edit`)}
                       >
-                        Create Apply
+                        Edit
                       </ActionButton>
-                    )
-                  ) : !hasAcceptedApply ? (
-                    <ActionButton
-                      className="cursor-pointer"
-                      onClick={() => {
-                        navigate(`/apply/${myApply._id}`);
-                      }}
-                    >
-                      View Apply
-                    </ActionButton>
-                  ) : (
-                    myApply._id == acceptedApply?._id && (
+                    ) : (
                       <ActionButton
                         className="cursor-pointer"
-                        onClick={() => {
-                          navigate(`/chat/${acceptedApply?._id}`);
-                        }}
+                        onClick={() => navigate(`/chat/${acceptedOffer?._id}`)}
                       >
                         Chat
                       </ActionButton>
                     )
+                  ) : (
+                    <ActionButton
+                      className="cursor-pointer"
+                      onClick={() => navigate(`/chat/${acceptedApply?._id}`)}
+                    >
+                      Chat
+                    </ActionButton>
+                  )}
+
+                  {post.status == 'Not working' && (
+                    <ActionButton
+                      className="cursor-pointer"
+                      onClick={() => setOpenDeletePostModal(true)}
+                    >
+                      Delete
+                    </ActionButton>
                   )}
                 </>
-              )
-            )}
+              ) : (
+                user && (
+                  <>
+                    {/* Provider View */}
+                    <div>{renderActionButton()}</div>
+                  </>
+                )
+              ))}
+
             <ActionButton
               buttonColor="red"
               className="cursor-pointer"
@@ -438,6 +617,62 @@ export default function PostDetailPage() {
         </div>
       </main>
       <Footer />
+
+      {openDeletePostModal && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
+            <p className="mb-2 text-lg font-semibold">
+              ต้องการลบโพสต์นี้ใช่หรือไม่?
+            </p>
+            <p className="text-sm text-red-500 mb-4">
+              การลบโพสต์นี้จะเป็นการยกเลิกการสมัครของผู้ให้บริการทั้งหมด
+              และไม่สามารถกู้คืนได้
+            </p>
+            <div className="flex justify-center gap-4">
+              <ActionButton
+                onClick={async () => {
+                  setStatusPostLoading(true);
+                  await updatePostStatus(post._id, 'Deleted');
+                  await updatePostMatched(post._id, false);
+                  const allApplies = await getAppliesByPostId(post._id);
+                  const rejectAppliesPromises = allApplies.map((a) =>
+                    deleteApply(a._id),
+                  );
+                  const allOffers = await getOffersByPostId(post._id);
+                  const rejectOffersPromises = allOffers.map((o) =>
+                    deleteOffer(o._id),
+                  );
+                  await Promise.all([
+                    ...rejectAppliesPromises,
+                    ...rejectOffersPromises,
+                  ]);
+                  setStatusPostLoading(false);
+                  setOpenDeletePostModal(false);
+                  window.location.href = `/post/${post._id}`;
+                }}
+                className={`${isStatusPostLoading ? '' : 'cursor-pointer'}`}
+                disabled={isStatusPostLoading}
+              >
+                {isStatusPostLoading && (
+                  <Loader className="animate-spin" size={24} />
+                )}
+                Yes
+              </ActionButton>
+              <ActionButton
+                className={`cursor-pointer bg-gray-200 text-black border-gray-200 
+            ${isStatusPostLoading ? '' : 'cursor-pointer'}`}
+                disabled={isStatusPostLoading}
+                onClick={() => setOpenDeletePostModal(false)}
+              >
+                {isStatusPostLoading && (
+                  <Loader className="animate-spin" size={24} />
+                )}
+                No
+              </ActionButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
