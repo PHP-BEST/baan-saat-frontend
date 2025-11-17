@@ -1,38 +1,61 @@
 import { getDetailedAppliesByProviderId } from '@/api/apply';
+import { getDetailedOffersByProviderId } from '@/api/offer';
 import Loading from '@/components/our-components/loading';
 import { useUser } from '@/context/UserContext';
 import type { ApplyDetail } from '@/interfaces/Apply';
+import type { OfferDetail } from '@/interfaces/Offer';
 import { formatDateToDisplay } from '@/utils/function';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function MyApplyPage() {
+export default function MyWorkPage() {
   const { user } = useUser();
   const navigate = useNavigate();
 
   if (!user) return;
 
-  const [appliesDetail, setAppliesDetail] = useState<ApplyDetail[]>([]);
+  const [worksDetail, setWorksDetail] = useState<(ApplyDetail | OfferDetail)[]>(
+    [],
+  );
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const getApplies = async () => {
       setLoading(true);
       const currentApplies = await getDetailedAppliesByProviderId(user._id);
-      const sortedApplies = currentApplies.sort(
+      const currentOffers = await getDetailedOffersByProviderId(user._id);
+      const workStatusesToShow = ['Not working', 'In progress', 'Completed'];
+
+      const filteredWork = currentApplies.filter(
+        (apply) =>
+          apply.status === 'Accepted' &&
+          workStatusesToShow.includes(apply.post.status),
+      );
+      const filteredWork2 = currentOffers.filter(
+        (offer) =>
+          offer.status === 'Accepted' &&
+          workStatusesToShow.includes(offer.post.status),
+      );
+      const sortedWork = [...filteredWork, ...filteredWork2].sort(
         (a, b) =>
           new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
       );
-      setAppliesDetail(sortedApplies);
+      setWorksDetail(sortedWork);
       setLoading(false);
     };
     getApplies();
   }, []);
 
+  const isApplyType = (
+    item: ApplyDetail | OfferDetail,
+  ): item is ApplyDetail => {
+    return (item as ApplyDetail).appliedPrice !== undefined;
+  };
+
   if (loading) {
     return (
       <>
-        <h1 className="text-2xl font-bold mb-2">My Applies</h1>
+        <h1 className="text-2xl font-bold mb-2">My Work</h1>
         <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
           <Loading />
         </div>
@@ -40,13 +63,13 @@ export default function MyApplyPage() {
     );
   }
 
-  if (appliesDetail.length === 0) {
+  if (worksDetail.length === 0) {
     return (
       <>
-        <h1 className="text-2xl font-bold mb-2">My Applies</h1>
+        <h1 className="text-2xl font-bold mb-2">My Work</h1>
         <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
           <p className="text-xl text-center font-semibold">
-            You haven&apos;t created any applies yet...
+            You don&apos;t have any active or completed work yet...
           </p>
         </div>
       </>
@@ -55,7 +78,7 @@ export default function MyApplyPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold mb-2">My Applies</h1>
+      <h1 className="text-2xl font-bold mb-2">My Work</h1>
       <div className="w-full h-full flex flex-col items-center bg-white border border-border-sidebar rounded-2xl px-8 pb-4 pt-8 shadow-sm m-0">
         {/* Table */}
         <div className="w-full max-h-[100vh] overflow-auto">
@@ -65,47 +88,52 @@ export default function MyApplyPage() {
                 <th className="border border-gray-200 p-2 w-2/5">Post Title</th>
                 <th className="border border-gray-200 p-2 w-1/5">Customer</th>
                 <th className="border border-gray-200 p-2 w-1/5">
-                  Applied Date
+                  Comfirm Date
                 </th>
                 <th className="border border-gray-200 p-2 w-1/5">
-                  Applied Price
+                  Comfirm Price
                 </th>
                 <th className="border border-gray-200 p-2 w-1/5">Status</th>
               </tr>
             </thead>
             <tbody>
-              {appliesDetail.map((apply, idx) => (
+              {worksDetail.map((work, idx) => (
                 <tr
                   key={`customer-request-${idx}`}
                   className="bg-table-row-content text-center cursor-pointer hover:bg-gray-100"
                   onClick={() => {
-                    navigate(`/apply/${apply._id}`);
+                    navigate(
+                      isApplyType(work)
+                        ? `/apply/${work._id}`
+                        : `/offer/${work._id}`,
+                    );
                   }}
                 >
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {apply.post?.title ? apply.post.title : 'Unknown'}
+                    {work.post.title}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {apply.customer?.name ? apply.customer.name : 'Unknown'}
+                    {work.customer.name}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {formatDateToDisplay(apply.date)}
+                    {formatDateToDisplay(work.date)}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {apply.appliedPrice} THB
+                    {isApplyType(work) ? work.appliedPrice : work.price} THB
                   </td>
                   <td
                     className={`border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap font-bold 
                       ${
-                        apply.status == 'Accepted'
+                        work.post.status === 'Completed'
                           ? 'text-accept'
-                          : apply.status == 'Rejected' ||
-                              apply.status == 'Deleted'
-                            ? 'text-reject'
-                            : ''
+                          : work.post.status === 'In progress'
+                            ? 'text-blue-500'
+                            : work.post.status === 'Not working'
+                              ? 'text-gray-500'
+                              : ''
                       }`}
                   >
-                    {apply.status}
+                    {work.post.status}
                   </td>
                 </tr>
               ))}

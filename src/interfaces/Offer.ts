@@ -1,33 +1,37 @@
 import type { Post } from './Post';
 import type { User } from './User';
 
-export interface Apply {
+export interface Offer {
   _id: string;
   postId: string;
   customerId: string;
   providerId: string;
-  description?: string;
-  appliedPrice: number;
   date: Date;
-  status: ApplyStatus;
+  price: number;
+  status: OfferedStatus;
+  description?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface ApplyDetail {
+export interface OfferDetail {
   _id: string;
   post: Post;
   postId: string;
   customer: User;
   customerId: string;
   provider: User;
+  price: number;
   providerId: string;
   date: Date;
-  appliedPrice: number;
-  status: ApplyStatus;
-  description?: string;
+  status: OfferedStatus;
   createdAt: Date;
   updatedAt: Date;
 }
-
-export type ApplyStatus = 'Pending' | 'Accepted' | 'Rejected' | 'Deleted';
+export type OfferedStatus =
+  | 'Pending'
+  | 'Accepted'
+  | 'Rejected'
+  | 'Taken'
+  | 'Cancel'
+  | 'Deleted';

@@ -18,6 +18,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from '@/components/ui/dropdown-menu';
+import OfferModal from '@/components/ui/offerModal';
 
 function ratingHue(avg: number) {
   const t = Math.max(0, Math.min(1, (avg - 1) / 4));
@@ -229,6 +230,7 @@ export default function ProviderProfilePage() {
                   : '-'}
               </p>
             </div>
+            <OfferModal />
           </div>
         </div>
 

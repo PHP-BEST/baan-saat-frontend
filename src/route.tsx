@@ -4,6 +4,7 @@ import AccountLayout from './layouts/AccountLayout';
 import MainLayout from './layouts/MainLayout';
 import LandingPage from './pages/Landing';
 import MyPostPage from './pages/MyPost';
+import MyOfferPage from './pages/MyOffer';
 import LoginPage from './pages/Login';
 import ProfilePage from './pages/Profile';
 import ProtectedRoute from './middleware/protectedRoute';
@@ -29,6 +30,8 @@ import ApplyDetailPage from './pages/ApplyDetail';
 import ChatPage from './pages/Chat';
 import ProviderProfilePage from './pages/ProviderProfilePage';
 import ReviewCreate from './pages/ReviewCreate';
+import MyWorkPage from './pages/MyWork';
+import OfferDetailPage from './pages/OfferDetail';
 
 export const router = createBrowserRouter([
   {
@@ -52,6 +55,8 @@ export const router = createBrowserRouter([
           { path: 'become-provider', element: <BecomeProvider /> },
           { path: 'post', element: <MyPostPage /> },
           { path: 'apply', element: <MyApplyPage /> },
+          { path: 'offer', element: <MyOfferPage /> },
+          { path: 'work', element: <MyWorkPage /> },
         ],
       },
       {
@@ -134,6 +139,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ApplyDetailPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'offer/:offerId',
+        element: (
+          <ProtectedRoute>
+            <OfferDetailPage />
           </ProtectedRoute>
         ),
       },

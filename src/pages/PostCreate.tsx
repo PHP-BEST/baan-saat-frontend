@@ -46,6 +46,7 @@ export const PostCreatePage: React.FC = () => {
     description: '',
     tag: null,
     other: '',
+    isMatched: false,
     budget: 0,
     telNumber: user?.telNumber || '',
     location: '',
@@ -223,6 +224,7 @@ export const PostCreatePage: React.FC = () => {
         setFormData({
           title: '',
           description: '',
+          isMatched: false,
           tag: null,
           other: '',
           budget: 0,

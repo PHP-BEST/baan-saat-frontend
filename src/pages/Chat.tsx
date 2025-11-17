@@ -289,7 +289,7 @@ export default function ChatPage() {
                   Yes
                 </ActionButton>
                 <ActionButton
-                  className={`cursor-pointer bg-gray-200 text-black border-gray-200 
+                  className={`cursor-pointer bg-gray-200 text-black border-gray-200
             ${isUpdateStatusLoading ? '' : 'cursor-pointer'}`}
                   disabled={isUpdateStatusLoading}
                   onClick={() => setOpenUpdatePostStatusModal(false)}
@@ -332,7 +332,7 @@ export default function ChatPage() {
                   Yes
                 </ActionButton>
                 <ActionButton
-                  className={`cursor-pointer bg-gray-200 text-black border-gray-200 
+                  className={`cursor-pointer bg-gray-200 text-black border-gray-200
             ${isUpdateStatusLoading ? '' : 'cursor-pointer'}`}
                   disabled={isUpdateStatusLoading}
                   onClick={() => setOpenCancelApplyModal(false)}

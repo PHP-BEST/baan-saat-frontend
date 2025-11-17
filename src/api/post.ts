@@ -22,6 +22,27 @@ export const getAllPosts = async (): Promise<Post[]> => {
   }
 };
 
+export const getAllAvailablePosts = async (): Promise<Post[]> => {
+  try {
+    const response = await axios.get<ResponseInterface<Post[]>>(
+      `${API_BASE}/available`,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+
+    if (response.data.success) {
+      const posts: Post[] = response.data.data;
+      return posts;
+    } else {
+      return [];
+    }
+  } catch (err) {
+    console.log('Error fetching posts in getAllPosts:', err);
+    return [];
+  }
+};
+
 export const getUserPosts = async (userId: string): Promise<Post[]> => {
   try {
     const allPosts = await getAllPosts();
@@ -105,12 +126,13 @@ export const searchPosts = async (query: string): Promise<Post[]> => {
 export interface FilterPostParams {
   userId?: string;
   title?: string;
-  tags: PostTag[];
-  other: string;
+  tags?: PostTag[];
+  other?: string;
   minBudget?: number;
   maxBudget?: number;
   startDate?: string;
   endDate?: string;
+  isMatched?: boolean;
 }
 
 export const filterPosts = async (
@@ -144,6 +166,7 @@ export interface PostFormInterface {
   telNumber: string;
   budget: number;
   location: string;
+  isMatched: boolean;
   coverPhotoUrl?: string;
   image1Url?: string;
   image2Url?: string;
@@ -217,6 +240,26 @@ export const updatePost = async (
     const response = await axios.put<ResponseInterface<Post>>(
       `${API_BASE}/${postId}`,
       payload,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+
+    return !!response.data.success;
+  } catch (err) {
+    console.error('Error updating post:', err);
+    return false;
+  }
+};
+
+export const updatePostMatched = async (
+  postId: string,
+  isMatched: boolean,
+): Promise<boolean> => {
+  try {
+    const response = await axios.put<ResponseInterface<Post>>(
+      `${API_BASE}/${postId}`,
+      { isMatched },
       {
         headers: { 'Content-Type': 'application/json' },
       },

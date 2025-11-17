@@ -1,4 +1,5 @@
 import { updateApplyStatus, type ApplyFormInterface } from '@/api/apply';
+import { updateOfferStatus } from '@/api/offer';
 import type { PostFormInterface } from '@/api/post';
 import type { PostTag } from '@/interfaces/Post';
 
@@ -87,4 +88,20 @@ export const acceptApply = async (applyId: string) => {
 
 export const rejectApply = async (applyId: string) => {
   await updateApplyStatus(applyId, 'Rejected');
+};
+
+export const deleteApply = async (applyId: string) => {
+  await updateApplyStatus(applyId, 'Deleted');
+};
+export const acceptOffer = async (offerId: string) => {
+  await updateOfferStatus(offerId, 'Accepted');
+};
+export const rejectOffer = async (offerId: string) => {
+  await updateOfferStatus(offerId, 'Rejected');
+};
+export const deleteOffer = async (offerId: string) => {
+  await updateOfferStatus(offerId, 'Deleted');
+};
+export const takenOffer = async (offerId: string) => {
+  await updateOfferStatus(offerId, 'Taken');
 };

@@ -74,6 +74,27 @@ export const updateUser = async (
   }
 };
 
+export const searchProviders = async (query: string) => {
+  try {
+    let response = null;
+
+    if (query.trim() === '') {
+      // When no query, get all providers
+      response = await Axios.get(`${API_ROOT}/api/users/providers`);
+    } else {
+      // When query exists, search providers by name
+      response = await Axios.get(
+        `${API_ROOT}/api/users/search?role=provider&query=${encodeURIComponent(query)}`,
+      );
+    }
+
+    return response.data.data; // Array of providers
+  } catch (error) {
+    console.error('Error searching providers:', error);
+    return [];
+  }
+};
+
 export const promoteUser = async () => {
   try {
     const response = await Axios.post(`${API_BASE}/promotion`);
