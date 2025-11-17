@@ -20,6 +20,7 @@ import {
   DialogClose,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { getDetailedAppliesByProviderId } from '@/api/apply';
 
 export default function OfferModal() {
   const [open, setOpen] = useState<boolean>(false);
@@ -41,9 +42,11 @@ export default function OfferModal() {
         isMatched: false,
       });
       const providerOffers = await getOffersByProviderId(userId);
+      const applyProvider = await getDetailedAppliesByProviderId(userId);
       const offerPostIds = new Set(providerOffers.map((o) => o.postId));
+      const applyPostIds = new Set(applyProvider.map((a) => a.postId));
       const filteredPosts = userPosts.filter(
-        (post) => !offerPostIds.has(post._id),
+        (post) => !offerPostIds.has(post._id) && !applyPostIds.has(post._id)
       );
       setPosts(filteredPosts);
       setLoading(false);
