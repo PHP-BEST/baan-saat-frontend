@@ -3,6 +3,7 @@ import type { Post, PostTag } from '@/interfaces/Post';
 import axios from 'axios';
 
 const API_BASE = `${API_ROOT}/api/posts`;
+type PostStatus = 'Not working' | 'In progress' | 'Completed' | 'Deleted';
 
 export const getAllPosts = async (): Promise<Post[]> => {
   try {
@@ -200,15 +201,25 @@ export const createPost = async (
   }
 };
 
-export const updatePostStatus = async (postId: string) => {
+export const updatePostStatus = async (postId: string, status?: PostStatus) => {
   try {
-    const post = await getPostById(postId);
-    let nextStatus = 'Not working';
-    if (post?.status == 'Not working') {
-      nextStatus = 'In progress';
-    } else if (post?.status == 'In progress') {
-      nextStatus = 'Completed';
+    let nextStatus: PostStatus;
+
+    if (status) {
+      nextStatus = status;
+    } else {
+      const post = await getPostById(postId);
+      if (post?.status === 'Not working') {
+        nextStatus = 'In progress';
+      } else if (post?.status === 'In progress') {
+        nextStatus = 'Completed';
+      } else if (post?.status === 'Completed') {
+        nextStatus = 'Completed';
+      } else {
+        nextStatus = 'Not working';
+      }
     }
+
     const response = await axios.put<ResponseInterface<Post>>(
       `${API_BASE}/${postId}`,
       { status: nextStatus },
@@ -216,6 +227,7 @@ export const updatePostStatus = async (postId: string) => {
         headers: { 'Content-Type': 'application/json' },
       },
     );
+
     if (response.data.success) {
       return true;
     } else {
