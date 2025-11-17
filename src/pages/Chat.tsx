@@ -24,7 +24,7 @@ export default function ChatPage() {
   const navigate = useNavigate();
   const { user } = useUser();
   const { applyId, offerId } = useParams();
-  const  workId  = applyId ?? offerId
+  const workId = applyId ?? offerId;
 
   const [apply, setApply] = useState<ApplyDetail | null>(null);
   const [offer, setOffer] = useState<OfferDetail | null>(null);
@@ -52,8 +52,7 @@ export default function ChatPage() {
           const offerData = await getDetailedOfferedById(workId);
           if (!offerData) {
             return;
-          }
-          else {
+          } else {
             setOffer(offerData);
             setPost(offerData.post);
           }
@@ -407,7 +406,7 @@ export default function ChatPage() {
                       buttonColor="red"
                       onClick={() => setOpenCancelWorkModal(true)}
                     >
-                      Cancel 
+                      Cancel
                     </ActionButton>
                   ) : post.status == 'Completed' ? (
                     // <ActionButton onClick={() => setOpenPayModal(true)}>Pay</ActionButton>
