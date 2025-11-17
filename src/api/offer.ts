@@ -40,6 +40,20 @@ export const getOfferById = async (offerId: string): Promise<Offer> => {
     throw error;
   }
 };
+export const getDetailedOfferedById = async (
+  offerId: string,
+): Promise<OfferDetail> => {
+  try {
+    const response = await axios.get<ResponseInterface<OfferDetail>>(
+      `${API_BASE}/${offerId}/detail`,
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching detailed offer by ID:', error);
+    throw error;
+  }
+};
+
 export const getOffersByPostId = async (postId: string): Promise<Offer[]> => {
   try {
     const response = await axios.get<ResponseInterface<OfferDetail[]>>(
