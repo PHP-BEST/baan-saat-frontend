@@ -322,7 +322,7 @@ export default function OfferDetailPage() {
                 ) : (
                   <></>
                 )
-              ) : (offer.status == 'Pending' || offer.status == 'Accepted') ?(
+              ) : offer.status == 'Pending' || offer.status == 'Accepted' ? (
                 <ActionButton
                   buttonColor="red"
                   onClick={() => {
