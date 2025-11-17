@@ -1,12 +1,16 @@
-import { getDetailedApplyById } from '@/api/apply';
-import { deletePost, updatePostStatus } from '@/api/post';
+import { getDetailedApplyById, updateApplyStatus } from '@/api/apply';
+import { updatePostMatched, updatePostStatus } from '@/api/post';
+import { getDetailedOfferedById, updateOfferStatus } from '@/api/offer';
+import { getPaymentStatusByPostId } from '@/api/payment';
+import { useQuery } from '@tanstack/react-query';
 import ActionButton from '@/components/our-components/actionButton';
 import Footer from '@/components/our-components/footer';
 import Header from '@/components/our-components/header';
 import Loading from '@/components/our-components/loading';
 import { useUser } from '@/context/UserContext';
-import ApplyNotFound from '@/error/ApplyNotFound';
+import WorkNotFound from '@/error/WorkNotFound';
 import type { ApplyDetail } from '@/interfaces/Apply';
+import type { OfferDetail } from '@/interfaces/Offer';
 import type { Post } from '@/interfaces/Post';
 import type { User } from '@/interfaces/User';
 import { formatDateToDisplay } from '@/utils/function';
@@ -17,55 +21,71 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { DialogDescription } from '@radix-ui/react-dialog';
 import PaymentIntent from '@/components/payments/PaymentIntent';
 import PaymentButton from '@/components/payments/PaymentButton';
-import { useQuery } from '@tanstack/react-query';
-import { getPaymentStatusByPostId } from '@/api/payment';
+import { Chatbox } from './Chatbox';
+
 export default function ChatPage() {
   const navigate = useNavigate();
   const { user } = useUser();
-  const { applyId } = useParams();
+  const { applyId, offerId } = useParams();
+  const workId = applyId ?? offerId;
 
   const [apply, setApply] = useState<ApplyDetail | null>(null);
+  const [offer, setOffer] = useState<OfferDetail | null>(null);
   const [post, setPost] = useState<Post | null>(null);
   const [customer, setCustomer] = useState<User | null>(null);
   const [provider, setProvider] = useState<User | null>(null);
 
   const [openUpdatePostStatusModal, setOpenUpdatePostStatusModal] =
     useState(false);
-  const [openCancelApplyModal, setOpenCancelApplyModal] = useState(false);
+  const [openCancelWorkModal, setOpenCancelWorkModal] = useState(false);
   const [openPayModal, setOpenPayModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isUpdateStatusLoading, setUpdateStatusLoading] = useState(false);
+
+  const receiverid =
+    customer?._id === user?._id ? provider?._id : customer?._id;
+
+  const work: ApplyDetail | OfferDetail | null = apply !== null ? apply : offer;
+
   const { data: payStatus } = useQuery({
-    queryKey: ['payment-status', apply?.postId],
-    enabled: !!apply,
-    queryFn: () => getPaymentStatusByPostId(apply!.postId),
+    queryKey: ['payment-status', work?.postId],
+    enabled: !!work,
+    queryFn: () => getPaymentStatusByPostId(work!.postId),
   });
   const paid = payStatus === 'succeeded';
   const alreadyReviewed = false;
   const canReview = paid && !alreadyReviewed;
 
   useEffect(() => {
-    const fetchApply = async () => {
-      if (!applyId || !user) return;
+    const fetchWork = async () => {
+      if (!workId || !user) return;
       try {
         setLoading(true);
-        const applyData = await getDetailedApplyById(applyId);
-        if (!applyData) {
-          return;
-        }
-        setApply(applyData);
-        setPost(applyData.post);
-        setCustomer(applyData.customer);
-        setProvider(applyData.provider);
+        const results = await Promise.allSettled([
+          getDetailedApplyById(workId),
+          getDetailedOfferedById(workId),
+        ]);
+        const applyData =
+          results[0].status === 'fulfilled' ? results[0].value : null;
+        const offerData =
+          results[1].status === 'fulfilled' ? results[1].value : null;
+        const work = applyData ?? offerData;
+        if (!work) return;
+
+        if (applyData) setApply(applyData);
+        else setOffer(offerData);
+        setPost(work.post);
+        setCustomer(work.customer);
+        setProvider(work.provider);
       } catch (err) {
-        console.error('Error fetching apply:', err);
+        console.error('Error fetching work:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchApply();
-  }, [applyId, user]);
+    fetchWork();
+  }, [workId, user]);
 
   if (!user) {
     return null;
@@ -87,267 +107,485 @@ export default function ChatPage() {
     );
   }
 
-  if (!apply) {
+  if (!apply && !offer) {
     return (
       <div>
         <Header />
         <div className="w-full min-h-screen h-fit px-12 py-8 bg-gray-50">
-          <ApplyNotFound />
+          <WorkNotFound />
         </div>
         <Footer />
       </div>
     );
   }
+  if (apply) {
+    return (
+      <div className="flex flex-col min-h-screen bg-white">
+        <Header />
+        <main className="flex-grow flex justify-center py-12 px-4">
+          <div className="w-full max-w-6xl bg-white rounded-2xl shadow-md border border-gray-200 flex flex-col lg:flex-row overflow-hidden">
+            {/* Apply Info */}
+            <div className="w-full lg:w-[40%] border-r border-gray-200 bg-gray-50 p-6 flex flex-col gap-6">
+              <h2 className="text-2xl font-semibold text-gray-800">
+                Post Detail
+              </h2>
 
-  const getNextStatus = () => {
-    if (post.status == 'Not working') {
-      return 'In progress';
-    } else if (post.status == 'In progress') {
-      return 'Completed';
-    } else {
-      return 'null';
-    }
-  };
-
-  return (
-    <div className="flex flex-col min-h-screen bg-white">
-      <Header />
-      <main className="flex-grow flex justify-center py-12 px-4">
-        <div className="w-full max-w-6xl bg-white rounded-2xl shadow-md border border-gray-200 flex flex-col lg:flex-row overflow-hidden">
-          {/* Apply Info */}
-          <div className="w-full lg:w-[40%] border-r border-gray-200 bg-gray-50 p-6 flex flex-col gap-6">
-            <h2 className="text-2xl font-semibold text-gray-800">
-              Post Detail
-            </h2>
-
-            <div className="flex flex-col gap-4 text-gray-700">
-              <div className="font-medium text-lg">
-                <span>Post:</span>{' '}
-                <span
-                  className="text-button-action hover:underline cursor-pointer"
-                  onClick={() => {
-                    navigate(`/post/${post._id}`);
-                  }}
-                >
-                  {post.title}
-                </span>
-              </div>
-              <div className="font-medium text-lg">
-                <span>Customer:</span>{' '}
-                <span
-                  className="text-button-action hover:underline cursor-pointer"
-                  onClick={() => {
-                    navigate(`/user/${customer?._id}`);
-                  }}
-                >
-                  {customer?.name}
-                </span>
-              </div>
-              <div className="font-medium text-lg">
-                <span>Provider:</span>{' '}
-                <span
-                  className="text-button-action hover:underline cursor-pointer"
-                  onClick={() => {
-                    navigate(`/user/${provider?._id}`);
-                  }}
-                >
-                  {provider?.name}
-                </span>
-              </div>
-              <div className="font-medium text-lg">
-                <span>Date:</span> {formatDateToDisplay(apply.date)}
-              </div>
-              <div className="font-medium text-lg">
-                <span>Applied Price:</span> ฿{apply.appliedPrice}
-              </div>
-              <div>
-                <span className="font-medium text-lg">Status:</span>{' '}
-                <span className="px-3 py-1 bg-button-action text-white rounded-full text-sm font-medium">
-                  {post.status}
-                </span>
-              </div>
-            </div>
-
-            <Dialog open={openPayModal} onOpenChange={setOpenPayModal}>
-              <DialogContent className="h-[85vh] bg-white">
-                <DialogDescription>
-                  <PaymentIntent
-                    postId={apply.postId}
-                    providerConnectId={provider?.connectId || ''}
-                  />
-                </DialogDescription>
-              </DialogContent>
-            </Dialog>
-
-            <div className="flex gap-4 mt-6 items-center">
-              {String(user._id) === String(apply.customerId) && (
-                <>
-                  {canReview ? (
-                    <ActionButton
-                      buttonColor="green"
-                      onClick={() =>
-                        navigate(
-                          `/reviews/new/${apply.postId}/${apply.providerId}`,
-                        )
-                      }
-                    >
-                      Write a review
-                    </ActionButton>
-                  ) : (
-                    post.status === 'Completed' && (
-                      <PaymentButton
-                        postId={apply.postId}
-                        openModal={setOpenPayModal}
-                      />
-                    )
-                  )}
-
-                  {post.status === 'Not working' && (
-                    <ActionButton
-                      buttonColor="red"
-                      onClick={() => setOpenCancelApplyModal(true)}
-                    >
-                      Cancel Apply
-                    </ActionButton>
-                  )}
-                </>
-              )}
-
-              {String(user._id) === String(apply.providerId) &&
-                post.status !== 'Completed' && (
-                  <ActionButton
-                    buttonColor="green"
-                    onClick={() => setOpenUpdatePostStatusModal(true)}
+              <div className="flex flex-col gap-4 text-gray-700">
+                <div className="font-medium text-lg">
+                  <span>Post:</span>{' '}
+                  <span
+                    className="text-button-action hover:underline cursor-pointer"
+                    onClick={() => {
+                      navigate(`/post/${post._id}`);
+                    }}
                   >
-                    Update Status
-                  </ActionButton>
+                    {post.title}
+                  </span>
+                </div>
+                <div className="font-medium text-lg">
+                  <span>Customer:</span>{' '}
+                  <span
+                    className="text-button-action hover:underline cursor-pointer"
+                    onClick={() => {
+                      navigate(`/user/${customer?._id}`);
+                    }}
+                  >
+                    {customer?.name}
+                  </span>
+                </div>
+                <div className="font-medium text-lg">
+                  <span>Provider:</span>{' '}
+                  <span
+                    className="text-button-action hover:underline cursor-pointer"
+                    onClick={() => {
+                      navigate(`/user/${provider?._id}/provider`);
+                    }}
+                  >
+                    {provider?.name}
+                  </span>
+                </div>
+                <div className="font-medium text-lg">
+                  <span>Date:</span> {formatDateToDisplay(apply.date)}
+                </div>
+                <div className="font-medium text-lg">
+                  <span>Applied Price:</span> ฿{apply.appliedPrice}
+                </div>
+                <div>
+                  <span className="font-medium text-lg">Status:</span>{' '}
+                  <span className="px-3 py-1 bg-button-action text-white rounded-full text-sm font-medium">
+                    {post.status}
+                  </span>
+                </div>
+              </div>
+
+              <Dialog open={openPayModal} onOpenChange={setOpenPayModal}>
+                <DialogContent className="h-[85vh] bg-white">
+                  <DialogDescription>
+                    <PaymentIntent
+                      postId={apply.postId}
+                      providerConnectId={provider?.connectId || ''}
+                    />
+                  </DialogDescription>
+                </DialogContent>
+              </Dialog>
+
+              <div className="flex gap-4 mt-6 items-center">
+                {String(user._id) === String(apply.customerId) && (
+                  <>
+                    {canReview ? (
+                      <ActionButton
+                        buttonColor="green"
+                        onClick={() =>
+                          navigate(
+                            `/reviews/new/${apply.postId}/${apply.providerId}`,
+                          )
+                        }
+                      >
+                        Write a review
+                      </ActionButton>
+                    ) : (
+                      post.status === 'Completed' && (
+                        <PaymentButton
+                          postId={apply.postId}
+                          openModal={setOpenPayModal}
+                        />
+                      )
+                    )}
+
+                    {post.status === 'Not working' && (
+                      <ActionButton
+                        buttonColor="red"
+                        onClick={() => setOpenCancelWorkModal(true)}
+                      >
+                        Cancel Apply
+                      </ActionButton>
+                    )}
+                  </>
                 )}
 
-              <ActionButton onClick={() => navigate(-1)}>Back</ActionButton>
-            </div>
-          </div>
+                {String(user._id) === String(apply.providerId) &&
+                  post.status !== 'Completed' && (
+                    <ActionButton
+                      buttonColor="green"
+                      onClick={() => setOpenUpdatePostStatusModal(true)}
+                    >
+                      Update Status
+                    </ActionButton>
+                  )}
 
-          {/* Chat Section: Just the mock page */}
-          <div className="w-full lg:w-[60%] flex flex-col justify-between">
-            <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-gray-800">
-                Chat Room: Mock Version
-              </h3>
-            </div>
-
-            <div className="flex-grow overflow-y-auto px-6 py-4 bg-gray-50">
-              <div className="flex flex-col gap-4">
-                <div className="self-start bg-gray-200 text-gray-800 px-4 py-2 rounded-2xl max-w-sm">
-                  Hi! I’ll arrive at 2 PM for the cleaning.
-                </div>
-                <div className="self-end bg-green-600 text-white px-4 py-2 rounded-2xl max-w-sm">
-                  Sure! I’ll be home by then.
-                </div>
-                <div className="self-start bg-gray-200 text-gray-800 px-4 py-2 rounded-2xl max-w-sm">
-                  Perfect, see you soon!
-                </div>
+                <ActionButton onClick={() => navigate(-1)}>Back</ActionButton>
               </div>
             </div>
 
-            <div className="border-t border-gray-200 p-4 bg-white flex gap-3 items-center">
-              <input
-                type="text"
-                placeholder="Type your message..."
-                className="flex-grow px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-button-action"
-              />
-              <ActionButton buttonColor="green" onClick={() => {}}>
-                Send
-              </ActionButton>
+            {/* Chat Section: Just the mock page */}
+            {/* Chat Section */}
+            <div className="w-full lg:w-[60%] flex flex-col h-full max-h-[80vh] bg-white rounded-tr-2xl overflow-hidden border-l border-gray-200">
+              {/* Chat Header */}
+              <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between ">
+                <h3 className="text-xl font-semibold text-gray-800">
+                  Chat Room
+                </h3>
+              </div>
+
+              {/* Chat Content */}
+              <div className="flex-1 overflow-y-auto overflow-x-hidden">
+                <Chatbox id={[receiverid || '', post._id]} />
+              </div>
             </div>
           </div>
-        </div>
 
-        {openUpdatePostStatusModal && (
-          <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
-              <p className="mb-2 text-lg font-semibold">
-                ต้องการ Update Status เป็น {getNextStatus()} ใช่หรือไม่?
-              </p>
-              <p className="text-sm text-red-500 mb-4">
-                การอัปเดตสถานะจะเปลี่ยนสถานะของโพสต์นี้และไม่สามารถแก้ไขได้
-              </p>
-              <div className="flex justify-center gap-4">
-                <ActionButton
-                  onClick={async () => {
-                    setUpdateStatusLoading(true);
-                    await updatePostStatus(post._id);
-                    setUpdateStatusLoading(false);
-                    setOpenUpdatePostStatusModal(false);
-                    window.location.reload();
-                  }}
-                  className={`${isUpdateStatusLoading ? '' : 'cursor-pointer'}`}
-                  disabled={isUpdateStatusLoading}
-                >
-                  {isUpdateStatusLoading && (
-                    <Loader className="animate-spin" size={24} />
-                  )}
-                  Yes
-                </ActionButton>
-                <ActionButton
-                  className={`cursor-pointer bg-gray-200 text-black border-gray-200
+          {openUpdatePostStatusModal && (
+            <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
+                <p className="mb-2 text-lg font-semibold">
+                  ต้องการ Update Status เป็น{' '}
+                  {post.status == 'Not working'
+                    ? 'In progress'
+                    : post.status == 'In progress'
+                      ? 'Completed'
+                      : undefined}{' '}
+                  ใช่หรือไม่?
+                </p>
+                <p className="text-sm text-red-500 mb-4">
+                  การอัปเดตสถานะจะเปลี่ยนสถานะของโพสต์นี้และไม่สามารถแก้ไขได้
+                </p>
+                <div className="flex justify-center gap-4">
+                  <ActionButton
+                    onClick={async () => {
+                      setUpdateStatusLoading(true);
+                      if (post.status == 'Not working') {
+                        await updatePostStatus(post._id);
+                      } else if (post.status == 'In progress') {
+                        await updatePostStatus(post._id);
+                      }
+                      setUpdateStatusLoading(false);
+                      setOpenUpdatePostStatusModal(false);
+                      window.location.reload();
+                    }}
+                    className={`${isUpdateStatusLoading ? '' : 'cursor-pointer'}`}
+                    disabled={isUpdateStatusLoading}
+                  >
+                    {isUpdateStatusLoading && (
+                      <Loader className="animate-spin" size={24} />
+                    )}
+                    Yes
+                  </ActionButton>
+                  <ActionButton
+                    className={`cursor-pointer bg-gray-200 text-black border-gray-200
             ${isUpdateStatusLoading ? '' : 'cursor-pointer'}`}
-                  disabled={isUpdateStatusLoading}
-                  onClick={() => setOpenUpdatePostStatusModal(false)}
-                >
-                  {isUpdateStatusLoading && (
-                    <Loader className="animate-spin" size={24} />
-                  )}
-                  No
-                </ActionButton>
+                    disabled={isUpdateStatusLoading}
+                    onClick={() => setOpenUpdatePostStatusModal(false)}
+                  >
+                    {isUpdateStatusLoading && (
+                      <Loader className="animate-spin" size={24} />
+                    )}
+                    No
+                  </ActionButton>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {openCancelApplyModal && (
-          <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
-              <p className="mb-2 text-lg font-semibold">
-                ต้องการ Cancel Provider ใช่หรือไม่?
-              </p>
-              <p className="text-sm text-red-500 mb-4">
-                การยกเลิกจะลบโพสต์นี้อย่างถาวร รวมถึงข้อมูลการสมัครทั้งหมด
-                และไม่สามารถกู้คืนได้
-              </p>
-              <div className="flex justify-center gap-4">
-                <ActionButton
-                  onClick={async () => {
-                    setUpdateStatusLoading(true);
-                    await deletePost(apply.postId);
-                    setUpdateStatusLoading(false);
-                    setOpenCancelApplyModal(false);
-                    window.location.href = '/account/post';
-                  }}
-                  className={`${isUpdateStatusLoading ? '' : 'cursor-pointer'}`}
-                  disabled={isUpdateStatusLoading}
-                >
-                  {isUpdateStatusLoading && (
-                    <Loader className="animate-spin" size={24} />
-                  )}
-                  Yes
-                </ActionButton>
-                <ActionButton
-                  className={`cursor-pointer bg-gray-200 text-black border-gray-200
+          {openCancelWorkModal && (
+            <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
+                <p className="mb-2 text-lg font-semibold">
+                  ต้องการยกเลิกการให้บริการของผู้ให้บริการคนนี้ใช่หรือไม่?
+                </p>
+                <p className="mb-4 text-sm text-red-500">
+                  การยกเลิกการให้บริการจะทำให้ผู้บริการไม่สามารถสมัครให้บริการนี้ได้อีก
+                </p>
+                <div className="flex justify-center gap-4">
+                  <ActionButton
+                    onClick={async () => {
+                      setUpdateStatusLoading(true);
+                      await updateApplyStatus(apply._id, 'Rejected');
+                      await updatePostMatched(post._id, false);
+                      setUpdateStatusLoading(false);
+                      setOpenCancelWorkModal(false);
+                      window.location.href = `/post/${post._id}`;
+                    }}
+                    className={`${isUpdateStatusLoading ? '' : 'cursor-pointer'}`}
+                    disabled={isUpdateStatusLoading}
+                  >
+                    {isUpdateStatusLoading && (
+                      <Loader className="animate-spin" size={24} />
+                    )}
+                    Yes
+                  </ActionButton>
+                  <ActionButton
+                    className={`cursor-pointer bg-gray-200 text-black border-gray-200
             ${isUpdateStatusLoading ? '' : 'cursor-pointer'}`}
-                  disabled={isUpdateStatusLoading}
-                  onClick={() => setOpenCancelApplyModal(false)}
-                >
-                  {isUpdateStatusLoading && (
-                    <Loader className="animate-spin" size={24} />
+                    disabled={isUpdateStatusLoading}
+                    onClick={() => setOpenCancelWorkModal(false)}
+                  >
+                    {isUpdateStatusLoading && (
+                      <Loader className="animate-spin" size={24} />
+                    )}
+                    No
+                  </ActionButton>
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+  if (offer) {
+    return (
+      <div className="flex flex-col min-h-screen bg-white">
+        <Header />
+        <main className="flex-grow flex justify-center py-12 px-4">
+          <div className="w-full max-w-6xl bg-white rounded-2xl shadow-md border border-gray-200 flex flex-col lg:flex-row overflow-hidden">
+            {/* offer Info */}
+            <div className="w-full lg:w-[40%] border-r border-gray-200 bg-gray-50 p-6 flex flex-col gap-6">
+              <h2 className="text-2xl font-semibold text-gray-800">
+                Post Detail
+              </h2>
+
+              <div className="flex flex-col gap-4 text-gray-700">
+                <div className="font-medium text-lg">
+                  <span>Post:</span>{' '}
+                  <span
+                    className="text-button-action hover:underline cursor-pointer"
+                    onClick={() => {
+                      navigate(`/post/${post._id}`);
+                    }}
+                  >
+                    {post.title}
+                  </span>
+                </div>
+                <div className="font-medium text-lg">
+                  <span>Customer:</span>{' '}
+                  <span
+                    className="text-button-action hover:underline cursor-pointer"
+                    onClick={() => {
+                      navigate(`/user/${customer?._id}`);
+                    }}
+                  >
+                    {customer?.name}
+                  </span>
+                </div>
+                <div className="font-medium text-lg">
+                  <span>Provider:</span>{' '}
+                  <span
+                    className="text-button-action hover:underline cursor-pointer"
+                    onClick={() => {
+                      navigate(`/user/${provider?._id}/provider`);
+                    }}
+                  >
+                    {provider?.name}
+                  </span>
+                </div>
+                <div className="font-medium text-lg">
+                  <span>Date:</span> {formatDateToDisplay(offer.date)}
+                </div>
+                <div className="font-medium text-lg">
+                  <span>Price:</span> ฿{offer.price}
+                </div>
+                <div>
+                  <span className="font-medium text-lg">Status:</span>{' '}
+                  <span className="px-3 py-1 bg-button-action text-white rounded-full text-sm font-medium">
+                    {post.status}
+                  </span>
+                </div>
+              </div>
+
+              <Dialog open={openPayModal} onOpenChange={setOpenPayModal}>
+                <DialogContent className="h-[85vh] bg-white">
+                  <DialogDescription>
+                    <PaymentIntent
+                      postId={offer.postId}
+                      providerConnectId={provider?.connectId || ''}
+                    />
+                  </DialogDescription>
+                </DialogContent>
+              </Dialog>
+
+              <div className="flex gap-4 mt-6 items-center">
+                {String(user._id) === String(offer.customerId) && (
+                  <>
+                    {canReview ? (
+                      <ActionButton
+                        buttonColor="green"
+                        onClick={() =>
+                          navigate(
+                            `/reviews/new/${offer.postId}/${offer.providerId}`,
+                          )
+                        }
+                      >
+                        Write a review
+                      </ActionButton>
+                    ) : (
+                      post.status === 'Completed' && (
+                        <PaymentButton
+                          postId={offer.postId}
+                          openModal={setOpenPayModal}
+                        />
+                      )
+                    )}
+
+                    {post.status === 'Not working' && (
+                      <ActionButton
+                        buttonColor="red"
+                        onClick={() => setOpenCancelWorkModal(true)}
+                      >
+                        Cancel Offer
+                      </ActionButton>
+                    )}
+                  </>
+                )}
+
+                {String(user._id) === String(offer.providerId) &&
+                  post.status !== 'Completed' && (
+                    <ActionButton
+                      buttonColor="green"
+                      onClick={() => setOpenUpdatePostStatusModal(true)}
+                    >
+                      Update Status
+                    </ActionButton>
                   )}
-                  No
-                </ActionButton>
+
+                <ActionButton onClick={() => navigate(-1)}>Back</ActionButton>
+              </div>
+            </div>
+
+            {/* Chat Section: Just the mock page */}
+            {/* Chat Section */}
+            <div className="w-full lg:w-[60%] flex flex-col h-full max-h-[80vh] bg-white rounded-tr-2xl overflow-hidden border-l border-gray-200">
+              {/* Chat Header */}
+              <div className="px-6 py-4 border-b border-gray-200 bg-white flex items-center justify-between ">
+                <h3 className="text-xl font-semibold text-gray-800">
+                  Chat Room
+                </h3>
+              </div>
+
+              {/* Chat Content */}
+              <div className="flex-1 overflow-y-auto overflow-x-hidden">
+                <Chatbox id={[receiverid || '', post._id]} />
               </div>
             </div>
           </div>
-        )}
-      </main>
-      <Footer />
-    </div>
-  );
+
+          {openUpdatePostStatusModal && (
+            <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
+                <p className="mb-2 text-lg font-semibold">
+                  ต้องการ Update Status เป็น{' '}
+                  {post.status == 'Not working'
+                    ? 'In progress'
+                    : post.status == 'In progress'
+                      ? 'Completed'
+                      : undefined}{' '}
+                  ใช่หรือไม่?
+                </p>
+                <p className="text-sm text-red-500 mb-4">
+                  การอัปเดตสถานะจะเปลี่ยนสถานะของโพสต์นี้และไม่สามารถแก้ไขได้
+                </p>
+                <div className="flex justify-center gap-4">
+                  <ActionButton
+                    onClick={async () => {
+                      setUpdateStatusLoading(true);
+                      if (post.status == 'Not working') {
+                        await updatePostStatus(post._id);
+                      } else if (post.status == 'In progress') {
+                        await updatePostStatus(post._id);
+                      }
+                      setUpdateStatusLoading(false);
+                      setOpenUpdatePostStatusModal(false);
+                      window.location.reload();
+                    }}
+                    className={`${isUpdateStatusLoading ? '' : 'cursor-pointer'}`}
+                    disabled={isUpdateStatusLoading}
+                  >
+                    {isUpdateStatusLoading && (
+                      <Loader className="animate-spin" size={24} />
+                    )}
+                    Yes
+                  </ActionButton>
+                  <ActionButton
+                    className={`cursor-pointer bg-gray-200 text-black border-gray-200
+            ${isUpdateStatusLoading ? '' : 'cursor-pointer'}`}
+                    disabled={isUpdateStatusLoading}
+                    onClick={() => setOpenUpdatePostStatusModal(false)}
+                  >
+                    {isUpdateStatusLoading && (
+                      <Loader className="animate-spin" size={24} />
+                    )}
+                    No
+                  </ActionButton>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {openCancelWorkModal && (
+            <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl p-6 shadow-lg min-w-[300px] text-center">
+                <p className="mb-2 text-lg font-semibold">
+                  ต้องการยกเลิกการให้บริการของผู้ให้บริการคนนี้ใช่หรือไม่?
+                </p>
+                <p className="mb-4 text-sm text-red-500">
+                  การยกเลิกการให้บริการจะทำให้ผู้บริการไม่สามารถสมัครให้บริการนี้ได้อีก
+                </p>
+                <div className="flex justify-center gap-4">
+                  <ActionButton
+                    onClick={async () => {
+                      setUpdateStatusLoading(true);
+                      await updateOfferStatus(offer._id, 'Cancel');
+                      await updatePostMatched(post._id, false);
+                      setUpdateStatusLoading(false);
+                      setOpenCancelWorkModal(false);
+                      window.location.href = `/post/${post._id}`;
+                    }}
+                    className={`${isUpdateStatusLoading ? '' : 'cursor-pointer'}`}
+                    disabled={isUpdateStatusLoading}
+                  >
+                    {isUpdateStatusLoading && (
+                      <Loader className="animate-spin" size={24} />
+                    )}
+                    Yes
+                  </ActionButton>
+                  <ActionButton
+                    className={`cursor-pointer bg-gray-200 text-black border-gray-200
+            ${isUpdateStatusLoading ? '' : 'cursor-pointer'}`}
+                    disabled={isUpdateStatusLoading}
+                    onClick={() => setOpenCancelWorkModal(false)}
+                  >
+                    {isUpdateStatusLoading && (
+                      <Loader className="animate-spin" size={24} />
+                    )}
+                    No
+                  </ActionButton>
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 }
