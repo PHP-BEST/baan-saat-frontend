@@ -322,7 +322,7 @@ export default function OfferDetailPage() {
                 ) : (
                   <></>
                 )
-              ) : (
+              ) : (offer.status == 'Pending' || offer.status == 'Accepted') ?(
                 <ActionButton
                   buttonColor="red"
                   onClick={() => {
@@ -335,6 +335,8 @@ export default function OfferDetailPage() {
                   )}
                   Cancel
                 </ActionButton>
+              ) : (
+                <></>
               )}
 
               <ActionButton

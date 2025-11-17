@@ -46,7 +46,7 @@ export default function OfferModal() {
       const offerPostIds = new Set(providerOffers.map((o) => o.postId));
       const applyPostIds = new Set(applyProvider.map((a) => a.postId));
       const filteredPosts = userPosts.filter(
-        (post) => !offerPostIds.has(post._id) && !applyPostIds.has(post._id)
+        (post) => !offerPostIds.has(post._id) && !applyPostIds.has(post._id),
       );
       setPosts(filteredPosts);
       setLoading(false);

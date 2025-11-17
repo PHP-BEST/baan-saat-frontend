@@ -509,6 +509,15 @@ export default function PostDetailPage() {
                 >
                   {acceptedApply ? acceptedApply.provider.name : 'Unknown'}
                 </p>
+              ) : hasAcceptedOffer ? (
+                <p
+                  className="text-lg font-semibold text-button-action hover:underline cursor-pointer"
+                  onClick={() => {
+                    navigate(`/user/${acceptedOffer?.providerId}/provider`);
+                  }}
+                >
+                  {acceptedOffer ? acceptedOffer.provider.name : 'Unknown'}
+                </p>
               ) : (
                 <p className="text-lg text-gray-700">
                   No providers match this post...

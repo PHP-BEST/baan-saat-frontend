@@ -83,10 +83,10 @@ export default function MyApplyPage() {
                   }}
                 >
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {apply.post?.title? apply.post.title : "Unknown"}
+                    {apply.post?.title ? apply.post.title : 'Unknown'}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
-                    {apply.customer?.name? apply.customer.name : "Unknown"}
+                    {apply.customer?.name ? apply.customer.name : 'Unknown'}
                   </td>
                   <td className="border border-gray-200 p-2 text-ellipsis overflow-hidden whitespace-nowrap">
                     {formatDateToDisplay(apply.date)}
