@@ -6,7 +6,7 @@ import Footer from '@/components/our-components/footer';
 import Header from '@/components/our-components/header';
 import Loading from '@/components/our-components/loading';
 import { useUser } from '@/context/UserContext';
-import WorkNotFound from '@/error/workNotFound';
+import WorkNotFound from '@/error/WorkNotFound';
 import type { ApplyDetail } from '@/interfaces/Apply';
 import type { OfferDetail } from '@/interfaces/Offer';
 import type { Post } from '@/interfaces/Post';
