@@ -3,6 +3,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import CheckoutForm from './CheckoutForm';
 import { getPaymentIntentSecret } from '@/api/payment';
 import { useState } from 'react';
+import { VITE_STRIPE_PUBLISHABLE_KEY } from '@/config/env';
 
 type PaymentIntentType = {
   postId: string;
@@ -14,10 +15,9 @@ const PaymentIntent = ({ postId, providerConnectId }: PaymentIntentType) => {
   // recreating the `Stripe` object on every render.
   const [clientSecret, setClientSecret] = useState<string>('');
 
-  const stripePromise = loadStripe(
-    'pk_test_51SJVRvFaQigwOapPZIdy29BOTGvshns6JzXHbSFp4vAtRPHjJwRo98aCaONEmAbujA8FzDpZr8Vfr6oPdzSq56IW00glgjw7sA',
-    { stripeAccount: providerConnectId },
-  );
+  const stripePromise = loadStripe(VITE_STRIPE_PUBLISHABLE_KEY, {
+    stripeAccount: providerConnectId,
+  });
 
   (async () => {
     try {

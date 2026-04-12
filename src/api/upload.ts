@@ -2,7 +2,7 @@ import axios from 'axios';
 import { API_ROOT } from '@/config/api';
 
 const UPLOAD_API = `${API_ROOT}/api/storage`;
-const ASSET_BASE = 'https://baan-saat.sgp1.digitaloceanspaces.com';
+const ASSET_BASE = 'https://baan-saat.s3.ap-southeast-1.amazonaws.com';
 
 type UploadResponse = {
   fileKeyList: string[];
